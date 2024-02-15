@@ -61,6 +61,10 @@ export class ReadActions {
     const r = await this.transaction.run('MATCH (p:Person {firstName: $fn}) RETURN p', {fn: firstName});
     return r.records.map(rec => rec.get('p').properties as Person<LocalDateTime>);
   }
+  async findMainPartner(personId: string): Promise<Person<LocalDateTime> | undefined> {
+    const r = await this.transaction.run('MATCH (:Person {id: $id})-[:PARTNER]-(p:Person) RETURN p', {id: personId});
+    return r.records[0]?.get('p')?.properties;
+  }
   async findPersonWithRelations(personId: string, relationHops: number): Promise<[Person<LocalDateTime>[], Relationship[]]> {
     if (!Number.isInteger(relationHops)) {
       throw new TypeError('relationHops must be an integer');

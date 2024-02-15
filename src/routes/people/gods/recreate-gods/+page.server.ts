@@ -15,6 +15,7 @@ export async function load() {
     
     const rhea = await act.addPerson({firstName: 'Rhea', gender: 'female'});
     await act.addPersonRelation(hades.id, rhea.id, 'PARENT');
+    await act.addPersonRelation(rhea.id, cronus.id, 'PARTNER');
     
     const hera = await act.addPerson({firstName: 'Hera', gender: 'female'});
     await act.addPersonRelation(hera.id, rhea.id, 'PARENT');
@@ -37,6 +38,7 @@ export async function load() {
     
     const aphrodite = await act.addPerson({firstName: 'Aphrodite', gender: 'female'});
     await act.addPersonRelation(aphrodite.id, zeus.id, 'PARENT');
+    await act.addPersonRelation(aphrodite.id, ares.id, 'PARTNER');
     
     const eros = await act.addPerson({firstName: 'Eros', gender: 'male'});
     await act.addPersonRelation(eros.id, ares.id, 'PARENT');

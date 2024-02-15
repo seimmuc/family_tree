@@ -5,14 +5,15 @@ import { error } from '@sveltejs/kit';
 export async function load({ params }) {
   const godName = params.name ?? 'Zeus';
 
-  const [personId, [people, relations]] = await ReadActions.perform(async act => {
+  const [focusPeopleIds, [people, relations]] = await ReadActions.perform(async act => {
     const ppl = await act.findPeopleByFirstName(godName);
     if (ppl.length < 1) {
       error(404);
     }
-    const personId = ppl[0].id as string;
-    return [personId, await act.findPersonWithRelations(personId, 2)];
+    const focusPerson = ppl[0];
+    const partner = await act.findMainPartner(focusPerson.id);
+    return [[focusPerson.id, partner?.id].filter(v => v !== undefined), await act.findPersonWithRelations(focusPerson.id, 2)];
   });
 
-  return {godName, personId, people: people.map(personStandardDate), relations};
+  return {godName, focusPeopleIds, people: people.map(personStandardDate), relations};
 }

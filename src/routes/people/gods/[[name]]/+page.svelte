@@ -1,6 +1,6 @@
 <script lang="ts">
 	import PersonNode from '$lib/components/PersonNode.svelte';
-import { Parentship, type ParentRelationship, type Person } from '$lib/types.js';
+  import { Parentship, type ParentRelationship, type Person } from '$lib/types.js';
 
   export let data;
 
@@ -9,14 +9,16 @@ import { Parentship, type ParentRelationship, type Person } from '$lib/types.js'
     return Parentship.fromRelation(rel as ParentRelationship, pplMap);
   });
 
-  const person = data.people.find((element) => element.id === data.personId) as Person;
-  const parents = parentships.filter((element) => element.child.id === data.personId).map((element) => element.parent as Person<Date>);
-  const children = parentships.filter((element) => element.parent.id === data.personId).map((element) => element.child as Person<Date>);
+  const focusPeople = data.people.filter((element) => data.focusPeopleIds.includes(element.id));
+  const parents = parentships.filter((element) => data.focusPeopleIds.includes(element.child.id)).map((element) => element.parent as Person<Date>);
+  const children = parentships.filter((element) => data.focusPeopleIds.includes(element.parent.id)).map((element) => element.child as Person<Date>);
 </script>
 
 <h2>Temp pages for testing purposes only, will be removed later</h2>
 
-<PersonNode person={person} />
+{#each focusPeople as person}
+  <PersonNode person={person} />
+{/each}
 
 {#each parents as parent}
   <PersonNode person={parent} />
