@@ -1,4 +1,16 @@
+@use './colors';
+
 :root {
   background-color: black;
   color: white;
+}
+
+:root[data-theme="light"] {
+  background-color: colors.$light-bg;
+  color: colors.$light-text;
+}
+
+:root[data-theme="dark"], :root:not([data-theme="light"]) {
+  background-color: colors.$dark-bg;
+  color: colors.$dark-text;
 }
