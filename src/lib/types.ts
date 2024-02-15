@@ -3,7 +3,7 @@ import type { Integer, LocalDateTime } from "neo4j-driver";
 export type DateOrLDT = Date | LocalDateTime<number | Integer>;
 
 export interface Person<DT extends DateOrLDT = Date> {
-  id?: string;
+  id: string;
   firstName: string;
   lastName?: string;
   nickname?: string;
@@ -29,13 +29,13 @@ export class Parentship implements ParentRelationship {
   participants: Record<'parent' | 'child', [string]>;
   child: Person<DateOrLDT>;
   parent: Person<DateOrLDT>;
-  constructor(parent: Person<DateOrLDT> & {id: string}, child: Person<DateOrLDT> & {id: string}) {
+  constructor(parent: Person<DateOrLDT>, child: Person<DateOrLDT>) {
     this.child = child;
     this.parent = parent;
     this.participants = {parent: [parent.id], child: [child.id]};
   }
 
-  static fromRelation(relation: ParentRelationship, people: {[id: string]: Person<DateOrLDT> & {id: string}}): Parentship {
+  static fromRelation(relation: ParentRelationship, people: {[id: string]: Person<DateOrLDT>}): Parentship {
     if (relation.relType != 'parent') {
       throw Error('relation must be of type "parent"');
     }

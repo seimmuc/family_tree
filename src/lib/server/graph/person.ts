@@ -1,4 +1,4 @@
-import type { Person, Relationship } from "$lib/types";
+import type { DateOrLDT, Person, Relationship } from "$lib/types";
 import { Integer, LocalDateTime, ManagedTransaction, Relationship as Neo4jRel } from "neo4j-driver";
 import { readTransaction, writeTransaction } from "./memgraph";
 import type { TransactionConfig } from "neo4j-driver-core";
@@ -83,7 +83,7 @@ export class ReadActions {
     const pIdenMap: {[identity: number]: string} = {};
     const rIdenSet: Set<number> = new Set();
     const [pl, rl] = r.records.reduce(([pl, rl], rc) => {
-      const prsn = rc.get('t') as {identity: Integer, properties: Person<LocalDateTime> & {id: string}};
+      const prsn = rc.get('t') as {identity: Integer, properties: Person<LocalDateTime>};
       pIdenMap[prsn.identity.toNumber()] = prsn.properties.id;
       pl.push(prsn.properties);
       const relArr = rc.get('r') as {identity: Integer, start: number, end: number, type: string}[] | null;
@@ -136,7 +136,7 @@ export class WriteActions extends ReadActions {
    * @param person the person object, do not include id property as it'll be assigned by the server
    * @returns the person object, as it is returned from the databse server
    */
-  async addPerson(person: Person<LocalDateTime<Integer | number>>): Promise<Person<LocalDateTime>> {
+  async addPerson(person: Omit<Person<LocalDateTime<Integer | number>>, 'id'>): Promise<Person<LocalDateTime>> {
     const r = await this.transaction.run('CREATE (p:Person $pdata) SET p.id = randomUUID() RETURN p', {pdata: person});
     return r.records[0].get('p').properties;
   }
@@ -149,13 +149,19 @@ export class WriteActions extends ReadActions {
    * 
    * Security warning: relationType is injected into the query without any sanitization. Do not allow any user input to leak into it. 
    */
-  async addPersonRelation(fromPersonId: string | undefined, toPersonId: string | undefined, relationType: PersonRelationType): Promise<Neo4jRel | undefined> {
-    if (fromPersonId === undefined || toPersonId === undefined) {
-      return;
+  async addPersonRelation(fromPerson: string | Person<DateOrLDT>, toPerson: string | Person<DateOrLDT>, relationType: PersonRelationType): Promise<Neo4jRel | undefined> {
+    if (typeof fromPerson === 'object') {
+      fromPerson = fromPerson.id;
+    }
+    if (typeof toPerson === 'object') {
+      toPerson = toPerson.id;
+    }
+    if (typeof fromPerson !== 'string' || typeof toPerson !== 'string') {
+      throw Error('missing person id');
     }
     const r = await this.transaction.run(
       `MATCH (f:Person {id: $fid}), (t:Person {id: $tid}) CREATE (f)-[r:${relationType}]->(t) RETURN r`,
-      {fid: fromPersonId, tid: toPersonId}
+      {fid: fromPerson, tid: toPerson}
     );
     if (r.records.length > 1) {
       throw Error('db returned multiple new relation records, probably because multiple people have the same id');

@@ -4,7 +4,7 @@ import { Parentship, type ParentRelationship, type Person } from '$lib/types.js'
 
   export let data;
 
-  const pplMap = Object.fromEntries(data.people.map(p => [p.id as string, p as Person & {id: string}]));
+  const pplMap = Object.fromEntries(data.people.map(p => [p.id as string, p]));
   const parentships: Parentship[] = data.relations.map(rel => {
     return Parentship.fromRelation(rel as ParentRelationship, pplMap);
   });
