@@ -12,7 +12,8 @@ export async function load({ params }) {
     }
     const focusPerson = ppl[0];
     const partner = await act.findMainPartner(focusPerson.id);
-    return [[focusPerson.id, partner?.id].filter(v => v !== undefined), await act.findPersonWithRelations(focusPerson.id, 2)];
+    const partnerIds = [focusPerson.id, partner?.id].filter(v => v !== undefined) as string[];
+    return [partnerIds, await act.findFamily(partnerIds, 2)];
   });
 
   return {godName, focusPeopleIds, people: people.map(personStandardDate), relations};

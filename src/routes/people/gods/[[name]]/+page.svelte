@@ -1,13 +1,12 @@
 <script lang="ts">
 	import PersonNode from '$lib/components/PersonNode.svelte';
-  import { Parentship, type ParentRelationship, type Person } from '$lib/types.js';
+  import { Parentship, type Person, toRelationshipClass, type RelationshipCl } from '$lib/types.js';
 
   export let data;
 
   const pplMap = Object.fromEntries(data.people.map(p => [p.id as string, p]));
-  const parentships: Parentship[] = data.relations.map(rel => {
-    return Parentship.fromRelation(rel as ParentRelationship, pplMap);
-  });
+  const relationships: RelationshipCl[] = data.relations.map(rel => toRelationshipClass(rel, pplMap));
+  const parentships: Parentship[] = relationships.filter(r => r.relType === 'parent') as Parentship[];
 
   const focusPeople = data.people.filter((element) => data.focusPeopleIds.includes(element.id));
   const parents = parentships.filter((element) => data.focusPeopleIds.includes(element.child.id)).map((element) => element.parent as Person<Date>);

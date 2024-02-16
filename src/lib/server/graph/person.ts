@@ -1,4 +1,4 @@
-import type { DateOrLDT, Person, Relationship } from "$lib/types";
+import type { DateOrLDT, ParentRelationship, PartnerRelationship, Person, Relationship } from "$lib/types";
 import { Integer, LocalDateTime, ManagedTransaction, Relationship as Neo4jRel } from "neo4j-driver";
 import { readTransaction, writeTransaction } from "./memgraph";
 import type { TransactionConfig } from "neo4j-driver-core";
@@ -115,7 +115,61 @@ export class ReadActions {
 
     return [pl, relations];
   }
+  async findFamily(partnerIds: string[], relationHops: number): Promise<[Person<LocalDateTime>[], Relationship[]]> {
+    if (!Number.isInteger(relationHops)) {
+      throw new TypeError('relationHops must be an integer');
+    } else if (relationHops < 0 || relationHops > 25) {
+      throw new RangeError('relationHops must be between 0 and 25');
+    }
+
+    // MATCH (p:Person)-[*..1]-(t:Person)
+    // WHERE p.firstName IN ["Aphrodite", "Ares"]
+    // WITH DISTINCT t
+    // MATCH (t)-[r]-()
+    // RETURN t, collect(r) as r
+    // UNION
+    // MATCH (p:Person)
+    // WHERE p.firstName IN ["Aphrodite", "Ares"]
+    // RETURN p as t, null as r
+    const r = await this.transaction.run(
+      `MATCH (p:Person)-[*..${relationHops}]-(t:Person) WHERE p.id IN $pids WITH DISTINCT t MATCH (t)-[r]-() RETURN t, collect(r) as r UNION MATCH (p:Person) WHERE p.id IN $pids RETURN p as t, null as r`,
+      {pids: partnerIds}
+    );
+
+    const pIdenMap: {[identity: number]: Person<LocalDateTime>} = {};
+    const rIdenMap: {[identity: number]: {start: number, end: number, type: PersonRelationType}} = {};
+    for (const rc of r.records) {
+      const prsnRc = rc.get('t') as {identity: Integer, properties: Person<LocalDateTime>};
+      pIdenMap[prsnRc.identity.toNumber()] = prsnRc.properties
+      const relArr = rc.get('r') as {identity: Integer, start: number, end: number, type: PersonRelationType}[] | null;
+      if (relArr !== null) {
+        for (const rel of relArr) {
+          rIdenMap[rel.identity.toNumber()] = rel;
+        }
+      }
+    }
+
+    const relations: Relationship[] = Object.values(rIdenMap).map(rel => {
+      if (!Object.hasOwn(pIdenMap, rel.start) || !Object.hasOwn(pIdenMap, rel.end)) { return; }
+      if (rel.type === 'PARENT') {
+        return {
+          relType: 'parent',
+          participants: {parent: [pIdenMap[rel.end].id], child: [pIdenMap[rel.start].id]}
+        } as ParentRelationship;
+      }
+      if (rel.type === 'PARTNER') {
+        return {
+          relType: "partner",
+          participants: {partner: [pIdenMap[rel.start].id, pIdenMap[rel.end].id]}
+        } as PartnerRelationship;
+      }
+      return;
+    }).filter(v => v !== undefined) as Relationship[];
+
+    return [Object.values(pIdenMap), relations];
+  }
 }
+
 
 export class WriteActions extends ReadActions {
   static async perform<T>(cb: (actions: WriteActions) => Promise<T> | T, config?: TransactionConfig): Promise<T> {
