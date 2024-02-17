@@ -2,7 +2,7 @@
 	import PersonNode from '$lib/components/PersonNode.svelte';
 	import type { Point } from '$lib/components/types.js';
   import { Parentship, type Person, toRelationshipClass, type RelationshipCl } from '$lib/types.js';
-	import { onMount, tick, onDestroy } from 'svelte';
+	import { onMount } from 'svelte';
 
   export let data;
 
@@ -98,21 +98,26 @@
     context.stroke();
   }
 
-  onMount(async () => {
-    // Wait for wrapperDimensions object to update
-    await tick();
-    redraw();
+  onMount(() => {
+    // initial draw on page load
+    resizeTimer = setTimeout(redraw, 0);
+
+    // redraw whenever canvas resizes
     resize = new ResizeObserver(() => {
+      // redraw immediately
       redraw();
+
+      // occasionally canvas will cleared immediatelly after this, so schedule another redraw in 5 ms
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(redraw, 5);
     });
     resize.observe(cnv);
+
+    return () => {
+      resize.unobserve(cnv);
+      clearTimeout(resizeTimer);
+    }
   });
-  onDestroy(() => {
-    resize.unobserve(cnv);
-    clearTimeout(resizeTimer);
-  })
 </script>
 
 <h2>Temp pages for testing purposes only, will be removed later</h2>
