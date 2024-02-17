@@ -2,11 +2,13 @@
 	import PersonNode from '$lib/components/PersonNode.svelte';
 	import type { Point } from '$lib/components/types.js';
   import { Parentship, type Person, toRelationshipClass, type RelationshipCl } from '$lib/types.js';
-	import { onMount, tick } from 'svelte';
+	import { onMount, tick, onDestroy } from 'svelte';
 
   export let data;
 
   let cnv: HTMLCanvasElement;
+  let resize: ResizeObserver;
+  let resizeTimer: NodeJS.Timeout | number;
 
   const pplMap = Object.fromEntries(data.people.map(p => [p.id as string, p]));
   const relationships: RelationshipCl[] = data.relations.map(rel => toRelationshipClass(rel, pplMap));
@@ -15,7 +17,7 @@
   // Construct collections of people's data to be used throughout the page
   type PersonData = {person: Person<Date>, node: PersonNode};
   const focusPeople: Array<PersonData & {parents: PersonData[]}> = data.people.filter((element) => data.focusPeopleIds.includes(element.id)).map(person => {return {person: person, node: undefined as any as PersonNode, parents: [] as PersonData[]}});
-  const parents: Array<{person: Person<Date>, node: PersonNode, child: string}> = Object.entries(data.parentsOf).flatMap(([fId, pIds]) => pIds.map(pId => {return {person: pplMap[pId] as Person<Date>, node: undefined as any as PersonNode, child: fId}}));
+  const parents: Array<PersonData & {child: string}> = Object.entries(data.parentsOf).flatMap(([fId, pIds]) => pIds.map(pId => {return {person: pplMap[pId] as Person<Date>, node: undefined as any as PersonNode, child: fId}}));
   const children: Array<PersonData> = data.children.map(cId => pplMap[cId]).filter(c => c !== undefined).map((element) => {return {person: element as Person<Date>, node: undefined as any as PersonNode}});
   parents.forEach(p => {
     focusPeople.find(fp => fp.person.id === p.child)?.parents.push(p);
@@ -24,9 +26,7 @@
   let wrapperElem: HTMLDivElement;
   const wrapperDimensions = {x: 0, y: 0, width: 0, height: 0};
 
-  onMount(async () => {
-    // Wait for wrapperDimensions object to update
-    await tick();
+  function redraw() {
     wrapperDimensions.x = wrapperElem.getBoundingClientRect().x;
     wrapperDimensions.y = wrapperElem.getBoundingClientRect().y;
     
@@ -73,8 +73,46 @@
         context.lineTo(point.x, point.y);
       }
     }
+
+    for (const person of focusPeople) {
+      if (person.parents.length < 1) {
+        continue;
+      }
+      const focusMiddle = person.node.center(wrapperDimensions);
+      if (person.parents.length > 1) {
+        const center1 = person.parents[0].node.center(wrapperDimensions);
+        const center2 = person.parents[1].node.center(wrapperDimensions); 
+        const parentsMiddle = {x: (center1.x + center2.x) / 2, y: (center1.y + center2.y) / 2};
+        context.moveTo(focusMiddle.x, focusMiddle.y);
+        context.lineTo(parentsMiddle.x, parentsMiddle.y);
+        context.moveTo(center1.x, center1.y);
+        context.lineTo(center2.x, center2.y);
+      }
+      else {
+        const center = person.parents[0].node.center(wrapperDimensions); 
+        context.moveTo(focusMiddle.x, focusMiddle.y);
+        context.lineTo(center.x, center.y);
+      }
+    }
+
     context.stroke();
+  }
+
+  onMount(async () => {
+    // Wait for wrapperDimensions object to update
+    await tick();
+    redraw();
+    resize = new ResizeObserver(() => {
+      redraw();
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(redraw, 5);
+    });
+    resize.observe(cnv);
   });
+  onDestroy(() => {
+    resize.unobserve(cnv);
+    clearTimeout(resizeTimer);
+  })
 </script>
 
 <h2>Temp pages for testing purposes only, will be removed later</h2>
@@ -129,13 +167,16 @@
     display: flex;
     flex-direction: row;
     align-items: center;
-    margin-top: 15px;
     justify-content: center;
     gap: 60px;
   }
 
+  .row.parents {
+    margin-bottom: 75px;
+  }
+
   .row.children {
-    margin-top: 200px;
+    margin-top: 150px;
     gap: 20px;
   }
 
