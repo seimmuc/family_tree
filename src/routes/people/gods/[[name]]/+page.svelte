@@ -12,9 +12,14 @@
   const relationships: RelationshipCl[] = data.relations.map(rel => toRelationshipClass(rel, pplMap));
   const parentships: Parentship[] = relationships.filter(r => r.relType === 'parent') as Parentship[];
 
-  const focusPeople: Array<{person: Person<Date>, node: PersonNode}> = data.people.filter((element) => data.focusPeopleIds.includes(element.id)).map(person => {return {person: person, node: undefined as any as PersonNode}});
-  const parents: Array<{person: Person<Date>, node: PersonNode}> = parentships.filter((element) => data.focusPeopleIds.includes(element.child.id)).map((element) => {return {person: element.parent as Person<Date>, node: undefined as any as PersonNode}});
-  const children: Array<{person: Person<Date>, node: PersonNode}> = parentships.filter((element) => data.focusPeopleIds.includes(element.parent.id)).map((element) => {return {person: element.child as Person<Date>, node: undefined as any as PersonNode}});
+  // Construct collections of people's data to be used throughout the page
+  type PersonData = {person: Person<Date>, node: PersonNode};
+  const focusPeople: Array<PersonData & {parents: PersonData[]}> = data.people.filter((element) => data.focusPeopleIds.includes(element.id)).map(person => {return {person: person, node: undefined as any as PersonNode, parents: [] as PersonData[]}});
+  const parents: Array<{person: Person<Date>, node: PersonNode, child: string}> = Object.entries(data.parentsOf).flatMap(([fId, pIds]) => pIds.map(pId => {return {person: pplMap[pId] as Person<Date>, node: undefined as any as PersonNode, child: fId}}));
+  const children: Array<PersonData> = data.children.map(cId => pplMap[cId]).filter(c => c !== undefined).map((element) => {return {person: element as Person<Date>, node: undefined as any as PersonNode}});
+  parents.forEach(p => {
+    focusPeople.find(fp => fp.person.id === p.child)?.parents.push(p);
+  });
 
   let wrapperElem: HTMLDivElement;
   const wrapperDimensions = {x: 0, y: 0, width: 0, height: 0};

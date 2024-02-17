@@ -16,5 +16,23 @@ export async function load({ params }) {
     return [partnerIds, await act.findFamily(partnerIds, 2)];
   });
 
-  return {godName, focusPeopleIds, people: people.map(personStandardDate), relations};
+  // get all child IDs and list of their parents
+  const children: Record<string, string[]> = {};
+  for (const rel of relations) {
+    if (rel.relType == 'parent' && focusPeopleIds.includes(rel.participants.parent[0])) {
+      (children[rel.participants.child[0]] ??= []).push(rel.participants.parent[0]);
+    }
+  }
+  // filter children to only include ones that are children of all people in focusPeopleIds
+  const sharedChildren = Object.entries(children).filter(([_, pIds]) => focusPeopleIds.every(id => pIds.includes(id))).map(([cId, _]) => cId);
+
+  // get all parents of each focus person
+  const parents: Record<string, string[]> = {};
+  for (const rel of relations) {
+    if (rel.relType == 'parent' && focusPeopleIds.includes(rel.participants.child[0])) {
+      (parents[rel.participants.child[0]] ??= []).push(rel.participants.parent[0]);
+    }
+  }
+ 
+  return {godName, focusPeopleIds, people: people.map(personStandardDate), relations, children: sharedChildren, parentsOf: parents};
 }
