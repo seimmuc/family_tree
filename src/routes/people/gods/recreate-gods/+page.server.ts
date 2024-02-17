@@ -8,39 +8,39 @@ export async function load() {
     const delCount = await act.deletePeople(filtersWhereAnd([{prop: 'firstName', operator: 'IN', val: ALL_FIRST_NAMES}], 'p'));
     const pplCountStart = await act.countAllPeople();
     
-    const hades = await act.addPerson({firstName: 'Hades', gender: 'male'});
+    const hades = await act.addPerson({firstName: 'Hades', gender: 'male', bio: 'God of the dead and the king of the underworld'});
     
-    const cronus = await act.addPerson({firstName: 'Cronus', gender: 'male'});
+    const cronus = await act.addPerson({firstName: 'Cronus', gender: 'male', bio: 'Self-fulfiller of a prophecy'});
     await act.addPersonRelation(hades.id, cronus.id, 'PARENT');
     
-    const rhea = await act.addPerson({firstName: 'Rhea', gender: 'female'});
+    const rhea = await act.addPerson({firstName: 'Rhea', gender: 'female', bio: 'Full-time mom and a part-time trickster'});
     await act.addPersonRelation(hades.id, rhea.id, 'PARENT');
     await act.addPersonRelation(rhea.id, cronus.id, 'PARTNER');
     
-    const hera = await act.addPerson({firstName: 'Hera', gender: 'female'});
+    const hera = await act.addPerson({firstName: 'Hera', gender: 'female', bio: 'Goddess of marriage'});
     await act.addPersonRelation(hera.id, rhea.id, 'PARENT');
     await act.addPersonRelation(hera.id, cronus.id, 'PARENT');
     
-    const poseidon = await act.addPerson({firstName: 'Poseidon', gender: 'male'});
+    const poseidon = await act.addPerson({firstName: 'Poseidon', gender: 'male', bio: 'Ruler of seas, winds, and even the earth(quakes). Also horses. Mostly just horses.'});
     await act.addPersonRelation(poseidon.id, rhea.id, 'PARENT');
     await act.addPersonRelation(poseidon.id, cronus.id, 'PARENT');
     
-    const zeus = await act.addPerson({firstName: 'Zeus', gender: 'male'});
+    const zeus = await act.addPerson({firstName: 'Zeus', gender: 'male', bio: 'God of thunder, aka the sky daddy. Sex god, but only figuratively.'});
     await act.addPersonRelation(zeus.id, rhea.id, 'PARENT');
     await act.addPersonRelation(zeus.id, cronus.id, 'PARENT');
     
-    const persephone = await act.addPerson({firstName: 'Persephone', gender: 'female'});
+    const persephone = await act.addPerson({firstName: 'Persephone', gender: 'female', bio: 'I didn\'t choose the underworld, the king od the underworld chose me. Through kidnapping.'});
     await act.addPersonRelation(persephone.id, zeus.id, 'PARENT');
     
     const ares = await act.addPerson({firstName: 'Ares', gender: 'male'});
     await act.addPersonRelation(ares.id, hera.id, 'PARENT');
     await act.addPersonRelation(ares.id, zeus.id, 'PARENT');
     
-    const aphrodite = await act.addPerson({firstName: 'Aphrodite', gender: 'female'});
+    const aphrodite = await act.addPerson({firstName: 'Aphrodite', gender: 'female', bio: 'Goddess of beauty, love and lust'});
     await act.addPersonRelation(aphrodite.id, zeus.id, 'PARENT');
     await act.addPersonRelation(aphrodite.id, ares.id, 'PARTNER');
     
-    const eros = await act.addPerson({firstName: 'Eros', gender: 'male'});
+    const eros = await act.addPerson({firstName: 'Eros', gender: 'male', bio: 'God of love and sex'});
     await act.addPersonRelation(eros.id, ares.id, 'PARENT');
     await act.addPersonRelation(eros.id, aphrodite.id, 'PARENT');
     

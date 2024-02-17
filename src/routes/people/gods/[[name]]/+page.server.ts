@@ -36,3 +36,26 @@ export async function load({ params }) {
  
   return {godName, focusPeopleIds, people: people.map(personStandardDate), relations, children: sharedChildren, parentsOf: parents};
 }
+
+export const actions = {
+  updatePerson: async ({ request }) => {
+    const data = await request.formData();
+    const personUuid = data.get('person-id');
+    console.log('updating person ', personUuid);
+  },
+  deletePerson: async ({ request }) => {
+    const data = await request.formData();
+    const personUuid = data.get('person-id');
+    console.log('deleting person ', personUuid);
+  },
+  uploadPic: async ({ request }) => {
+    const data = await request.formData();
+    const personUuid = data.get('person-id');
+    console.log('uploading avatar ', personUuid);
+  },
+  deletePic: async ({ request }) => {
+    const data = await request.formData();
+    const personUuid = data.get('person-id');
+    console.log('deleting avatar ', personUuid);
+  }
+}

@@ -7,11 +7,10 @@ export interface Person<DT extends DateOrLDT = Date> {
   firstName: string;
   lastName?: string;
   nickname?: string;
-  title?: string;
-  suffix?: string;
   gender?: string;
   birthDate?: DT;
   deathDate?: DT;
+  bio?: string;
 }
 
 export interface Relationship {
