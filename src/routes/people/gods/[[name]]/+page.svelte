@@ -1,5 +1,6 @@
 <script lang="ts">
 	import PersonNode from '$lib/components/PersonNode.svelte';
+	import PopUp from '$lib/components/PopUp.svelte';
 	import type { Point } from '$lib/components/types.js';
   import { Parentship, type Person, toRelationshipClass, type RelationshipCl } from '$lib/types.js';
 	import { onMount } from 'svelte';
@@ -22,6 +23,17 @@
   parents.forEach(p => {
     focusPeople.find(fp => fp.person.id === p.child)?.parents.push(p);
   });
+
+  let popUpVisible = false;
+  let popUpPerson: Person | undefined = undefined;
+  let popUpPosition: Point = {x: 0, y: 0};
+
+  // Pop-Up open
+  function onPersonClick(person: PersonData) {
+    popUpPerson = person.person; 
+    popUpVisible = true;
+    popUpPosition = person.node.bottomCenter();
+  }
 
   let wrapperElem: HTMLDivElement;
   const wrapperDimensions = {x: 0, y: 0, width: 0, height: 0};
@@ -128,22 +140,27 @@
   <div class="row parents">
     {#each parents as parent}
       <!-- Parent Nodes -->
-      <PersonNode bind:this={parent.node} person={parent.person} />
+      <PersonNode bind:this={parent.node} person={parent.person} on:click={() => onPersonClick(parent)}/>
     {/each}
   </div>
   <div class="row focus">
     {#each focusPeople as person}
       <!-- Focus Nodes -->
-      <PersonNode bind:this={person.node} person={person.person} />
+      <PersonNode bind:this={person.node} person={person.person} on:click={() => onPersonClick(person)}/>
     {/each}
   </div>
   <div class="row children">
     {#each children as child}
       <!-- Children Nodes -->
-      <PersonNode bind:this={child.node} person={child.person} />
+      <PersonNode bind:this={child.node} person={child.person} on:click={() => onPersonClick(child)}/>
     {/each}
   </div>
 </div>
+
+<!-- HTML Pop-Up -->
+{#if popUpVisible}
+  <PopUp person={popUpPerson} position={popUpPosition} />
+{/if}
 
 <p>{data.godName}: ({data.people.length}, {data.relations.length})</p>
 

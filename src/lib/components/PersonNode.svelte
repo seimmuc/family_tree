@@ -4,7 +4,7 @@
 
   export let person: Person;
 
-  let root: HTMLDivElement;
+  let root: HTMLButtonElement;
 
   export function center(negativeOffset: Point): Point {
     const boundingBox = root.getBoundingClientRect();
@@ -13,15 +13,22 @@
       y: boundingBox.y + boundingBox.height / 2 - negativeOffset.y
     }
   }
+  export function bottomCenter(): Point {
+    const boundingBox = root.getBoundingClientRect();
+    return {
+      x: boundingBox.x + boundingBox.width / 2,
+      y: boundingBox.y + boundingBox.height
+    }
+  }
 </script>
 
-<div bind:this={root} class="person self">{person.firstName}</div>
+<button bind:this={root} class="person self" on:click>{person.firstName}</button>
 
 <style>
   .person {
     background-color: white;
     color: black;
-    width: 70px;
+    width: 110px;
     aspect-ratio: 1/1;
     border-radius: 50%;
     display: flex;

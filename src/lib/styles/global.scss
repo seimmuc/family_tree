@@ -6,11 +6,15 @@
 }
 
 :root[data-theme="light"] {
+  --bg-color: #{colors.$light-bg};
+  --fg-color: #{colors.$light-text};
   background-color: colors.$light-bg;
   color: colors.$light-text;
 }
 
 :root[data-theme="dark"], :root:not([data-theme="light"]) {
+  --bg-color: #{colors.$dark-bg};
+  --fg-color: #{colors.$dark-text};
   background-color: colors.$dark-bg;
   color: colors.$dark-text;
 }
