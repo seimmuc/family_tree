@@ -9,7 +9,7 @@
 
   let cnv: HTMLCanvasElement;
   let resize: ResizeObserver;
-  let resizeTimer: NodeJS.Timeout | number;
+  let resizeTimer: number;
 
   const pplMap = Object.fromEntries(data.people.map(p => [p.id as string, p]));
   const relationships: RelationshipCl[] = data.relations.map(rel => toRelationshipClass(rel, pplMap));
@@ -25,20 +25,39 @@
   });
 
   let popUpVisible = false;
-  let popUpPerson: Person | undefined = undefined;
+  let popUpPerson: PersonData = undefined as any as PersonData;
   let popUpPosition: Point = {x: 0, y: 0};
+
+  let dontClosePopup = false;
 
   // Pop-Up open
   function onPersonClick(person: PersonData) {
-    popUpPerson = person.person; 
+    popUpPerson = person;
     popUpVisible = true;
     popUpPosition = person.node.bottomCenter();
+    dontClosePopup = true;
+  }
+
+  function onPopUpClick(event: MouseEvent) {
+    dontClosePopup = true;
+  }
+  
+  function onWindowClick(event: MouseEvent) {
+    if (dontClosePopup) {
+      dontClosePopup = false;
+    } else {
+      popUpVisible = false;
+    }
   }
 
   let wrapperElem: HTMLDivElement;
   const wrapperDimensions = {x: 0, y: 0, width: 0, height: 0};
 
   function redraw() {
+    if (popUpVisible) {
+      popUpPosition = popUpPerson?.node.bottomCenter() ?? {x: 0, y: 0};
+    }
+
     wrapperDimensions.x = wrapperElem.getBoundingClientRect().x;
     wrapperDimensions.y = wrapperElem.getBoundingClientRect().y;
     
@@ -132,6 +151,8 @@
   });
 </script>
 
+<svelte:window on:click={onWindowClick} />
+
 <h2>Temp pages for testing purposes only, will be removed later</h2>
 
 <!-- Main Area -->
@@ -159,24 +180,8 @@
 
 <!-- HTML Pop-Up -->
 {#if popUpVisible}
-  <PopUp person={popUpPerson} position={popUpPosition} />
+  <PopUp person={popUpPerson.person} position={popUpPosition} on:click={onPopUpClick}/>
 {/if}
-
-<p>{data.godName}: ({data.people.length}, {data.relations.length})</p>
-
-<h1>People:</h1>
-<ol>
-  {#each data.people as person}
-    <li><span style="font-family: monospace;">[{person.id}]</span>: {person.firstName}</li>
-  {/each}
-</ol>
-
-<h1>Relations:</h1>
-<ol>
-  {#each parentships as parentship}
-    <li>{parentship.relType}, parent: <span style="font-family: monospace;">{parentship.parent.id}</span>, child: <span style="font-family: monospace;">{parentship.child.id}</span></li>
-  {/each}
-</ol>
 
 <style>
   .tree-wrapper {
