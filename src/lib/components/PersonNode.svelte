@@ -36,5 +36,6 @@
     align-items: center;
     padding: 20px;
     border: black solid 2px;
+    cursor: pointer;
   }
 </style>

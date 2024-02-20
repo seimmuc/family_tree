@@ -180,7 +180,7 @@
 
 <!-- HTML Pop-Up -->
 {#if popUpVisible}
-  <PopUp person={popUpPerson.person} position={popUpPosition} on:click={onPopUpClick}/>
+  <PopUp person={popUpPerson.person} position={popUpPosition} on:click={onPopUpClick} on:close={() => popUpVisible = false}/>
 {/if}
 
 <style>
