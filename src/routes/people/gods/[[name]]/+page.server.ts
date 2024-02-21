@@ -1,6 +1,9 @@
+import { MEDIA_IMAGE_MIME_TYPES } from '$env/static/private';
 import { personStandardDate } from '$lib/server/graph/mgutils';
 import { ReadActions } from '$lib/server/graph/person.js';
-import { error } from '@sveltejs/kit';
+import { addOrReplacePhoto } from '$lib/server/media.js';
+import { error, type Actions } from '@sveltejs/kit';
+import { isUUID } from '$lib/utils.js';
 
 export async function load({ params }) {
   const godName = params.name ?? 'Zeus';
@@ -37,25 +40,43 @@ export async function load({ params }) {
   return {godName, focusPeopleIds, people: people.map(personStandardDate), relations, children: sharedChildren, parentsOf: parents};
 }
 
-export const actions = {
+function getUUID(formData: FormData): string {
+  const uuid = formData.get('person-id') as string;
+  if (!isUUID(uuid)) {
+    console.log('missing person-id in form data');
+    error(422, 'missing person UUID');
+  }
+  return uuid;
+}
+
+export const actions: Actions = {
   updatePerson: async ({ request }) => {
     const data = await request.formData();
-    const personUuid = data.get('person-id');
+    const personUuid = getUUID(data);
     console.log('updating person ', personUuid);
   },
   deletePerson: async ({ request }) => {
     const data = await request.formData();
-    const personUuid = data.get('person-id');
+    const personUuid = getUUID(data);
     console.log('deleting person ', personUuid);
   },
   uploadPic: async ({ request }) => {
     const data = await request.formData();
-    const personUuid = data.get('person-id');
+    const personUuid = getUUID(data);
     console.log('uploading avatar ', personUuid);
+    const file = data.get('pic')?.valueOf();
+    if (!(file instanceof File)) {
+      console.error("file in request.formData() isn't an instance of File, likely because browser sent data using incorrect enctype");
+      error(422, 'file was not uploaded');
+    }
+    if (!MEDIA_IMAGE_MIME_TYPES.includes(file.type)) {
+      error(422, 'file type is not allowed');
+    }
+    await addOrReplacePhoto(personUuid, file);
   },
   deletePic: async ({ request }) => {
     const data = await request.formData();
-    const personUuid = data.get('person-id');
+    const personUuid = getUUID(data);
     console.log('deleting avatar ', personUuid);
   }
 }
