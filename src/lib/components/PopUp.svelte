@@ -26,32 +26,44 @@
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <div class="pop-up" style="left: {position.x}px; top: {position.y}px" on:click>
-  <div class="top-bar">
-    <button class="top-button" on:click={toggleEditMode}><FontAwesomeIcon icon={faPenToSquare} /></button>
-    {#if editMode}
-      <input type="text" bind:value={person.firstName}/>
-    {:else}
-      <h1 class="personName">{person.firstName}</h1>
-    {/if}
-    <button class="top-button" on:click={close}><FontAwesomeIcon icon={faXmark} /></button>
-  </div>
-  <div class="main-content">
-    <div class="dates">
+  <form method="POST" action="?/updatePerson">
+    <input type="hidden" name="person-id" value="{person.id}">
+    <div class="top-bar">
+        {#if editMode}
+          <button class="top-button" type="submit"> 
+            <FontAwesomeIcon icon={faFloppyDisk} />
+          </button>
+        {:else}
+          <button class="top-button" type="button" on:click={toggleEditMode}>
+            <FontAwesomeIcon icon={faPenToSquare} />
+          </button>
+        {/if}
       {#if editMode}
-        <input type="date" bind:value={person.birthDate}/>
-        <input type="date" bind:value={person.deathDate}/>
+        <input name="firstName" class="personName" type="text" bind:value={person.firstName} size="{person.firstName.length}"/>
       {:else}
-        <h3 class="personBirth">{person?.birthDate} - {person?.deathDate}</h3>
+        <h1 class="personName">{person.firstName}</h1>
       {/if}
+      <button class="top-button" type="button" on:click={close}>
+        <FontAwesomeIcon icon={faXmark} />
+      </button>
     </div>
-    <br>
-    {#if editMode}
-      <textarea class="bio" bind:value={person.bio}></textarea>  
-    {:else}
-      <p>{person?.bio}</p>
-    {/if} 
-  </div>
-  
+    <div class="main-content">
+      <div class="dates">
+        {#if editMode}
+          <input name="birthDate" class="date-input" type="date" bind:value={person.birthDate}/>
+          <input name="deathDate" class="date-input" type="date" bind:value={person.deathDate}/>
+        {:else}
+          <h3 class="personBirth">{person?.birthDate} - {person?.deathDate}</h3>
+        {/if}
+      </div>
+      <br>
+      {#if editMode}
+        <textarea name="bio" class="bio" bind:value={person.bio}></textarea>  
+      {:else}
+        <p class="bio">{person?.bio}</p>
+      {/if} 
+    </div>
+  </form>
 </div>
 
 <style>
@@ -67,6 +79,7 @@
   .personName {
     margin: 0px;
     margin-top: 20px;
+    font-size: 36px;
   }
 
   .personBirth {
@@ -82,7 +95,9 @@
   .main-content {
     display: flex;
     flex-direction: column;
-    padding: 20px 20px 5px 20px;
+    padding: 20px 20px 20px 20px;
+    align-items: center;
+    gap: 10px;
   }
 
   .top-button {
@@ -94,4 +109,21 @@
     cursor: pointer;
     outline: inherit;
   }
+
+  .bio {
+    width: 100%;
+    height: max-content;
+    overflow-wrap: anywhere;
+  }
+
+  textarea.bio {
+    width: 420px;
+    height: 129px;
+  }
+
+  .date-input {
+    font-size: 24px;
+  }
+
+
 </style>

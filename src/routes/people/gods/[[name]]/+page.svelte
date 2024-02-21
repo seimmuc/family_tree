@@ -9,7 +9,7 @@
 
   let cnv: HTMLCanvasElement;
   let resize: ResizeObserver;
-  let resizeTimer: number;
+  let resizeTimer: NodeJS.Timeout | number;
 
   const pplMap = Object.fromEntries(data.people.map(p => [p.id as string, p]));
   const relationships: RelationshipCl[] = data.relations.map(rel => toRelationshipClass(rel, pplMap));
