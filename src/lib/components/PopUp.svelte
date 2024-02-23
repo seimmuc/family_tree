@@ -5,6 +5,7 @@
 	import type { Person } from "$lib/types";
 	import type { Point } from "./types";
   import { createEventDispatcher } from 'svelte';
+	import { enhance } from "$app/forms";
 
   export let person: Person;
   export let position: Point;
@@ -26,20 +27,20 @@
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <div class="pop-up" style="left: {position.x}px; top: {position.y}px" on:click>
-  <form method="POST" action="?/updatePerson">
-    <input type="hidden" name="person-id" value="{person.id}">
+  <form method="POST" action="?/updatePerson" use:enhance enctype="multipart/form-data">
+    <input type="hidden" name="id" value="{person.id}">
     <div class="top-bar">
-        {#if editMode}
-          <button class="top-button" type="submit"> 
-            <FontAwesomeIcon icon={faFloppyDisk} />
-          </button>
-        {:else}
-          <button class="top-button" type="button" on:click={toggleEditMode}>
-            <FontAwesomeIcon icon={faPenToSquare} />
-          </button>
-        {/if}
       {#if editMode}
-        <input name="firstName" class="personName" type="text" bind:value={person.firstName} size="{person.firstName.length}"/>
+        <button class="top-button" type="submit"> 
+          <FontAwesomeIcon icon={faFloppyDisk} />
+        </button>
+      {:else}
+        <button class="top-button" type="button" on:click={toggleEditMode}>
+          <FontAwesomeIcon icon={faPenToSquare} />
+        </button>
+      {/if}
+      {#if editMode}
+        <input class="personName" type="text" name="firstName" bind:value={person.firstName} size="{person.firstName.length}"/>
       {:else}
         <h1 class="personName">{person.firstName}</h1>
       {/if}
@@ -50,17 +51,17 @@
     <div class="main-content">
       <div class="dates">
         {#if editMode}
-          <input name="birthDate" class="date-input" type="date" bind:value={person.birthDate}/>
-          <input name="deathDate" class="date-input" type="date" bind:value={person.deathDate}/>
+          <input class="date-input" type="date" name="birthDate" bind:value={person.birthDate}/>
+          <input class="date-input" type="date" name="deathDate" bind:value={person.deathDate}/>
         {:else}
-          <h3 class="personBirth">{person?.birthDate} - {person?.deathDate}</h3>
+          <h3 class="personBirth">{person.birthDate} - {person.deathDate}</h3>
         {/if}
       </div>
       <br>
       {#if editMode}
-        <textarea name="bio" class="bio" bind:value={person.bio}></textarea>  
+        <textarea class="bio" name="bio" bind:value={person.bio}></textarea>  
       {:else}
-        <p class="bio">{person?.bio}</p>
+        <p class="bio">{person.bio}</p>
       {/if} 
     </div>
   </form>
