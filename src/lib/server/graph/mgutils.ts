@@ -1,4 +1,4 @@
-import type { DateOrLDT, Person } from "$lib/types";
+import type { DateOrLDT, Person, UpdatablePerson } from "$lib/types";
 import { LocalDateTime } from "neo4j-driver";
 
 type DateToLDT<T> = T extends Date ? LocalDateTime<number> : T;
@@ -20,4 +20,8 @@ export function personStandardDate(person: Person<DateOrLDT>): Person<Date> {
 
 export function personLocalDateTime(person: Person<DateOrLDT>): Person<LocalDateTime<number>> {
   return toLocalDateTime(person as {[k: string]: any}) as Person<LocalDateTime<number>>;
+}
+
+export function personUpdatableLocalDateTime(person: UpdatablePerson<DateOrLDT>): UpdatablePerson<LocalDateTime<number>> {
+  return toLocalDateTime(person as {[k: string]: any}) as UpdatablePerson<LocalDateTime<number>>;
 }

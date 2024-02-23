@@ -2,7 +2,7 @@
 	import PersonNode from '$lib/components/PersonNode.svelte';
 	import PopUp from '$lib/components/PopUp.svelte';
 	import type { Point } from '$lib/components/types.js';
-  import { Parentship, type Person, toRelationshipClass, type RelationshipCl } from '$lib/types.js';
+  import { type Person } from '$lib/types.js';
 	import { onMount } from 'svelte';
 
   export let data;
@@ -11,18 +11,23 @@
   let resize: ResizeObserver;
   let resizeTimer: NodeJS.Timeout | number;
 
-  const pplMap = Object.fromEntries(data.people.map(p => [p.id as string, p]));
-  const relationships: RelationshipCl[] = data.relations.map(rel => toRelationshipClass(rel, pplMap));
-  const parentships: Parentship[] = relationships.filter(r => r.relType === 'parent') as Parentship[];
-
-  // Construct collections of people's data to be used throughout the page
   type PersonData = {person: Person<Date>, node: PersonNode};
-  const focusPeople: Array<PersonData & {parents: PersonData[]}> = data.people.filter((element) => data.focusPeopleIds.includes(element.id)).map(person => {return {person: person, node: undefined as any as PersonNode, parents: [] as PersonData[]}});
-  const parents: Array<PersonData & {child: string}> = Object.entries(data.parentsOf).flatMap(([fId, pIds]) => pIds.map(pId => {return {person: pplMap[pId] as Person<Date>, node: undefined as any as PersonNode, child: fId}}));
-  const children: Array<PersonData> = data.children.map(cId => pplMap[cId]).filter(c => c !== undefined).map((element) => {return {person: element as Person<Date>, node: undefined as any as PersonNode}});
-  parents.forEach(p => {
-    focusPeople.find(fp => fp.person.id === p.child)?.parents.push(p);
-  });
+  let pplMap: Record<string, Person>;
+  let focusPeople: Array<PersonData & {parents: PersonData[]}>;
+  let parents: Array<PersonData & {child: string}>;
+  let children: Array<PersonData>;
+
+  function peopleUpdate() {
+    // Construct collections of people's data to be used throughout the page
+    pplMap = Object.fromEntries(data.people.map(p => [p.id as string, p]));
+    focusPeople = data.people.filter((element) => data.focusPeopleIds.includes(element.id)).map(person => {return {person: person, node: undefined as any as PersonNode, parents: [] as PersonData[]}});
+    parents = Object.entries(data.parentsOf).flatMap(([fId, pIds]) => pIds.map(pId => {return {person: pplMap[pId] as Person<Date>, node: undefined as any as PersonNode, child: fId}}));
+    children = data.children.map(cId => pplMap[cId]).filter(c => c !== undefined).map((element) => {return {person: element as Person<Date>, node: undefined as any as PersonNode}});
+    parents.forEach(p => {
+      focusPeople.find(fp => fp.person.id === p.child)?.parents.push(p);
+    });
+  }
+  $: data.people, peopleUpdate();
 
   let popUpVisible = false;
   let popUpPerson: PersonData = undefined as any as PersonData;
@@ -153,7 +158,7 @@
 
 <svelte:window on:click={onWindowClick} />
 
-<h2>Temp pages for testing purposes only, will be removed later</h2>
+<!-- <h2>Temp pages for testing purposes only, will be removed later</h2> -->
 
 <!-- Main Area -->
 <div class="tree-wrapper" bind:clientWidth={wrapperDimensions.width} bind:clientHeight={wrapperDimensions.height} bind:this={wrapperElem}>

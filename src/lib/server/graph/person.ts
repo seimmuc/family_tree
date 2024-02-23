@@ -1,4 +1,4 @@
-import type { DateOrLDT, ParentRelationship, PartnerRelationship, Person, Relationship } from "$lib/types";
+import type { DateOrLDT, ParentRelationship, PartnerRelationship, Person, Relationship, UpdatablePerson } from "$lib/types";
 import { Integer, LocalDateTime, ManagedTransaction, Relationship as Neo4jRel } from "neo4j-driver";
 import { readTransaction, writeTransaction } from "./memgraph";
 import type { TransactionConfig } from "neo4j-driver-core";
@@ -192,10 +192,20 @@ export class WriteActions extends ReadActions {
   /**
    * Adds a person to the database
    * @param person the person object, do not include id property as it'll be assigned by the server
-   * @returns the person object, as it is returned from the databse server
+   * @returns the person object, as it is returned from the database server
    */
   async addPerson(person: Omit<Person<LocalDateTime<Integer | number>>, 'id'>): Promise<Person<LocalDateTime>> {
     const r = await this.transaction.run('CREATE (p:Person $pdata) SET p.id = randomUUID() RETURN p', {pdata: person});
+    return r.records[0].get('p').properties;
+  }
+
+  /**
+   * Updates a person in the database
+   * @param person the person object with new data, person.id must not change
+   * @returns the updated person object, as it is returned from the database server
+   */
+  async updatePerson(person: UpdatablePerson<LocalDateTime<Integer | number>>): Promise<Person<LocalDateTime>> {
+    const r = await this.transaction.run('MATCH (p:Person {id: $pid}) SET p = $pdata RETURN p LIMIT 1', {pid: person.id, pdata: person});
     return r.records[0].get('p').properties;
   }
 

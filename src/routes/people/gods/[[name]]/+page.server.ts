@@ -1,9 +1,11 @@
 import { MEDIA_IMAGE_MIME_TYPES } from '$env/static/private';
-import { personStandardDate } from '$lib/server/graph/mgutils';
-import { ReadActions } from '$lib/server/graph/person.js';
+import { personStandardDate, personUpdatableLocalDateTime } from '$lib/server/graph/mgutils';
+import { ReadActions, WriteActions } from '$lib/server/graph/person.js';
 import { addOrReplacePhoto } from '$lib/server/media.js';
 import { error, type Actions } from '@sveltejs/kit';
 import { isUUID } from '$lib/utils.js';
+import { PERSON_KEYS, PERSON_SCHEMA, type UpdatablePerson } from '$lib/types.js';
+import { ValidationError } from 'yup';
 
 export async function load({ params }) {
   const godName = params.name ?? 'Zeus';
@@ -49,11 +51,30 @@ function getUUID(formData: FormData): string {
   return uuid;
 }
 
+function validatePerson(person: {[k: string]: any}): UpdatablePerson {
+  return PERSON_SCHEMA.validateSync(person, { abortEarly: true, stripUnknown: true });
+}
+
 export const actions: Actions = {
   updatePerson: async ({ request }) => {
     const data = await request.formData();
-    const personUuid = getUUID(data);
-    console.log('updating person ', personUuid);
+    console.log('updating person ', data.get('id'));
+    const dangerousPerson = Object.fromEntries(PERSON_KEYS.map(k => {
+      const v = data.get(k)?.valueOf();
+      return [k, v]
+    }).filter(e => e[1] !== undefined));
+    let validPerson: UpdatablePerson;
+    try {
+      validPerson = validatePerson(dangerousPerson);
+    } catch (err) {
+      if (err instanceof ValidationError) {
+        return error(422, err.message);
+      }
+      throw err;
+    }
+    const updatedPerson = await WriteActions.perform(async act => {
+      return act.updatePerson(personUpdatableLocalDateTime(validPerson));
+    });
   },
   deletePerson: async ({ request }) => {
     const data = await request.formData();

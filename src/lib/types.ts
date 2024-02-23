@@ -1,6 +1,12 @@
 import type { Integer, LocalDateTime } from "neo4j-driver";
+import { date, object, string, ObjectSchema } from "yup";
 
 export type DateOrLDT = Date | LocalDateTime<number | Integer>;
+
+type OptionalKeysNullable<T extends Record<any, any>> = {
+  [K in keyof T]: undefined extends T[K] ? T[K] | null : T[K];
+};
+
 
 export interface Person<DT extends DateOrLDT = Date> {
   id: string;
@@ -12,6 +18,22 @@ export interface Person<DT extends DateOrLDT = Date> {
   deathDate?: DT;
   bio?: string;
 }
+
+export type UpdatablePerson<T extends DateOrLDT = Date> = OptionalKeysNullable<Person<T>>;
+
+export const PERSON_SCHEMA: ObjectSchema<UpdatablePerson> = object({
+  id: string().required().lowercase().uuid().label('person id'),
+  firstName: string().required().min(1).label('first name'),
+  lastName: string().optional(),
+  nickname: string().optional(),
+  gender: string().optional(),
+  birthDate: date().transform((v, ov) => {return ov === '' ? null : v}).optional().nullable(),
+  deathDate: date().transform((v, ov) => {return ov === '' ? null : v}).optional().nullable(),
+  bio: string().optional().nullable()
+}).noUnknown();
+
+export const PERSON_KEYS = Object.keys(PERSON_SCHEMA.fields);
+
 
 export interface Relationship {
   relType: string;
