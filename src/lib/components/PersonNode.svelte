@@ -20,6 +20,9 @@
       y: boundingBox.y + boundingBox.height
     }
   }
+  export function boundBox(): DOMRect {
+    return root.getBoundingClientRect();
+  }
 </script>
 
 <button bind:this={root} class="person self" on:click>{person.firstName}</button>

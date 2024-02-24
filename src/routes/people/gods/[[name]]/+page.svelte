@@ -1,10 +1,12 @@
 <script lang="ts">
-	import PersonNode from '$lib/components/PersonNode.svelte';
+	import FloatingUiComponent, { type FloatingUICompControl } from '$lib/components/FloatingUIComponent.svelte';
+  import PersonNode from '$lib/components/PersonNode.svelte';
 	import PopUp from '$lib/components/PopUp.svelte';
 	import type { Point } from '$lib/components/types.js';
   import { type Person } from '$lib/types.js';
+	import { type ClientRectObject } from '@floating-ui/core';
 	import { onMount } from 'svelte';
-
+	
   export let data;
 
   let cnv: HTMLCanvasElement;
@@ -29,17 +31,26 @@
   }
   $: data.people, peopleUpdate();
 
-  let popUpVisible = false;
-  let popUpPerson: PersonData = undefined as any as PersonData;
-  let popUpPosition: Point = {x: 0, y: 0};
-
+  const popup = {
+    control: undefined as FloatingUICompControl | undefined,
+    person: undefined as any as PersonData,
+    virtElem: {getBoundingClientRect: (): ClientRectObject => {
+      if (popup.person) {
+        return popup.person.node.boundBox();
+      }
+      return { x: 0, y: 0, top: 0, left: 0, bottom: 0, right: 0, width: 0, height: 0 };
+    }}
+  };
   let dontClosePopup = false;
 
   // Pop-Up open
   function onPersonClick(person: PersonData) {
-    popUpPerson = person;
-    popUpVisible = true;
-    popUpPosition = person.node.bottomCenter();
+    popup.person = person;
+    if (popup.control?.isVisible()) {
+      popup.control?.update();
+    } else {
+      popup.control?.show();
+    }
     dontClosePopup = true;
   }
 
@@ -51,7 +62,7 @@
     if (dontClosePopup) {
       dontClosePopup = false;
     } else {
-      popUpVisible = false;
+      popup.control?.hide();
     }
   }
 
@@ -59,10 +70,6 @@
   const wrapperDimensions = {x: 0, y: 0, width: 0, height: 0};
 
   function redraw() {
-    if (popUpVisible) {
-      popUpPosition = popUpPerson?.node.bottomCenter() ?? {x: 0, y: 0};
-    }
-
     wrapperDimensions.x = wrapperElem.getBoundingClientRect().x;
     wrapperDimensions.y = wrapperElem.getBoundingClientRect().y;
     
@@ -184,9 +191,23 @@
 </div>
 
 <!-- HTML Pop-Up -->
-{#if popUpVisible}
-  <PopUp person={popUpPerson.person} position={popUpPosition} on:click={onPopUpClick} on:close={() => popUpVisible = false}/>
-{/if}
+<FloatingUiComponent
+  bind:control={popup.control}
+  virtualElement={popup.virtElem}
+  offsetPx={20}
+  arrowShiftPx={13}
+  --popup-bg="color-mix(in hsl, var(--bg-color) 60%, gray)"
+  --popup-border="2px solid black"
+>
+  <PopUp
+    style="background-color: var(--popup-bg, gray); border: var(--popup-border, 1px solid black);"
+    slot="tooltip"
+    person={popup.person.person}
+    on:click={onPopUpClick}
+    on:close={popup.control?.hide}
+  />
+  <div slot="arrow" class="arrow" />
+</FloatingUiComponent>
 
 <style>
   .tree-wrapper {
@@ -217,5 +238,15 @@
     height: 100%;
     position: absolute;
     z-index: -1;
+  }
+
+  .arrow {
+    background-color: var(--popup-bg, gray);
+    border: var(--popup-border, 1px solid black);
+    border-right-width: 0;
+    border-bottom-width: 0;
+    border-bottom-right-radius: 100%;
+    width: 25px;
+    height: 25px;
   }
 </style>

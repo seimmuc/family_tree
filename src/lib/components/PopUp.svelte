@@ -3,12 +3,11 @@
   import { faXmark } from "@fortawesome/free-solid-svg-icons";
   import { faPenToSquare, faFloppyDisk } from "@fortawesome/free-regular-svg-icons";
 	import type { Person } from "$lib/types";
-	import type { Point } from "./types";
-  import { createEventDispatcher } from 'svelte';
+	import { createEventDispatcher } from 'svelte';
 	import { enhance } from "$app/forms";
 
   export let person: Person;
-  export let position: Point;
+  export let style: string = '';
 
   let editMode = false;
   const dispatch = createEventDispatcher();
@@ -26,7 +25,7 @@
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <!-- svelte-ignore a11y-no-static-element-interactions -->
-<div class="pop-up" style="left: {position.x}px; top: {position.y}px" on:click>
+<div class="pop-up" style={style} on:click>
   <form method="POST" action="?/updatePerson" use:enhance enctype="multipart/form-data">
     <input type="hidden" name="id" value="{person.id}">
     <div class="top-bar">
@@ -69,11 +68,6 @@
 
 <style>
   .pop-up {
-    position: absolute;
-    background-color: color-mix(in hsl, var(--bg-color) 60%, gray);
-    /* padding: 15px 15px 0px 15px; */
-    border: solid 2px black;
-    transform: translateX(-50%) translateY(20px);
     max-width: 500px;
   }
 
@@ -125,6 +119,4 @@
   .date-input {
     font-size: 24px;
   }
-
-
 </style>
