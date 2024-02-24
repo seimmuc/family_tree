@@ -165,8 +165,6 @@
 
 <svelte:window on:click={onWindowClick} />
 
-<!-- <h2>Temp pages for testing purposes only, will be removed later</h2> -->
-
 <!-- Main Area -->
 <div class="tree-wrapper" bind:clientWidth={wrapperDimensions.width} bind:clientHeight={wrapperDimensions.height} bind:this={wrapperElem}>
   <canvas bind:this={cnv} class="lines-canvas" width="{wrapperDimensions.width}" height="{wrapperDimensions.height}"></canvas>

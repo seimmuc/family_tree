@@ -8,14 +8,11 @@ import { PERSON_KEYS, PERSON_SCHEMA, type UpdatablePerson } from '$lib/types.js'
 import { ValidationError } from 'yup';
 
 export async function load({ params }) {
-  const godName = params.name ?? 'Zeus';
-
   const [focusPeopleIds, [people, relations]] = await ReadActions.perform(async act => {
-    const ppl = await act.findPeopleByFirstName(godName);
-    if (ppl.length < 1) {
-      error(404);
+    const focusPerson = await act.findPersonById(params.id);
+    if (focusPerson === undefined) {
+      return error(404);
     }
-    const focusPerson = ppl[0];
     const partner = await act.findMainPartner(focusPerson.id);
     const partnerIds = [focusPerson.id, partner?.id].filter(v => v !== undefined) as string[];
     return [partnerIds, await act.findFamily(partnerIds, 2)];
@@ -39,7 +36,7 @@ export async function load({ params }) {
     }
   }
  
-  return {godName, focusPeopleIds, people: people.map(personStandardDate), relations, children: sharedChildren, parentsOf: parents};
+  return {focusPeopleIds, people: people.map(personStandardDate), relations, children: sharedChildren, parentsOf: parents};
 }
 
 function getUUID(formData: FormData): string {
