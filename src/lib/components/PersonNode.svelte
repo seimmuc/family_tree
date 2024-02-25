@@ -25,7 +25,7 @@
   }
 </script>
 
-<button bind:this={root} class="person self" on:click>{person.firstName}</button>
+<button bind:this={root} class="person self" on:click>{person.name}</button>
 
 <style>
   .person {

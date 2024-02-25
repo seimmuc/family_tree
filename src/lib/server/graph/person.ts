@@ -57,8 +57,8 @@ export class ReadActions {
     const r = await this.transaction.run('MATCH (p:Person) WHERE p.id = $id RETURN p LIMIT 1', {id});
     return r.records[0]?.get('p')?.properties;
   }
-  async findPeopleByFirstName(firstName: string): Promise<Person<LocalDateTime>[]> {
-    const r = await this.transaction.run('MATCH (p:Person {firstName: $fn}) RETURN p', {fn: firstName});
+  async findPeopleByName(name: string): Promise<Person<LocalDateTime>[]> {
+    const r = await this.transaction.run('MATCH (p:Person {name: $fn}) RETURN p', {fn: name});
     return r.records.map(rec => rec.get('p').properties as Person<LocalDateTime>);
   }
   async findMainPartner(personId: string): Promise<Person<LocalDateTime> | undefined> {
@@ -72,12 +72,12 @@ export class ReadActions {
       throw new RangeError('relationHops must be between 0 and 25');
     }
 
-    // MATCH (:Person {firstName: "Hades"})-[*..25]-(t:Person)
+    // MATCH (:Person {name: "Hades"})-[*..25]-(t:Person)
     // WITH DISTINCT t
     // MATCH (t)-[r]-()
     // RETURN t, collect(r) as r
     // UNION
-    // MATCH (p:Person {firstName: "Hades"})
+    // MATCH (p:Person {name: "Hades"})
     // RETURN p as t, null as r
     const r = await this.transaction.run(
       `MATCH (:Person {id: $pid})-[*..${relationHops}]-(t:Person) WITH DISTINCT t MATCH (t)-[r]-() RETURN t, collect(r) as r UNION MATCH (p:Person {id: $pid}) RETURN p as t, null as r`,
@@ -123,13 +123,13 @@ export class ReadActions {
     }
 
     // MATCH (p:Person)-[*..1]-(t:Person)
-    // WHERE p.firstName IN ["Aphrodite", "Ares"]
+    // WHERE p.name IN ["Aphrodite", "Ares"]
     // WITH DISTINCT t
     // MATCH (t)-[r]-()
     // RETURN t, collect(r) as r
     // UNION
     // MATCH (p:Person)
-    // WHERE p.firstName IN ["Aphrodite", "Ares"]
+    // WHERE p.name IN ["Aphrodite", "Ares"]
     // RETURN p as t, null as r
     const r = await this.transaction.run(
       `MATCH (p:Person)-[*..${relationHops}]-(t:Person) WHERE p.id IN $pids WITH DISTINCT t MATCH (t)-[r]-() RETURN t, collect(r) as r UNION MATCH (p:Person) WHERE p.id IN $pids RETURN p as t, null as r`,

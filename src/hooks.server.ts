@@ -13,7 +13,7 @@ if (!building) {
     const startQueries = [
       'CREATE INDEX ON :Person;',
       'CREATE INDEX ON :Person(id);',
-      'CREATE INDEX ON :Person(firstName);',
+      'CREATE INDEX ON :Person(name);',
     ]
     await useSession(async s => {
       for (const q of startQueries) {

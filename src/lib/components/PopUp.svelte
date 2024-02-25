@@ -39,9 +39,9 @@
         </button>
       {/if}
       {#if editMode}
-        <input class="personName" type="text" name="firstName" bind:value={person.firstName} size="{person.firstName.length}"/>
+        <input class="personName" type="text" name="name" bind:value={person.name} size="{person.name.length}"/>
       {:else}
-        <h1 class="personName">{person.firstName}</h1>
+        <h1 class="personName">{person.name}</h1>
       {/if}
       <button class="top-button" type="button" on:click={close}>
         <FontAwesomeIcon icon={faXmark} />

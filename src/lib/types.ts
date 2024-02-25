@@ -10,9 +10,7 @@ type OptionalKeysNullable<T extends Record<any, any>> = {
 
 export interface Person<DT extends DateOrLDT = Date> {
   id: string;
-  firstName: string;
-  lastName?: string;
-  nickname?: string;
+  name: string;
   gender?: string;
   birthDate?: DT;
   deathDate?: DT;
@@ -23,9 +21,7 @@ export type UpdatablePerson<T extends DateOrLDT = Date> = OptionalKeysNullable<P
 
 export const PERSON_SCHEMA: ObjectSchema<UpdatablePerson> = object({
   id: string().required().lowercase().uuid().label('person id'),
-  firstName: string().required().min(1).label('first name'),
-  lastName: string().optional(),
-  nickname: string().optional(),
+  name: string().required().min(1).label('first name'),
   gender: string().optional(),
   birthDate: date().transform((v, ov) => {return ov === '' ? null : v}).optional().nullable(),
   deathDate: date().transform((v, ov) => {return ov === '' ? null : v}).optional().nullable(),

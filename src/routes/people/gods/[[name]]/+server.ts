@@ -3,7 +3,7 @@ import { error, redirect } from '@sveltejs/kit';
 
 export const GET = async ({ params }) => {
   const ppl = await ReadActions.perform(async act => {
-    return act.findPeopleByFirstName(params.name ?? 'Hades');
+    return act.findPeopleByName(params.name ?? 'Hades');
   });
   if (ppl.length < 1) {
     error(404);

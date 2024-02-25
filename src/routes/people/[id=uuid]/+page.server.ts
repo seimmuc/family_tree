@@ -13,7 +13,6 @@ export async function load({ params }) {
   }
 
   return {
-    person: personStandardDate(person),
-    // relations
+    person: personStandardDate(person)
   }
 }
