@@ -5,9 +5,16 @@
 	import type { Person } from "$lib/types";
 	import { createEventDispatcher } from 'svelte';
 	import { enhance } from "$app/forms";
-
+	
   export let person: Person;
   export let style: string = '';
+
+  const dateFormatOptions: Intl.DateTimeFormatOptions = {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  }
+  const bioMaxLength = 50;
 
   let editMode = false;
   const dispatch = createEventDispatcher();
@@ -41,7 +48,7 @@
       {#if editMode}
         <input class="personName" type="text" name="name" bind:value={person.name} size="{person.name.length}"/>
       {:else}
-        <h1 class="personName">{person.name}</h1>
+        <h1 class="personName"><a href="/details/{person.id}">{person.name}</a></h1>
       {/if}
       <button class="top-button" type="button" on:click={close}>
         <FontAwesomeIcon icon={faXmark} />
@@ -53,14 +60,14 @@
           <input class="date-input" type="date" name="birthDate" bind:value={person.birthDate}/>
           <input class="date-input" type="date" name="deathDate" bind:value={person.deathDate}/>
         {:else}
-          <h3 class="personBirth">{person.birthDate} - {person.deathDate}</h3>
+          <h3 class="personBirth">{person.birthDate?.toLocaleDateString(undefined, dateFormatOptions)} - {person.deathDate?.toLocaleDateString(undefined, dateFormatOptions)}</h3>
         {/if}
       </div>
       <br>
       {#if editMode}
         <textarea class="bio" name="bio" bind:value={person.bio}></textarea>  
       {:else}
-        <p class="bio">{person.bio}</p>
+        <p class="bio">{person.bio ? (person.bio.length > bioMaxLength ? person.bio.substring(0, bioMaxLength) + "..." : person.bio) : ""}</p>
       {/if} 
     </div>
   </form>
