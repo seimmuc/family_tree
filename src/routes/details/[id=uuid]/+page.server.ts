@@ -1,4 +1,3 @@
-import { personStandardDate } from '$lib/server/graph/mgutils.js';
 import { ReadActions } from '$lib/server/graph/person.js';
 import { error } from '@sveltejs/kit';
 
@@ -12,6 +11,6 @@ export async function load({ params }) {
   }
 
   return {
-    person: personStandardDate(person)
+    person
   }
 }

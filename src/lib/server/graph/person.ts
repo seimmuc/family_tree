@@ -1,5 +1,5 @@
-import type { DateOrLDT, ParentRelationship, PartnerRelationship, Person, Relationship, UpdatablePerson } from "$lib/types";
-import { Integer, LocalDateTime, ManagedTransaction, Relationship as Neo4jRel } from "neo4j-driver";
+import type { ParentRelationship, PartnerRelationship, Person, Relationship, UpdatablePerson } from "$lib/types";
+import { Integer, ManagedTransaction, Relationship as Neo4jRel } from "neo4j-driver";
 import { readTransaction, writeTransaction } from "./memgraph";
 import type { TransactionConfig } from "neo4j-driver-core";
 
@@ -49,23 +49,23 @@ export class ReadActions {
     const r = await this.transaction.run('MATCH (p:Person) RETURN count(p) as pcount');
     return (r.records[0].get('pcount') as Integer).toInt();
   }
-  async findAllPeople(): Promise<Person<LocalDateTime>[]> {
+  async findAllPeople(): Promise<Person[]> {
     const r = await this.transaction.run('MATCH (p:Person) RETURN p');
     return r.records.map(r => r.get('p').properties);
   }
-  async findPersonById(id: string): Promise<Person<LocalDateTime> | undefined> {
+  async findPersonById(id: string): Promise<Person | undefined> {
     const r = await this.transaction.run('MATCH (p:Person) WHERE p.id = $id RETURN p LIMIT 1', {id});
     return r.records[0]?.get('p')?.properties;
   }
-  async findPeopleByName(name: string): Promise<Person<LocalDateTime>[]> {
+  async findPeopleByName(name: string): Promise<Person[]> {
     const r = await this.transaction.run('MATCH (p:Person {name: $fn}) RETURN p', {fn: name});
-    return r.records.map(rec => rec.get('p').properties as Person<LocalDateTime>);
+    return r.records.map(rec => rec.get('p').properties as Person);
   }
-  async findMainPartner(personId: string): Promise<Person<LocalDateTime> | undefined> {
+  async findMainPartner(personId: string): Promise<Person | undefined> {
     const r = await this.transaction.run('MATCH (:Person {id: $id})-[:PARTNER]-(p:Person) RETURN p', {id: personId});
     return r.records[0]?.get('p')?.properties;
   }
-  async findPersonWithRelations(personId: string, relationHops: number): Promise<[Person<LocalDateTime>[], Relationship[]]> {
+  async findPersonWithRelations(personId: string, relationHops: number): Promise<[Person[], Relationship[]]> {
     if (!Number.isInteger(relationHops)) {
       throw new TypeError('relationHops must be an integer');
     } else if (relationHops < 0 || relationHops > 25) {
@@ -87,7 +87,7 @@ export class ReadActions {
     const pIdenMap: {[identity: number]: string} = {};
     const rIdenSet: Set<number> = new Set();
     const [pl, rl] = r.records.reduce(([pl, rl], rc) => {
-      const prsn = rc.get('t') as {identity: Integer, properties: Person<LocalDateTime>};
+      const prsn = rc.get('t') as {identity: Integer, properties: Person};
       pIdenMap[prsn.identity.toNumber()] = prsn.properties.id;
       pl.push(prsn.properties);
       const relArr = rc.get('r') as {identity: Integer, start: number, end: number, type: string}[] | null;
@@ -100,7 +100,7 @@ export class ReadActions {
         });
       }
       return [pl, rl];
-    }, [[], []] as [Array<Person<LocalDateTime>>, Array<{start: number, end: number, type: string}>]);
+    }, [[], []] as [Array<Person>, Array<{start: number, end: number, type: string}>]);
 
     const relations: Relationship[] = rl.map(rel => {
       if (!Object.hasOwn(pIdenMap, rel.start) || !Object.hasOwn(pIdenMap, rel.end)) { return; }
@@ -115,7 +115,7 @@ export class ReadActions {
 
     return [pl, relations];
   }
-  async findFamily(partnerIds: string[], relationHops: number): Promise<[Person<LocalDateTime>[], Relationship[]]> {
+  async findFamily(partnerIds: string[], relationHops: number): Promise<[Person[], Relationship[]]> {
     if (!Number.isInteger(relationHops)) {
       throw new TypeError('relationHops must be an integer');
     } else if (relationHops < 0 || relationHops > 25) {
@@ -136,10 +136,10 @@ export class ReadActions {
       {pids: partnerIds}
     );
 
-    const pIdenMap: {[identity: number]: Person<LocalDateTime>} = {};
+    const pIdenMap: {[identity: number]: Person} = {};
     const rIdenMap: {[identity: number]: {start: number, end: number, type: PersonRelationType}} = {};
     for (const rc of r.records) {
-      const prsnRc = rc.get('t') as {identity: Integer, properties: Person<LocalDateTime>};
+      const prsnRc = rc.get('t') as {identity: Integer, properties: Person};
       pIdenMap[prsnRc.identity.toNumber()] = prsnRc.properties
       const relArr = rc.get('r') as {identity: Integer, start: number, end: number, type: PersonRelationType}[] | null;
       if (relArr !== null) {
@@ -194,7 +194,7 @@ export class WriteActions extends ReadActions {
    * @param person the person object, do not include id property as it'll be assigned by the server
    * @returns the person object, as it is returned from the database server
    */
-  async addPerson(person: Omit<Person<LocalDateTime<Integer | number>>, 'id'>): Promise<Person<LocalDateTime>> {
+  async addPerson(person: Omit<Person, 'id'>): Promise<Person> {
     const r = await this.transaction.run('CREATE (p:Person $pdata) SET p.id = randomUUID() RETURN p', {pdata: person});
     return r.records[0].get('p').properties;
   }
@@ -202,10 +202,14 @@ export class WriteActions extends ReadActions {
   /**
    * Updates a person in the database
    * @param person the person object with new data, person.id must not change
+   * @param partialUpdate if true, this will preserve existing properties in db that are missing in provided object; setting this to false value will clear all other properties from the person node in db, use with caution
    * @returns the updated person object, as it is returned from the database server
    */
-  async updatePerson(person: UpdatablePerson<LocalDateTime<Integer | number>>): Promise<Person<LocalDateTime>> {
-    const r = await this.transaction.run('MATCH (p:Person {id: $pid}) SET p = $pdata RETURN p LIMIT 1', {pid: person.id, pdata: person});
+  async updatePerson(person: UpdatablePerson, partialUpdate: boolean = true): Promise<Person> {
+    if (!person.id) {
+      throw new TypeError('missing person id');
+    }
+    const r = await this.transaction.run(`MATCH (p:Person {id: $pid}) SET p ${ partialUpdate ? '+=' : '='} $pdata RETURN p LIMIT 1`, {pid: person.id, pdata: person});
     return r.records[0].get('p').properties;
   }
 
@@ -217,7 +221,7 @@ export class WriteActions extends ReadActions {
    * 
    * Security warning: relationType is injected into the query without any sanitization. Do not allow any user input to leak into it. 
    */
-  async addPersonRelation(fromPerson: string | Person<DateOrLDT>, toPerson: string | Person<DateOrLDT>, relationType: PersonRelationType): Promise<Neo4jRel | undefined> {
+  async addPersonRelation(fromPerson: string | Person, toPerson: string | Person, relationType: PersonRelationType): Promise<Neo4jRel | undefined> {
     if (typeof fromPerson === 'object') {
       fromPerson = fromPerson.id;
     }

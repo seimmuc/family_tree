@@ -1,10 +1,9 @@
 import { MEDIA_IMAGE_MIME_TYPES } from '$env/static/private';
-import { personStandardDate, personUpdatableLocalDateTime } from '$lib/server/graph/mgutils';
 import { ReadActions, WriteActions } from '$lib/server/graph/person.js';
 import { addOrReplacePhoto } from '$lib/server/media.js';
-import { error, type Actions } from '@sveltejs/kit';
+import { error, type Actions, fail } from '@sveltejs/kit';
 import { isUUID } from '$lib/utils.js';
-import { PERSON_KEYS, PERSON_SCHEMA, type UpdatablePerson } from '$lib/types.js';
+import { PERSON_SCHEMA, type UpdatablePerson } from '$lib/types.js';
 import { ValidationError } from 'yup';
 
 export async function load({ params }) {
@@ -36,7 +35,7 @@ export async function load({ params }) {
     }
   }
  
-  return {focusPeopleIds, people: people.map(personStandardDate), relations, children: sharedChildren, parentsOf: parents};
+  return {focusPeopleIds, people, relations, children: sharedChildren, parentsOf: parents};
 }
 
 function getUUID(formData: FormData): string {
@@ -56,10 +55,17 @@ export const actions: Actions = {
   updatePerson: async ({ request }) => {
     const data = await request.formData();
     console.log('updating person ', data.get('id'));
-    const dangerousPerson = Object.fromEntries(PERSON_KEYS.map(k => {
-      const v = data.get(k)?.valueOf();
-      return [k, v]
-    }).filter(e => e[1] !== undefined));
+    let updateJson = data.get('person-update');
+    if (typeof updateJson !== 'string') {
+      return fail(422, {message: 'missing person-update data'});
+    }
+    let dangerousPerson;
+    try {
+      dangerousPerson = JSON.parse(updateJson);
+      if (typeof dangerousPerson !== 'object') { throw new Error(); }
+    } catch {
+      return fail(400, {message: 'invalid json'});
+    }
     let validPerson: UpdatablePerson;
     try {
       validPerson = validatePerson(dangerousPerson);
@@ -69,8 +75,9 @@ export const actions: Actions = {
       }
       throw err;
     }
+    console.log('validPerson: ', validPerson);
     const updatedPerson = await WriteActions.perform(async act => {
-      return act.updatePerson(personUpdatableLocalDateTime(validPerson));
+      return act.updatePerson(validPerson);
     });
   },
   deletePerson: async ({ request }) => {

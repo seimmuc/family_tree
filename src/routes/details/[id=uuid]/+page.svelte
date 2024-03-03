@@ -14,7 +14,7 @@
 
 <div class ="main-area">
   <h1>{person.name}</h1>
-  <h3>{person.birthDate?.toLocaleDateString(undefined, dateFormatOptions)} - {person.deathDate?.toLocaleDateString(undefined, dateFormatOptions)}</h3>
+  <h3>{(new Date(person.birthDate ?? '')).toLocaleDateString(undefined, dateFormatOptions)} - {(new Date(person.deathDate ?? '')).toLocaleDateString(undefined, dateFormatOptions)}</h3>
 
   <p>{person.bio}</p>
 </div>

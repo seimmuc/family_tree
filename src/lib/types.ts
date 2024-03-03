@@ -1,31 +1,29 @@
-import type { Integer, LocalDateTime } from "neo4j-driver";
-import { date, object, string, ObjectSchema } from "yup";
-
-export type DateOrLDT = Date | LocalDateTime<number | Integer>;
+import { object, string, ObjectSchema } from "yup";
+import { stripNonPrintableAndNormalize } from "./utils";
 
 type OptionalKeysNullable<T extends Record<any, any>> = {
   [K in keyof T]: undefined extends T[K] ? T[K] | null : T[K];
 };
 
 
-export interface Person<DT extends DateOrLDT = Date> {
+export interface Person {
   id: string;
   name: string;
   gender?: string;
-  birthDate?: DT;
-  deathDate?: DT;
+  birthDate?: string;   // YYYY-MM-DD
+  deathDate?: string;
   bio?: string;
 }
 
-export type UpdatablePerson<T extends DateOrLDT = Date> = OptionalKeysNullable<Person<T>>;
+export type UpdatablePerson = OptionalKeysNullable<Person>;
 
 export const PERSON_SCHEMA: ObjectSchema<UpdatablePerson> = object({
   id: string().required().lowercase().uuid().label('person id'),
-  name: string().required().min(1).label('first name'),
-  gender: string().optional(),
-  birthDate: date().transform((v, ov) => {return ov === '' ? null : v}).optional().nullable(),
-  deathDate: date().transform((v, ov) => {return ov === '' ? null : v}).optional().nullable(),
-  bio: string().optional().nullable()
+  name: string().transform(v => stripNonPrintableAndNormalize(v, false, true)).required().min(1),
+  gender: string().optional().nullable(),
+  birthDate: string().matches(/^\d{4}-\d{2}-\d{2}$/).optional().nullable().label('birth date'),
+  deathDate: string().matches(/^\d{4}-\d{2}-\d{2}$/).optional().nullable().label('death date'),
+  bio: string().transform(v => stripNonPrintableAndNormalize(v, false, false)).optional().nullable()
 }).noUnknown();
 
 export const PERSON_KEYS = Object.keys(PERSON_SCHEMA.fields);
@@ -48,15 +46,15 @@ export interface PartnerRelationship extends Relationship {
 export class Parentship implements ParentRelationship {
   relType: 'parent' = 'parent';
   participants: Record<'parent' | 'child', [string]>;
-  child: Person<DateOrLDT>;
-  parent: Person<DateOrLDT>;
-  constructor(parent: Person<DateOrLDT>, child: Person<DateOrLDT>) {
+  child: Person;
+  parent: Person;
+  constructor(parent: Person, child: Person) {
     this.child = child;
     this.parent = parent;
     this.participants = {parent: [parent.id], child: [child.id]};
   }
 
-  static fromRelation(relation: ParentRelationship, people: {[id: string]: Person<DateOrLDT>}): Parentship {
+  static fromRelation(relation: ParentRelationship, people: {[id: string]: Person}): Parentship {
     if (relation.relType != 'parent') {
       throw Error('relation must be of type "parent"');
     }
@@ -71,13 +69,13 @@ export class Parentship implements ParentRelationship {
 export class Partnership implements PartnerRelationship {
   relType: 'partner' = 'partner';
   participants: Record<'partner', string[]>;
-  partners: Person<DateOrLDT>[] = [];
-  constructor(partners: Person<DateOrLDT>[]) {
+  partners: Person[] = [];
+  constructor(partners: Person[]) {
     this.partners = partners;
     this.participants = {partner: partners.map(p => p.id)};
   }
 
-  static fromRelation(relation: PartnerRelationship, people: {[id: string]: Person<DateOrLDT>}): Partnership {
+  static fromRelation(relation: PartnerRelationship, people: {[id: string]: Person}): Partnership {
     if (relation.relType != 'partner') {
       throw Error('relation must be of type "partner"');
     }
@@ -92,7 +90,7 @@ export class Partnership implements PartnerRelationship {
 }
 export type RelationshipCl = Parentship | Partnership;
 
-export function toRelationshipClass(relation: Relationship, people: {[id: string]: Person<DateOrLDT>}): RelationshipCl {
+export function toRelationshipClass(relation: Relationship, people: {[id: string]: Person}): RelationshipCl {
   if (relation.relType === 'parent') {
     return Parentship.fromRelation(relation as ParentRelationship, people);
   }

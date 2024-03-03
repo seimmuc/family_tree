@@ -29,7 +29,7 @@ export async function load() {
     await act.addPersonRelation(zeus.id, rhea.id, 'PARENT');
     await act.addPersonRelation(zeus.id, cronus.id, 'PARENT');
     
-    const persephone = await act.addPerson({name: 'Persephone', gender: 'female', bio: 'I didn\'t choose the underworld, the king od the underworld chose me. Through kidnapping.'});
+    const persephone = await act.addPerson({name: 'Persephone', gender: 'female', bio: 'I didn\'t choose the underworld, the king of the underworld chose me. Through kidnapping.'});
     await act.addPersonRelation(persephone.id, zeus.id, 'PARENT');
     
     const ares = await act.addPerson({name: 'Ares', gender: 'male'});

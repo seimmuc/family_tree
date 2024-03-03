@@ -13,7 +13,7 @@
   let resize: ResizeObserver;
   let resizeTimer: NodeJS.Timeout | number;
 
-  type PersonData = {person: Person<Date>, node: PersonNode};
+  type PersonData = {person: Person, node: PersonNode};
   let pplMap: Record<string, Person>;
   let focusPeople: Array<PersonData & {parents: PersonData[]}>;
   let parents: Array<PersonData & {child: string}>;
@@ -23,19 +23,32 @@
     // Construct collections of people's data to be used throughout the page
     pplMap = Object.fromEntries(data.people.map(p => [p.id as string, p]));
     focusPeople = data.people.filter((element) => data.focusPeopleIds.includes(element.id)).map(person => {return {person: person, node: undefined as any as PersonNode, parents: [] as PersonData[]}});
-    parents = Object.entries(data.parentsOf).flatMap(([fId, pIds]) => pIds.map(pId => {return {person: pplMap[pId] as Person<Date>, node: undefined as any as PersonNode, child: fId}}));
-    children = data.children.map(cId => pplMap[cId]).filter(c => c !== undefined).map((element) => {return {person: element as Person<Date>, node: undefined as any as PersonNode}});
+    parents = Object.entries(data.parentsOf).flatMap(([fId, pIds]) => pIds.map(pId => {return {person: pplMap[pId] as Person, node: undefined as any as PersonNode, child: fId}}));
+    children = data.children.map(cId => pplMap[cId]).filter(c => c !== undefined).map((element) => {return {person: element as Person, node: undefined as any as PersonNode}});
     parents.forEach(p => {
       focusPeople.find(fp => fp.person.id === p.child)?.parents.push(p);
     });
+    if (popup.control?.isVisible()) {
+      // popup.person.node will be unbound and undefined after upcoming DOM update, we need to relink popup with new PersonData object
+      const personId = popup.person.person.id;
+      pdloop: for (let pdArr of [focusPeople, parents, children]) {
+        for (let pd of pdArr) {
+          if (pd.person.id === personId) {
+            popup.person = pd;
+            break pdloop;
+          }
+        }
+      }
+    }
   }
   $: data.people, peopleUpdate();
 
   const popup = {
     control: undefined as FloatingUICompControl | undefined,
+    comp: undefined as PopUp | undefined,
     person: undefined as any as PersonData,
     virtElem: {getBoundingClientRect: (): ClientRectObject => {
-      if (popup.person) {
+      if (popup.person && popup.person.node) {
         return popup.person.node.boundBox();
       }
       return { x: 0, y: 0, top: 0, left: 0, bottom: 0, right: 0, width: 0, height: 0 };
@@ -48,6 +61,7 @@
     popup.person = person;
     if (popup.control?.isVisible()) {
       popup.control?.update();
+      popup.comp?.reset(person.person);
     } else {
       popup.control?.show();
     }
@@ -201,6 +215,7 @@
     style="background-color: var(--popup-bg, gray); border: var(--popup-border, 1px solid black);"
     slot="tooltip"
     person={popup.person.person}
+    bind:this={popup.comp}
     on:click={onPopUpClick}
     on:close={popup.control?.hide}
   />
