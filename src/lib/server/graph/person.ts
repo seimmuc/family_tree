@@ -218,8 +218,8 @@ export class WriteActions extends ReadActions {
    * @param fromPersonId the relationship start person id
    * @param toPersonId the relationship end person id
    * @param relationType relationship type
-   * 
-   * Security warning: relationType is injected into the query without any sanitization. Do not allow any user input to leak into it. 
+   *
+   * Security warning: relationType is injected into the query without any sanitization. Do not allow any user input to leak into it.
    */
   async addPersonRelation(fromPerson: string | Person, toPerson: string | Person, relationType: PersonRelationType): Promise<Neo4jRel | undefined> {
     if (typeof fromPerson === 'object') {

@@ -7,7 +7,7 @@
   import { arrow, createFloatingActions, type UpdatePosition } from "svelte-floating-ui";
   import { type Placement } from '@floating-ui/utils';
 	import { writable } from "svelte/store";
-	
+
   export let placementDir: Placement = 'bottom';
   export let offsetPx = 8;
 

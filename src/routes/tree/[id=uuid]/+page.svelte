@@ -6,7 +6,7 @@
   import { type Person } from '$lib/types.js';
 	import { type ClientRectObject } from '@floating-ui/core';
 	import { onMount } from 'svelte';
-	
+
   export let data;
 
   let cnv: HTMLCanvasElement;
@@ -71,7 +71,7 @@
   function onPopUpClick(event: MouseEvent) {
     dontClosePopup = true;
   }
-  
+
   function onWindowClick(event: MouseEvent) {
     if (dontClosePopup) {
       dontClosePopup = false;
@@ -86,7 +86,7 @@
   function redraw() {
     wrapperDimensions.x = wrapperElem.getBoundingClientRect().x;
     wrapperDimensions.y = wrapperElem.getBoundingClientRect().y;
-    
+
     // Init canvas context
     const context = cnv.getContext('2d') as CanvasRenderingContext2D;
     context.lineWidth = 10;
@@ -103,7 +103,7 @@
       const center1 = focusPeople[0].node.center(wrapperDimensions);
       const center2 = focusPeople[1].node.center(wrapperDimensions);
       middle = {x: (center1.x + center2.x) / 2, y: (center1.y + center2.y) / 2};
-      
+
       // horizontal focus line
       context.moveTo(center1.x, center1.y);
       context.lineTo(center2.x, center2.y);
@@ -119,11 +119,11 @@
       // vertical line TO children
       context.moveTo(middle.x, middle.y);
       context.lineTo(c1p2.x, c1p2.y);
-      
+
       // horizontal line BETWEEN children
       context.moveTo(c2p1.x, c2p1.y);
       context.lineTo(c2p2.x, c2p2.y);
-    
+
       // lines TO each child
       for (const point of childPoints) {
         context.moveTo(point.x, c1p2.y);
@@ -138,7 +138,7 @@
       const focusMiddle = person.node.center(wrapperDimensions);
       if (person.parents.length > 1) {
         const center1 = person.parents[0].node.center(wrapperDimensions);
-        const center2 = person.parents[1].node.center(wrapperDimensions); 
+        const center2 = person.parents[1].node.center(wrapperDimensions);
         const parentsMiddle = {x: (center1.x + center2.x) / 2, y: (center1.y + center2.y) / 2};
         context.moveTo(focusMiddle.x, focusMiddle.y);
         context.lineTo(parentsMiddle.x, parentsMiddle.y);
@@ -146,7 +146,7 @@
         context.lineTo(center2.x, center2.y);
       }
       else {
-        const center = person.parents[0].node.center(wrapperDimensions); 
+        const center = person.parents[0].node.center(wrapperDimensions);
         context.moveTo(focusMiddle.x, focusMiddle.y);
         context.lineTo(center.x, center.y);
       }

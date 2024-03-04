@@ -8,7 +8,7 @@ export function clearKeys(object: Record<string, any>, keys: string[]): Record<s
 
 /**
  * Removes non-printable characters from string and normalizes newline and space characters (to unix newlines and ascii space)
- * 
+ *
  * Note: this function was shamelessly stolen from https://stackoverflow.com/a/71459391/22374935 (CC BY-SA 4.0) and then modifified
  * @param text input string to be processed
  * @param stripSurrogatesAndFormats keep certain characters, such as ones used for combined marks and emojis

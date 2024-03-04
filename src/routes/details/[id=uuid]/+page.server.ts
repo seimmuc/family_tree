@@ -5,7 +5,7 @@ export async function load({ params }) {
   const person = await ReadActions.perform(async act => {
     return await act.findPersonById(params.id);
   });
-  
+
   if (person === undefined) {
     error(404);
   }

@@ -34,7 +34,7 @@ export async function load({ params }) {
       (parents[rel.participants.child[0]] ??= []).push(rel.participants.parent[0]);
     }
   }
- 
+
   return {focusPeopleIds, people, relations, children: sharedChildren, parentsOf: parents};
 }
 
