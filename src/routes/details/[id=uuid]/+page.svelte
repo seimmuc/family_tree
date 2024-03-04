@@ -1,21 +1,16 @@
 <script lang="ts">
   import { FontAwesomeIcon } from "@fortawesome/svelte-fontawesome";
   import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
+	import { formatDate } from "$lib/client/clutils.js";
 
   export let data;
   $: person = data.person;
 
-  const dateFormatOptions: Intl.DateTimeFormatOptions = {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric'
-  }
 </script>
 
 <div class ="main-area">
   <h1>{person.name}</h1>
-  <h3>{(new Date(person.birthDate ?? '')).toLocaleDateString(undefined, dateFormatOptions)} - {(new Date(person.deathDate ?? '')).toLocaleDateString(undefined, dateFormatOptions)}</h3>
-
+  <h3 class="date-display">{formatDate(person.birthDate, 'birth')} - {formatDate(person.deathDate, 'death')}</h3>
   <p>{person.bio}</p>
 </div>
 

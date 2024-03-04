@@ -9,7 +9,7 @@
 	import type { SubmitFunction } from "@sveltejs/kit";
 	import { slide } from "svelte/transition";
 	import { formatDate, truncateString } from "$lib/client/clutils";
-  
+
   export let person: Person;
   export let style: string = '';
 
@@ -100,7 +100,7 @@
     <input type="hidden" name="id" value="{person.id}">
     <div class="top-bar">
       {#if editMode && false}
-        <button class="top-button" type="submit"> 
+        <button class="top-button" type="submit">
           <FontAwesomeIcon icon={faFloppyDisk} />
         </button>
       {:else}
@@ -126,7 +126,7 @@
             <input class="date-input" type="date" bind:value={editPerson.deathDate} />
           </div>
         {:else}
-          <h3 class="date-display" transition:slide={{ duration: 200, axis: 'y' }}>{formatDate(person.birthDate)} - {formatDate(person.deathDate)}</h3>
+          <h3 class="date-display" transition:slide={{ duration: 200, axis: 'y' }}>{formatDate(person.birthDate, 'birth')} - {formatDate(person.deathDate, 'death')}</h3>
         {/if}
       </div>
       {#if editMode}

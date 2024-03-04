@@ -15,10 +15,11 @@ export function truncateString(str: string, maxChars: number, maxLines: number):
   return [result, wasShortened];
 }
 
-export function formatDate(dateString?: string, dateFormatOptions: Intl.DateTimeFormatOptions = DEFAULT_DATE_FORMAT_OPRIONS): string {
+export function formatDate(dateString?: string, dateType: string | undefined = undefined, dateFormatOptions: Intl.DateTimeFormatOptions | undefined = DEFAULT_DATE_FORMAT_OPRIONS): string {
   if (!dateString) {
-    return 'unknown';
+    return `unknown ${dateType ? dateType + ' ' : ''}date`;
   }
+  dateFormatOptions ??= DEFAULT_DATE_FORMAT_OPRIONS;
   const d = new Date(dateString);
   return d.toLocaleDateString(undefined, dateFormatOptions);
 }
