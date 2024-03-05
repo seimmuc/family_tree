@@ -1,4 +1,4 @@
-import { ReadActions } from "$lib/server/graph/person";
+import { ReadActions } from '$lib/server/graph/person';
 
 export async function load() {
   const people = await ReadActions.perform(async act => {

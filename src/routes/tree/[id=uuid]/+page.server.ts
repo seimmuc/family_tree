@@ -25,7 +25,9 @@ export async function load({ params }) {
     }
   }
   // filter children to only include ones that are children of all people in focusPeopleIds
-  const sharedChildren = Object.entries(children).filter(([_, pIds]) => focusPeopleIds.every(id => pIds.includes(id))).map(([cId, _]) => cId);
+  const sharedChildren = Object.entries(children)
+    .filter(([_, pIds]) => focusPeopleIds.every(id => pIds.includes(id)))
+    .map(([cId, _]) => cId);
 
   // get all parents of each focus person
   const parents: Record<string, string[]> = {};
@@ -35,7 +37,7 @@ export async function load({ params }) {
     }
   }
 
-  return {focusPeopleIds, people, relations, children: sharedChildren, parentsOf: parents};
+  return { focusPeopleIds, people, relations, children: sharedChildren, parentsOf: parents };
 }
 
 function getUUID(formData: FormData): string {
@@ -47,7 +49,7 @@ function getUUID(formData: FormData): string {
   return uuid;
 }
 
-function validatePerson(person: {[k: string]: any}): UpdatablePerson {
+function validatePerson(person: { [k: string]: any }): UpdatablePerson {
   return PERSON_SCHEMA.validateSync(person, { abortEarly: true, stripUnknown: true });
 }
 
@@ -57,14 +59,16 @@ export const actions: Actions = {
     console.log('updating person ', data.get('id'));
     let updateJson = data.get('person-update');
     if (typeof updateJson !== 'string') {
-      return fail(422, {message: 'missing person-update data'});
+      return fail(422, { message: 'missing person-update data' });
     }
     let dangerousPerson;
     try {
       dangerousPerson = JSON.parse(updateJson);
-      if (typeof dangerousPerson !== 'object') { throw new Error(); }
+      if (typeof dangerousPerson !== 'object') {
+        throw new Error();
+      }
     } catch {
-      return fail(400, {message: 'invalid json'});
+      return fail(400, { message: 'invalid json' });
     }
     let validPerson: UpdatablePerson;
     try {
@@ -91,7 +95,9 @@ export const actions: Actions = {
     console.log('uploading avatar ', personUuid);
     const file = data.get('pic')?.valueOf();
     if (!(file instanceof File)) {
-      console.error("file in request.formData() isn't an instance of File, likely because browser sent data using incorrect enctype");
+      console.error(
+        "file in request.formData() isn't an instance of File, likely because browser sent data using incorrect enctype"
+      );
       error(422, 'file was not uploaded');
     }
     if (!MEDIA_IMAGE_MIME_TYPES.includes(file.type)) {
@@ -104,4 +110,4 @@ export const actions: Actions = {
     const personUuid = getUUID(data);
     console.log('deleting avatar ', personUuid);
   }
-}
+};

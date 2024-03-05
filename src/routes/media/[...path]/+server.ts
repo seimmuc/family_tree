@@ -12,11 +12,11 @@ export const GET = async ({ params }) => {
   try {
     const fileStream = fs.createReadStream(fullPath);
     const webStream = Readable.toWeb(fileStream);
-    return new Response(webStream as ReadableStream);   // Looks like typescript pulls definitions of what should be the same nodejs built-in type from 2 different places which slightly differ.
+    return new Response(webStream as ReadableStream); // Looks like typescript pulls definitions of what should be the same nodejs built-in type from 2 different places which slightly differ.
   } catch (e: any) {
     if (e?.code === 'ENOENT') {
       throw error(404);
     }
     throw e;
   }
-}
+};

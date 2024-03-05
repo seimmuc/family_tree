@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { Person } from "$lib/types";
-	import type { Point } from "./types";
+  import type { Person } from '$lib/types';
+  import type { Point } from './types';
 
   export let person: Person;
 
@@ -11,14 +11,14 @@
     return {
       x: boundingBox.x + boundingBox.width / 2 - negativeOffset.x,
       y: boundingBox.y + boundingBox.height / 2 - negativeOffset.y
-    }
+    };
   }
   export function bottomCenter(): Point {
     const boundingBox = root.getBoundingClientRect();
     return {
       x: boundingBox.x + boundingBox.width / 2,
       y: boundingBox.y + boundingBox.height
-    }
+    };
   }
   export function boundBox(): DOMRect {
     return root.getBoundingClientRect();

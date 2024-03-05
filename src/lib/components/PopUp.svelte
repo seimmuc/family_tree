@@ -1,25 +1,25 @@
 <script lang="ts">
-  import { FontAwesomeIcon } from "@fortawesome/svelte-fontawesome";
-  import { faXmark } from "@fortawesome/free-solid-svg-icons";
-  import { faPenToSquare, faFloppyDisk } from "@fortawesome/free-regular-svg-icons";
-  import type { Person, UpdatablePerson } from "$lib/types";
+  import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
+  import { faXmark } from '@fortawesome/free-solid-svg-icons';
+  import { faPenToSquare, faFloppyDisk } from '@fortawesome/free-regular-svg-icons';
+  import type { Person, UpdatablePerson } from '$lib/types';
   import { createEventDispatcher } from 'svelte';
-  import { isDateString, stripNonPrintableAndNormalize } from "$lib/utils";
-	import { enhance } from "$app/forms";
-	import type { SubmitFunction } from "@sveltejs/kit";
-	import { slide } from "svelte/transition";
-	import { formatDate, truncateString } from "$lib/client/clutils";
+  import { isDateString, stripNonPrintableAndNormalize } from '$lib/utils';
+  import { enhance } from '$app/forms';
+  import type { SubmitFunction } from '@sveltejs/kit';
+  import { slide } from 'svelte/transition';
+  import { formatDate, truncateString } from '$lib/client/clutils';
 
   export let person: Person;
   export let style: string = '';
 
   const bioMaxLength = 50;
   const bioMaxLines = 4;
-  type PersonChanges = {name?: string, bio?: string | null, birthDate?: string | null, deathDate?: string | null};
+  type PersonChanges = { name?: string; bio?: string | null; birthDate?: string | null; deathDate?: string | null };
 
   const dispatch = createEventDispatcher();
   let editMode: boolean = false;
-  let editPerson: {name: string, bio: string, birthDate?: string, deathDate?: string};
+  let editPerson: { name: string; bio: string; birthDate?: string; deathDate?: string };
   let shortenedBio: string | undefined = undefined;
   let bioIsLong: boolean = false;
   let showFullBio: boolean = false;
@@ -51,9 +51,9 @@
     const dd = isDateString(editPerson.deathDate) ? editPerson.deathDate : undefined;
     return {
       name: name !== person.name ? name : undefined,
-      bio: bio !== person.bio ? (bio ?? null) : undefined,
-      birthDate: bd !== person.birthDate ? (bd ?? null) : undefined,
-      deathDate: dd !== person.deathDate ? (dd ?? null) : undefined
+      bio: bio !== person.bio ? bio ?? null : undefined,
+      birthDate: bd !== person.birthDate ? bd ?? null : undefined,
+      deathDate: dd !== person.deathDate ? dd ?? null : undefined
     };
   }
 
@@ -62,12 +62,13 @@
   }
   const submitUpdate: SubmitFunction = ({ formData, cancel }) => {
     const ch = changes();
-    if (ch.name?.trim() === '') {   // name is too short
+    if (ch.name?.trim() === '') {
+      // name is too short
       cancel();
       return;
     }
-    ch.name ??= person.name;        // name cannot be removed, and should not be sent to server as undefined
-    const updatePerson: UpdatablePerson = {id: person.id, ...(ch as PersonChanges & {name: string})};
+    ch.name ??= person.name; // name cannot be removed, and should not be sent to server as undefined
+    const updatePerson: UpdatablePerson = { id: person.id, ...(ch as PersonChanges & { name: string }) };
     formData.append('person-update', JSON.stringify(updatePerson));
     editMode = false;
   };
@@ -75,7 +76,7 @@
   export function reset(newPerson?: Person) {
     editMode = false;
     const p = newPerson ?? person;
-    editPerson = {name: p.name, bio: p.bio ?? '', birthDate: p.birthDate, deathDate: p.deathDate};
+    editPerson = { name: p.name, bio: p.bio ?? '', birthDate: p.birthDate, deathDate: p.deathDate };
     const [sb, lb] = truncateString(p.bio ?? '', bioMaxLength, bioMaxLines);
     shortenedBio = lb ? sb.trimEnd() + '…' : undefined;
     bioIsLong = lb;
@@ -86,18 +87,24 @@
   }
 
   function close() {
-    dispatch("close");
+    dispatch('close');
   }
   reset();
 </script>
 
-<svelte:window on:keydown={(e) => {if (e.key === "Escape") {close()}}} />
+<svelte:window
+  on:keydown={e => {
+    if (e.key === 'Escape') {
+      close();
+    }
+  }}
+/>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <!-- svelte-ignore a11y-no-static-element-interactions -->
-<div class="pop-up" style={style} on:click>
+<div class="pop-up" {style} on:click>
   <form method="POST" action="?/updatePerson" enctype="multipart/form-data" use:enhance={submitUpdate}>
-    <input type="hidden" name="id" value="{person.id}">
+    <input type="hidden" name="id" value={person.id} />
     <div class="top-bar">
       {#if editMode && false}
         <button class="top-button" type="submit">
@@ -109,7 +116,13 @@
         </button>
       {/if}
       {#if editMode}
-        <h1 class="personName" contenteditable="plaintext-only" bind:textContent={editPerson.name} on:keydown={onNameKeydown} on:paste={onNamePaste}></h1>
+        <h1
+          class="personName"
+          contenteditable="plaintext-only"
+          bind:textContent={editPerson.name}
+          on:keydown={onNameKeydown}
+          on:paste={onNamePaste}
+        ></h1>
       {:else}
         <h1 class="personName"><a href="/details/{person.id}">{person.name}</a></h1>
       {/if}
@@ -126,16 +139,23 @@
             <input class="date-input" type="date" bind:value={editPerson.deathDate} />
           </div>
         {:else}
-          <h3 class="date-display" transition:slide={{ duration: 200, axis: 'y' }}>{formatDate(person.birthDate, 'birth')} - {formatDate(person.deathDate, 'death')}</h3>
+          <h3 class="date-display" transition:slide={{ duration: 200, axis: 'y' }}>
+            {formatDate(person.birthDate, 'birth')} - {formatDate(person.deathDate, 'death')}
+          </h3>
         {/if}
       </div>
       {#if editMode}
         <p class="bio" contenteditable="plaintext-only" bind:textContent={editPerson.bio} />
       {:else}
         <!-- <p class="bio">{person.bio ? (person.bio.length > bioMaxLength ? person.bio.substring(0, bioMaxLength) + "…" : person.bio) : ""}</p> -->
-        <p class="bio">{(!bioIsLong || showFullBio) ? person.bio : shortenedBio}</p>
+        <p class="bio">{!bioIsLong || showFullBio ? person.bio : shortenedBio}</p>
         {#if bioIsLong}
-          <button type="button" class="button-show-more" transition:slide={{ duration: 200, axis: 'y' }} on:click={() => {showFullBio = !showFullBio}}>{showFullBio ? 'Show less' : 'Show more'}</button>
+          <button
+            type="button"
+            class="button-show-more"
+            transition:slide={{ duration: 200, axis: 'y' }}
+            on:click={() => (showFullBio = !showFullBio)}>{showFullBio ? 'Show less' : 'Show more'}</button
+          >
         {/if}
       {/if}
       {#if editMode}
@@ -207,7 +227,8 @@
       flex-direction: column;
       align-items: center;
       margin: 15px 0;
-      .date-display, .date-input {
+      .date-display,
+      .date-input {
         margin: 0;
       }
     }

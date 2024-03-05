@@ -1,4 +1,4 @@
-import { ReadActions } from '$lib/server/graph/person.js'
+import { ReadActions } from '$lib/server/graph/person.js';
 import { error, redirect } from '@sveltejs/kit';
 
 export const GET = async ({ params }) => {
@@ -9,4 +9,4 @@ export const GET = async ({ params }) => {
     error(404);
   }
   redirect(302, `/tree/${ppl[0].id}`);
-}
+};

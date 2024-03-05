@@ -1,7 +1,7 @@
-import type { ParentRelationship, PartnerRelationship, Person, Relationship, UpdatablePerson } from "$lib/types";
-import { Integer, ManagedTransaction, Relationship as Neo4jRel } from "neo4j-driver";
-import { readTransaction, writeTransaction } from "./memgraph";
-import type { TransactionConfig } from "neo4j-driver-core";
+import type { ParentRelationship, PartnerRelationship, Person, Relationship, UpdatablePerson } from '$lib/types';
+import { Integer, ManagedTransaction, Relationship as Neo4jRel } from 'neo4j-driver';
+import { readTransaction, writeTransaction } from './memgraph';
+import type { TransactionConfig } from 'neo4j-driver-core';
 
 // export async function findPersonById(id: string): Promise<Person<LocalDateTime> | undefined> {
 //   return await readTransaction(async tx => {
@@ -13,12 +13,15 @@ import type { TransactionConfig } from "neo4j-driver-core";
 type FilterOperator = '=' | '<>' | '<' | '<=' | '>' | '>=' | 'IN' | '=~' | 'CONTAINS' | 'STARTS WITH' | 'ENDS WITH';
 
 type Filter = {
-  prop: string,
-  operator: FilterOperator,
-  val: any
-}
+  prop: string;
+  operator: FilterOperator;
+  val: any;
+};
 
-type WhereConditions<L extends number, OV extends string[] & {length: L}> = {conditions: string, params: {[k: string]: any}};
+type WhereConditions<L extends number, OV extends string[] & { length: L }> = {
+  conditions: string;
+  params: { [k: string]: any };
+};
 
 type PersonRelationType = 'PARENT' | 'SIBLING' | 'PARTNER';
 
@@ -29,10 +32,16 @@ type PersonRelationType = 'PARENT' | 'SIBLING' | 'PARTNER';
  * Security warning: this method inserts filter operators into the condition string without any sanitization. Do not allow any user input to leak into the query.
  */
 export function filtersWhereAnd<OV extends string>(filters: Filter[], objVar: OV): WhereConditions<1, [OV]> {
-  const fq: [string, [string, any][]][] = filters.map((f, i) => [`p[$prop${i}] ${f.operator} $val${i}`, [[`prop${i}`, f.prop], [`val${i}`, f.val]]]);
+  const fq: [string, [string, any][]][] = filters.map((f, i) => [
+    `p[$prop${i}] ${f.operator} $val${i}`,
+    [
+      [`prop${i}`, f.prop],
+      [`val${i}`, f.val]
+    ]
+  ]);
   const conditions: string = fq.map(v => v[0]).join(' AND ');
   const params = Object.fromEntries(fq.flatMap(v => v[1]));
-  return {conditions, params};
+  return { conditions, params };
 }
 
 export class ReadActions {
@@ -54,15 +63,15 @@ export class ReadActions {
     return r.records.map(r => r.get('p').properties);
   }
   async findPersonById(id: string): Promise<Person | undefined> {
-    const r = await this.transaction.run('MATCH (p:Person) WHERE p.id = $id RETURN p LIMIT 1', {id});
+    const r = await this.transaction.run('MATCH (p:Person) WHERE p.id = $id RETURN p LIMIT 1', { id });
     return r.records[0]?.get('p')?.properties;
   }
   async findPeopleByName(name: string): Promise<Person[]> {
-    const r = await this.transaction.run('MATCH (p:Person {name: $fn}) RETURN p', {fn: name});
+    const r = await this.transaction.run('MATCH (p:Person {name: $fn}) RETURN p', { fn: name });
     return r.records.map(rec => rec.get('p').properties as Person);
   }
   async findMainPartner(personId: string): Promise<Person | undefined> {
-    const r = await this.transaction.run('MATCH (:Person {id: $id})-[:PARTNER]-(p:Person) RETURN p', {id: personId});
+    const r = await this.transaction.run('MATCH (:Person {id: $id})-[:PARTNER]-(p:Person) RETURN p', { id: personId });
     return r.records[0]?.get('p')?.properties;
   }
   async findPersonWithRelations(personId: string, relationHops: number): Promise<[Person[], Relationship[]]> {
@@ -81,37 +90,44 @@ export class ReadActions {
     // RETURN p as t, null as r
     const r = await this.transaction.run(
       `MATCH (:Person {id: $pid})-[*..${relationHops}]-(t:Person) WITH DISTINCT t MATCH (t)-[r]-() RETURN t, collect(r) as r UNION MATCH (p:Person {id: $pid}) RETURN p as t, null as r`,
-      {pid: personId}
+      { pid: personId }
     );
 
-    const pIdenMap: {[identity: number]: string} = {};
+    const pIdenMap: { [identity: number]: string } = {};
     const rIdenSet: Set<number> = new Set();
-    const [pl, rl] = r.records.reduce(([pl, rl], rc) => {
-      const prsn = rc.get('t') as {identity: Integer, properties: Person};
-      pIdenMap[prsn.identity.toNumber()] = prsn.properties.id;
-      pl.push(prsn.properties);
-      const relArr = rc.get('r') as {identity: Integer, start: number, end: number, type: string}[] | null;
-      if (relArr !== null) {
-        relArr.forEach(rel => {
-          if (!rIdenSet.has(rel.identity.toNumber())) {
-            rIdenSet.add(rel.identity.toNumber());
-            rl.push(rel);
-          }
-        });
-      }
-      return [pl, rl];
-    }, [[], []] as [Array<Person>, Array<{start: number, end: number, type: string}>]);
+    const [pl, rl] = r.records.reduce(
+      ([pl, rl], rc) => {
+        const prsn = rc.get('t') as { identity: Integer; properties: Person };
+        pIdenMap[prsn.identity.toNumber()] = prsn.properties.id;
+        pl.push(prsn.properties);
+        const relArr = rc.get('r') as { identity: Integer; start: number; end: number; type: string }[] | null;
+        if (relArr !== null) {
+          relArr.forEach(rel => {
+            if (!rIdenSet.has(rel.identity.toNumber())) {
+              rIdenSet.add(rel.identity.toNumber());
+              rl.push(rel);
+            }
+          });
+        }
+        return [pl, rl];
+      },
+      [[], []] as [Array<Person>, Array<{ start: number; end: number; type: string }>]
+    );
 
-    const relations: Relationship[] = rl.map(rel => {
-      if (!Object.hasOwn(pIdenMap, rel.start) || !Object.hasOwn(pIdenMap, rel.end)) { return; }
-      if (rel.type === 'PARENT') {
-        return {
-          relType: rel.type.toLowerCase(),
-          participants: {parent: [pIdenMap[rel.end]], child: [pIdenMap[rel.start]]}
-        };
-      }
-      return;
-    }).filter(v => v !== undefined) as Relationship[];
+    const relations: Relationship[] = rl
+      .map(rel => {
+        if (!Object.hasOwn(pIdenMap, rel.start) || !Object.hasOwn(pIdenMap, rel.end)) {
+          return;
+        }
+        if (rel.type === 'PARENT') {
+          return {
+            relType: rel.type.toLowerCase(),
+            participants: { parent: [pIdenMap[rel.end]], child: [pIdenMap[rel.start]] }
+          };
+        }
+        return;
+      })
+      .filter(v => v !== undefined) as Relationship[];
 
     return [pl, relations];
   }
@@ -133,15 +149,17 @@ export class ReadActions {
     // RETURN p as t, null as r
     const r = await this.transaction.run(
       `MATCH (p:Person)-[*..${relationHops}]-(t:Person) WHERE p.id IN $pids WITH DISTINCT t MATCH (t)-[r]-() RETURN t, collect(r) as r UNION MATCH (p:Person) WHERE p.id IN $pids RETURN p as t, null as r`,
-      {pids: partnerIds}
+      { pids: partnerIds }
     );
 
-    const pIdenMap: {[identity: number]: Person} = {};
-    const rIdenMap: {[identity: number]: {start: number, end: number, type: PersonRelationType}} = {};
+    const pIdenMap: { [identity: number]: Person } = {};
+    const rIdenMap: { [identity: number]: { start: number; end: number; type: PersonRelationType } } = {};
     for (const rc of r.records) {
-      const prsnRc = rc.get('t') as {identity: Integer, properties: Person};
-      pIdenMap[prsnRc.identity.toNumber()] = prsnRc.properties
-      const relArr = rc.get('r') as {identity: Integer, start: number, end: number, type: PersonRelationType}[] | null;
+      const prsnRc = rc.get('t') as { identity: Integer; properties: Person };
+      pIdenMap[prsnRc.identity.toNumber()] = prsnRc.properties;
+      const relArr = rc.get('r') as
+        | { identity: Integer; start: number; end: number; type: PersonRelationType }[]
+        | null;
       if (relArr !== null) {
         for (const rel of relArr) {
           rIdenMap[rel.identity.toNumber()] = rel;
@@ -149,27 +167,30 @@ export class ReadActions {
       }
     }
 
-    const relations: Relationship[] = Object.values(rIdenMap).map(rel => {
-      if (!Object.hasOwn(pIdenMap, rel.start) || !Object.hasOwn(pIdenMap, rel.end)) { return; }
-      if (rel.type === 'PARENT') {
-        return {
-          relType: 'parent',
-          participants: {parent: [pIdenMap[rel.end].id], child: [pIdenMap[rel.start].id]}
-        } as ParentRelationship;
-      }
-      if (rel.type === 'PARTNER') {
-        return {
-          relType: "partner",
-          participants: {partner: [pIdenMap[rel.start].id, pIdenMap[rel.end].id]}
-        } as PartnerRelationship;
-      }
-      return;
-    }).filter(v => v !== undefined) as Relationship[];
+    const relations: Relationship[] = Object.values(rIdenMap)
+      .map(rel => {
+        if (!Object.hasOwn(pIdenMap, rel.start) || !Object.hasOwn(pIdenMap, rel.end)) {
+          return;
+        }
+        if (rel.type === 'PARENT') {
+          return {
+            relType: 'parent',
+            participants: { parent: [pIdenMap[rel.end].id], child: [pIdenMap[rel.start].id] }
+          } as ParentRelationship;
+        }
+        if (rel.type === 'PARTNER') {
+          return {
+            relType: 'partner',
+            participants: { partner: [pIdenMap[rel.start].id, pIdenMap[rel.end].id] }
+          } as PartnerRelationship;
+        }
+        return;
+      })
+      .filter(v => v !== undefined) as Relationship[];
 
     return [Object.values(pIdenMap), relations];
   }
 }
-
 
 export class WriteActions extends ReadActions {
   static async perform<T>(cb: (actions: WriteActions) => Promise<T> | T, config?: TransactionConfig): Promise<T> {
@@ -195,7 +216,9 @@ export class WriteActions extends ReadActions {
    * @returns the person object, as it is returned from the database server
    */
   async addPerson(person: Omit<Person, 'id'>): Promise<Person> {
-    const r = await this.transaction.run('CREATE (p:Person $pdata) SET p.id = randomUUID() RETURN p', {pdata: person});
+    const r = await this.transaction.run('CREATE (p:Person $pdata) SET p.id = randomUUID() RETURN p', {
+      pdata: person
+    });
     return r.records[0].get('p').properties;
   }
 
@@ -209,7 +232,10 @@ export class WriteActions extends ReadActions {
     if (!person.id) {
       throw new TypeError('missing person id');
     }
-    const r = await this.transaction.run(`MATCH (p:Person {id: $pid}) SET p ${ partialUpdate ? '+=' : '='} $pdata RETURN p LIMIT 1`, {pid: person.id, pdata: person});
+    const r = await this.transaction.run(
+      `MATCH (p:Person {id: $pid}) SET p ${partialUpdate ? '+=' : '='} $pdata RETURN p LIMIT 1`,
+      { pid: person.id, pdata: person }
+    );
     return r.records[0].get('p').properties;
   }
 
@@ -221,7 +247,11 @@ export class WriteActions extends ReadActions {
    *
    * Security warning: relationType is injected into the query without any sanitization. Do not allow any user input to leak into it.
    */
-  async addPersonRelation(fromPerson: string | Person, toPerson: string | Person, relationType: PersonRelationType): Promise<Neo4jRel | undefined> {
+  async addPersonRelation(
+    fromPerson: string | Person,
+    toPerson: string | Person,
+    relationType: PersonRelationType
+  ): Promise<Neo4jRel | undefined> {
     if (typeof fromPerson === 'object') {
       fromPerson = fromPerson.id;
     }
@@ -233,7 +263,7 @@ export class WriteActions extends ReadActions {
     }
     const r = await this.transaction.run(
       `MATCH (f:Person {id: $fid}), (t:Person {id: $tid}) CREATE (f)-[r:${relationType}]->(t) RETURN r`,
-      {fid: fromPerson, tid: toPerson}
+      { fid: fromPerson, tid: toPerson }
     );
     if (r.records.length > 1) {
       throw Error('db returned multiple new relation records, probably because multiple people have the same id');

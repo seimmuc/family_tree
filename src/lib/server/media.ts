@@ -1,7 +1,7 @@
 import path from 'node:path';
 import fs from 'node:fs';
 
-import { MEDIA_ROOT, MEDIA_IMAGE_MIME_TYPES } from "$env/static/private";
+import { MEDIA_ROOT, MEDIA_IMAGE_MIME_TYPES } from '$env/static/private';
 import { Writable } from 'node:stream';
 
 export async function addOrReplacePhoto(personUuid: string, file: File): Promise<boolean> {

@@ -14,9 +14,13 @@ export function clearKeys(object: Record<string, any>, keys: string[]): Record<s
  * @param stripSurrogatesAndFormats keep certain characters, such as ones used for combined marks and emojis
  * @returns processed string with unwanted characters stripped out
  */
-export function stripNonPrintableAndNormalize(text: string, stripSurrogatesAndFormats: boolean = false, stripNewline: boolean = false): string {
+export function stripNonPrintableAndNormalize(
+  text: string,
+  stripSurrogatesAndFormats: boolean = false,
+  stripNewline: boolean = false
+): string {
   // strip control chars. optionally, keep surrogates and formats
-  if(stripSurrogatesAndFormats) {
+  if (stripSurrogatesAndFormats) {
     if (stripNewline) {
       text = text.replace(/\p{C}/gu, '');
     } else {
@@ -44,9 +48,13 @@ export function dateFromString(dateString: string): Date | null {
 }
 
 export function isDateString(dateString?: string): boolean {
-  if (dateString === undefined) {return false; }
+  if (dateString === undefined) {
+    return false;
+  }
   const match = dateString.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-  if (match === null) { return false; }
+  if (match === null) {
+    return false;
+  }
   const [month, date] = [parseInt(match[2]), parseInt(match[3])];
   return month !== undefined && month > 0 && month <= 12 && date !== undefined && date > 0 && date <= 31;
 }
