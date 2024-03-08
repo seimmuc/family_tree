@@ -249,6 +249,7 @@
     display: flex;
     flex-direction: column;
     position: relative;
+    margin: 50px 25px;
   }
 
   .row {
