@@ -169,26 +169,7 @@
 </div>
 
 <style lang="scss">
-  @mixin contenteditable-border {
-    border: 1px solid transparent;
-    border-radius: 4px;
-    &[contenteditable] {
-      border-color: #eee;
-      padding: 0 3px;
-    }
-  }
-  @mixin styleless-button {
-    background: none;
-    color: inherit;
-    border: none;
-    cursor: pointer;
-  }
-  @mixin link-colors {
-    color: lightgray;
-    &:hover {
-      color: gray;
-    }
-  }
+  @use '$lib/styles/common';
 
   .pop-up {
     max-width: 600px;
@@ -204,14 +185,14 @@
     .personName {
       margin: 9px 2px 0;
       font-size: 2em;
-      @include contenteditable-border;
+      @include common.contenteditable-border;
       a {
-        @include link-colors;
+        @include common.link-colors;
         text-decoration: none;
       }
     }
     .top-button {
-      @include styleless-button;
+      @include common.styleless-button;
       padding: 11px;
       font-size: 1.4em;
     }
@@ -237,11 +218,11 @@
       white-space: pre-line;
       text-align: center;
       margin: 0;
-      @include contenteditable-border;
+      @include common.contenteditable-border;
     }
     .button-show-more {
-      @include styleless-button;
-      @include link-colors;
+      @include common.styleless-button;
+      @include common.link-colors;
     }
     .form-buttons {
       margin-top: 12px;

@@ -1,0 +1,21 @@
+@mixin contenteditable-border {
+  border: 1px solid transparent;
+  border-radius: 4px;
+  &[contenteditable] {
+    border-color: #eee;
+    padding: 0 3px;
+  }
+}
+@mixin styleless-button {
+  background: none;
+  color: inherit;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+}
+@mixin link-colors {
+  color: lightgray;
+  &:hover {
+    color: gray;
+  }
+}
