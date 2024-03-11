@@ -4,11 +4,11 @@
   import { faPenToSquare, faFloppyDisk } from '@fortawesome/free-regular-svg-icons';
   import type { Person, UpdatablePerson } from '$lib/types';
   import { createEventDispatcher } from 'svelte';
-  import { isDateString, stripNonPrintableAndNormalize } from '$lib/utils';
   import { enhance } from '$app/forms';
   import type { SubmitFunction } from '@sveltejs/kit';
   import { slide } from 'svelte/transition';
-  import { formatDate, nonewlines, truncateString } from '$lib/client/clutils';
+  import { formatDate, nonewlines, truncateString, toPersonEdit, getPersonChanges } from '$lib/client/clutils';
+  import type { PersonEdit } from '$lib/client/clutils';
 
   export let person: Person;
   export let style: string = '';
@@ -19,7 +19,7 @@
 
   const dispatch = createEventDispatcher();
   let editMode: boolean = false;
-  let editPerson: { name: string; bio: string; birthDate?: string; deathDate?: string };
+  let editPerson: PersonEdit;
   let shortenedBio: string | undefined = undefined;
   let bioIsLong: boolean = false;
   let showFullBio: boolean = false;
@@ -29,27 +29,11 @@
     editMode = !editMode;
   }
 
-  /**
-   * Returns an object with person properties that need to be changed, null value means that that property should be removed, undefined values should be ignored
-   */
-  function changes(): PersonChanges {
-    const name = stripNonPrintableAndNormalize(editPerson.name, false, true);
-    const bio = stripNonPrintableAndNormalize(editPerson.bio, false, false) || undefined;
-    const bd = isDateString(editPerson.birthDate) ? editPerson.birthDate : undefined;
-    const dd = isDateString(editPerson.deathDate) ? editPerson.deathDate : undefined;
-    return {
-      name: name !== person.name ? name : undefined,
-      bio: bio !== person.bio ? bio ?? null : undefined,
-      birthDate: bd !== person.birthDate ? bd ?? null : undefined,
-      deathDate: dd !== person.deathDate ? dd ?? null : undefined
-    };
-  }
-
   function actionCancel() {
     editMode = false;
   }
   const submitUpdate: SubmitFunction = ({ formData, cancel }) => {
-    const ch = changes();
+    const ch = getPersonChanges(person, editPerson);
     if (ch.name?.trim() === '') {
       // name is too short
       cancel();
@@ -64,14 +48,14 @@
   export function reset(newPerson?: Person) {
     editMode = false;
     const p = newPerson ?? person;
-    editPerson = { name: p.name, bio: p.bio ?? '', birthDate: p.birthDate, deathDate: p.deathDate };
+    editPerson = toPersonEdit(p);
     const [sb, lb] = truncateString(p.bio ?? '', bioMaxLength, bioMaxLines);
     shortenedBio = lb ? sb.trimEnd() + '…' : undefined;
     bioIsLong = lb;
     showFullBio = false;
   }
   export function tryClose(): boolean {
-    return !editMode || Object.keys(changes()).length < 1;
+    return !editMode || Object.keys(getPersonChanges(person, editPerson)).length < 1;
   }
 
   function close() {
