@@ -8,7 +8,7 @@
   import { enhance } from '$app/forms';
   import type { SubmitFunction } from '@sveltejs/kit';
   import { slide } from 'svelte/transition';
-  import { formatDate, truncateString } from '$lib/client/clutils';
+  import { formatDate, nonewlines, truncateString } from '$lib/client/clutils';
 
   export let person: Person;
   export let style: string = '';
@@ -23,22 +23,10 @@
   let shortenedBio: string | undefined = undefined;
   let bioIsLong: boolean = false;
   let showFullBio: boolean = false;
+  let frm: HTMLFormElement | undefined = undefined;
 
   function toggleEditMode() {
     editMode = !editMode;
-  }
-
-  // Prevent user from entering newlines in the name field
-  function onNameKeydown(e: KeyboardEvent) {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-    }
-  }
-  function onNamePaste(e: ClipboardEvent) {
-    const text = e.clipboardData?.getData('text');
-    if (text?.includes('\n')) {
-      e.preventDefault();
-    }
   }
 
   /**
@@ -103,7 +91,7 @@
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <div class="pop-up" {style} on:click>
-  <form method="POST" action="?/updatePerson" enctype="multipart/form-data" use:enhance={submitUpdate}>
+  <form method="POST" action="?/updatePerson" enctype="multipart/form-data" use:enhance={submitUpdate} bind:this={frm}>
     <input type="hidden" name="id" value={person.id} />
     <div class="top-bar">
       {#if editMode && false}
@@ -120,9 +108,9 @@
           class="personName"
           contenteditable="plaintext-only"
           bind:textContent={editPerson.name}
-          on:keydown={onNameKeydown}
-          on:paste={onNamePaste}
-        ></h1>
+          use:nonewlines
+          on:returnkey={() => frm?.requestSubmit()}
+        />
       {:else}
         <h1 class="personName"><a href="/details/{person.id}">{person.name}</a></h1>
       {/if}
