@@ -67,7 +67,7 @@ export class Parentship implements ParentRelationship {
   }
 
   static fromRelation(relation: ParentRelationship, people: { [id: string]: Person }): Parentship {
-    if (relation.relType != 'parent') {
+    if (relation.relType !== 'parent') {
       throw Error('relation must be of type "parent"');
     }
     const parent = people[relation.participants.parent[0]];
@@ -88,7 +88,7 @@ export class Partnership implements PartnerRelationship {
   }
 
   static fromRelation(relation: PartnerRelationship, people: { [id: string]: Person }): Partnership {
-    if (relation.relType != 'partner') {
+    if (relation.relType !== 'partner') {
       throw Error('relation must be of type "partner"');
     }
     const partners = relation.participants['partner'].map(id => {

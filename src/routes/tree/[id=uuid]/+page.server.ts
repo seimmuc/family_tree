@@ -20,7 +20,7 @@ export async function load({ params }) {
   // get all child IDs and list of their parents
   const children: Record<string, string[]> = {};
   for (const rel of relations) {
-    if (rel.relType == 'parent' && focusPeopleIds.includes(rel.participants.parent[0])) {
+    if (rel.relType === 'parent' && focusPeopleIds.includes(rel.participants.parent[0])) {
       (children[rel.participants.child[0]] ??= []).push(rel.participants.parent[0]);
     }
   }
@@ -32,7 +32,7 @@ export async function load({ params }) {
   // get all parents of each focus person
   const parents: Record<string, string[]> = {};
   for (const rel of relations) {
-    if (rel.relType == 'parent' && focusPeopleIds.includes(rel.participants.child[0])) {
+    if (rel.relType === 'parent' && focusPeopleIds.includes(rel.participants.child[0])) {
       (parents[rel.participants.child[0]] ??= []).push(rel.participants.parent[0]);
     }
   }

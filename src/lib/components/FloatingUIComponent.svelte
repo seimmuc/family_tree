@@ -47,8 +47,8 @@
       if (arrw !== null) {
         Object.assign(arrw.style, {
           position: 'absolute',
-          left: x != undefined ? `${x}px` : '',
-          top: y != undefined ? `${y}px` : '',
+          left: x !== undefined ? `${x}px` : '',
+          top: y !== undefined ? `${y}px` : '',
           bottom: '',
           right: '',
           [staticSide]: `-${arrowShiftPx}px`,
