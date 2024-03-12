@@ -4,7 +4,7 @@ import { addOrReplacePhoto } from '$lib/server/media.js';
 import { error, type Actions, fail } from '@sveltejs/kit';
 import { isUUID } from '$lib/utils.js';
 import { PERSON_SCHEMA, type UpdatablePerson } from '$lib/types.js';
-import { ValidationError } from 'yup';
+import { parseUpdatePerson, type FailError } from '$lib/server/sutils.js';
 
 export async function load({ params }) {
   const [focusPeopleIds, [people, relations]] = await ReadActions.perform(async act => {
@@ -49,39 +49,16 @@ function getUUID(formData: FormData): string {
   return uuid;
 }
 
-function validatePerson(person: { [k: string]: any }): UpdatablePerson {
-  return PERSON_SCHEMA.validateSync(person, { abortEarly: true, stripUnknown: true });
-}
-
 export const actions: Actions = {
   updatePerson: async ({ request }) => {
     const data = await request.formData();
-    console.log('updating person ', data.get('id'));
-    let updateJson = data.get('person-update');
-    if (typeof updateJson !== 'string') {
-      return fail(422, { message: 'missing person-update data' });
+    const personUpdate = parseUpdatePerson(data.get('person-update'));
+    if (Object.hasOwn(personUpdate, 'code')) {
+      const fe = personUpdate as FailError;
+      fail(fe.code, { message: fe.message });
     }
-    let dangerousPerson;
-    try {
-      dangerousPerson = JSON.parse(updateJson);
-      if (typeof dangerousPerson !== 'object') {
-        throw new Error();
-      }
-    } catch {
-      return fail(400, { message: 'invalid json' });
-    }
-    let validPerson: UpdatablePerson;
-    try {
-      validPerson = validatePerson(dangerousPerson);
-    } catch (err) {
-      if (err instanceof ValidationError) {
-        return error(422, err.message);
-      }
-      throw err;
-    }
-    console.log('validPerson: ', validPerson);
     const updatedPerson = await WriteActions.perform(async act => {
-      return act.updatePerson(validPerson);
+      return act.updatePerson(personUpdate as UpdatablePerson);
     });
   },
   deletePerson: async ({ request }) => {
