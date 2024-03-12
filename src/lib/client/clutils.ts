@@ -1,5 +1,5 @@
 import type { Person } from '$lib/types';
-import { clearEmptyVals, isDateString, stripNonPrintableAndNormalize } from '$lib/utils';
+import { clearUndefinedVals, isDateString, stripNonPrintableAndNormalize } from '$lib/utils';
 import type { Action } from 'svelte/action';
 
 const DEFAULT_DATE_FORMAT_OPRIONS: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'short', day: 'numeric' };
@@ -87,5 +87,5 @@ export function getPersonChanges(original: Person, edits: PersonEdit): PersonCha
     birthDate: bd !== original.birthDate ? bd ?? null : undefined,
     deathDate: dd !== original.deathDate ? dd ?? null : undefined
   };
-  return clearEmptyVals(res);
+  return clearUndefinedVals(res);
 }

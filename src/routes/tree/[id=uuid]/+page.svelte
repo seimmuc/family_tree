@@ -91,7 +91,9 @@
     if (dontClosePopup) {
       dontClosePopup = false;
     } else {
-      popup.control?.hide();
+      if (popup.comp?.tryClose()) {
+        popup.control?.hide();
+      }
     }
   }
 

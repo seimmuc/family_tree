@@ -24,6 +24,7 @@
   let bioIsLong: boolean = false;
   let showFullBio: boolean = false;
   let frm: HTMLFormElement | undefined = undefined;
+  let unsavedEdits = { fields: [] as string[], timer: undefined as NodeJS.Timeout | undefined };
 
   function toggleEditMode() {
     editMode = !editMode;
@@ -55,7 +56,21 @@
     showFullBio = false;
   }
   export function tryClose(): boolean {
-    return !editMode || Object.keys(getPersonChanges(person, editPerson)).length < 1;
+    if (!editMode) {
+      return true;
+    }
+    const uc = [...Object.keys(getPersonChanges(person, editPerson))];
+    if (uc.length < 1) {
+      return true;
+    }
+    if (unsavedEdits.timer !== undefined) {
+      clearTimeout(unsavedEdits.timer);
+    }
+    unsavedEdits.fields = uc;
+    unsavedEdits.timer = setTimeout(() => {
+      unsavedEdits.fields = [];
+    }, 2000);
+    return false;
   }
 
   function close() {
@@ -66,7 +81,7 @@
 
 <svelte:window
   on:keydown={e => {
-    if (e.key === 'Escape') {
+    if (e.key === 'Escape' && tryClose()) {
       close();
     }
   }}
@@ -90,6 +105,7 @@
       {#if editMode}
         <h1
           class="personName"
+          class:edited={unsavedEdits.fields.includes('name')}
           contenteditable="plaintext-only"
           bind:textContent={editPerson.name}
           use:nonewlines
@@ -107,8 +123,18 @@
       <div class="dates">
         {#if editMode}
           <div transition:slide={{ duration: 200, axis: 'y' }}>
-            <input class="date-input" type="date" bind:value={editPerson.birthDate} />
-            <input class="date-input" type="date" bind:value={editPerson.deathDate} />
+            <input
+              type="date"
+              class="date-input"
+              class:edited={unsavedEdits.fields.includes('birthDate')}
+              bind:value={editPerson.birthDate}
+            />
+            <input
+              type="date"
+              class="date-input"
+              class:edited={unsavedEdits.fields.includes('deathDate')}
+              bind:value={editPerson.deathDate}
+            />
           </div>
         {:else}
           <h3 class="date-display" transition:slide={{ duration: 200, axis: 'y' }}>
@@ -117,7 +143,12 @@
         {/if}
       </div>
       {#if editMode}
-        <p class="bio" contenteditable="plaintext-only" bind:textContent={editPerson.bio} />
+        <p
+          class="bio"
+          class:edited={unsavedEdits.fields.includes('bio')}
+          contenteditable="plaintext-only"
+          bind:textContent={editPerson.bio}
+        />
       {:else}
         <!-- <p class="bio">{person.bio ? (person.bio.length > bioMaxLength ? person.bio.substring(0, bioMaxLength) + "…" : person.bio) : ""}</p> -->
         <p class="bio">{!bioIsLong || showFullBio ? person.bio : shortenedBio}</p>
@@ -143,6 +174,13 @@
 <style lang="scss">
   @use '$lib/styles/common';
 
+  @mixin border-edited-highlight {
+    transition: border-color 0.2s;
+    &.edited {
+      border-color: red;
+    }
+  }
+
   .pop-up {
     max-width: 600px;
   }
@@ -158,6 +196,7 @@
       margin: 9px 2px 0;
       font-size: 2em;
       @include common.contenteditable-border;
+      @include border-edited-highlight;
       a {
         @include common.link-colors;
         text-decoration: none;
@@ -184,6 +223,9 @@
       .date-input {
         margin: 0;
       }
+      .date-input {
+        @include border-edited-highlight;
+      }
     }
     .bio {
       overflow-wrap: anywhere;
@@ -191,6 +233,7 @@
       text-align: center;
       margin: 0;
       @include common.contenteditable-border;
+      @include border-edited-highlight;
     }
     .button-show-more {
       @include common.styleless-button;
