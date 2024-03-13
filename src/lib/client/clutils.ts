@@ -2,7 +2,12 @@ import type { Person } from '$lib/types';
 import { clearUndefinedVals, isDateString, stripNonPrintableAndNormalize } from '$lib/utils';
 import type { Action } from 'svelte/action';
 
-const DEFAULT_DATE_FORMAT_OPRIONS: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'short', day: 'numeric' };
+const DEFAULT_DATE_FORMAT_OPRIONS: Intl.DateTimeFormatOptions = {
+  year: 'numeric',
+  month: 'short',
+  day: 'numeric',
+  timeZone: 'UTC'
+};
 
 export function truncateString(str: string, maxChars: number, maxLines: number): [string, boolean] {
   let result = str;
