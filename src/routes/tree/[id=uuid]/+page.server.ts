@@ -3,8 +3,7 @@ import { ReadActions, WriteActions } from '$lib/server/graph/person.js';
 import { addOrReplacePhoto } from '$lib/server/media.js';
 import { error, type Actions, fail } from '@sveltejs/kit';
 import { isUUID } from '$lib/utils.js';
-import { type UpdatablePerson } from '$lib/types.js';
-import { parseUpdatePerson, type FailError } from '$lib/server/sutils.js';
+import { parseUpdatePerson } from '$lib/server/sutils.js';
 
 export async function load({ params }) {
   const [focusPeopleIds, [people, relations]] = await ReadActions.perform(async act => {
@@ -53,12 +52,11 @@ export const actions: Actions = {
   updatePerson: async ({ request }) => {
     const data = await request.formData();
     const personUpdate = parseUpdatePerson(data.get('person-update'));
-    if (Object.hasOwn(personUpdate, 'code')) {
-      const fe = personUpdate as FailError;
-      fail(fe.code, { message: fe.message });
+    if (personUpdate.isErr()) {
+      return fail(personUpdate.error.code, { message: personUpdate.error.message });
     }
     const updatedPerson = await WriteActions.perform(async act => {
-      return act.updatePerson(personUpdate as UpdatablePerson);
+      return act.updatePerson(personUpdate.value);
     });
   },
   deletePerson: async ({ request }) => {

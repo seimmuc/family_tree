@@ -1,7 +1,6 @@
 import { ReadActions, WriteActions } from '$lib/server/graph/person.js';
 import { addOrReplacePhoto, tryDeletePhoto } from '$lib/server/media.js';
-import { parseUpdatePerson, type FailError } from '$lib/server/sutils.js';
-import type { UpdatablePerson } from '$lib/types.js';
+import { parseUpdatePerson } from '$lib/server/sutils.js';
 import { error, type Actions, fail } from '@sveltejs/kit';
 
 export async function load({ params }) {
@@ -22,11 +21,10 @@ export const actions: Actions = {
   update: async ({ request }) => {
     const data = await request.formData();
     const pupRes = parseUpdatePerson(data.get('person-update'));
-    if (Object.hasOwn(pupRes, 'code')) {
-      const fe = pupRes as FailError;
-      return fail(fe.code, { message: fe.message });
+    if (pupRes.isErr()) {
+      return fail(pupRes.error.code, { message: pupRes.error.message });
     }
-    const personUpdate = pupRes as UpdatablePerson;
+    const personUpdate = pupRes.value;
     const photo = data.get('photo');
 
     const updatedPerson = await WriteActions.perform(async act => {
