@@ -5,7 +5,6 @@ import { Readable } from 'node:stream';
 import { error } from '@sveltejs/kit';
 
 export const GET = async ({ params }) => {
-  console.log('path: ', params.path);
   // normalize the path, then remove any "../" and "/" parts from the beginning of the path
   const safeRelPath = path.posix.normalize(params.path).replace(/^(\.\.(\/|\\|$)|\/)+/i, '');
   const fullPath = path.posix.join(MEDIA_ROOT, safeRelPath);

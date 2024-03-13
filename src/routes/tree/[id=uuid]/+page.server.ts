@@ -1,9 +1,9 @@
-import { MEDIA_IMAGE_MIME_TYPES } from '$env/static/private';
+import { PUBLIC_MEDIA_IMAGE_MIME_TYPES } from '$env/static/public';
 import { ReadActions, WriteActions } from '$lib/server/graph/person.js';
 import { addOrReplacePhoto } from '$lib/server/media.js';
 import { error, type Actions, fail } from '@sveltejs/kit';
 import { isUUID } from '$lib/utils.js';
-import { PERSON_SCHEMA, type UpdatablePerson } from '$lib/types.js';
+import { type UpdatablePerson } from '$lib/types.js';
 import { parseUpdatePerson, type FailError } from '$lib/server/sutils.js';
 
 export async function load({ params }) {
@@ -77,7 +77,7 @@ export const actions: Actions = {
       );
       error(422, 'file was not uploaded');
     }
-    if (!MEDIA_IMAGE_MIME_TYPES.includes(file.type)) {
+    if (!PUBLIC_MEDIA_IMAGE_MIME_TYPES.includes(file.type)) {
       error(422, 'file type is not allowed');
     }
     await addOrReplacePhoto(personUuid, file);

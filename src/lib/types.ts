@@ -12,6 +12,7 @@ export interface Person {
   birthDate?: string; // YYYY-MM-DD
   deathDate?: string;
   bio?: string;
+  photo?: string;
 }
 
 export type UpdatablePerson = OptionalKeysNullable<Person>;
@@ -35,6 +36,10 @@ export const PERSON_SCHEMA: ObjectSchema<UpdatablePerson> = object({
     .label('death date'),
   bio: string()
     .transform(v => stripNonPrintableAndNormalize(v, false, false))
+    .optional()
+    .nullable(),
+  photo: string()
+    .matches(/^[^/.][^/]*$/)
     .optional()
     .nullable()
 }).noUnknown();

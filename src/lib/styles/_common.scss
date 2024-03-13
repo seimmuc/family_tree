@@ -1,9 +1,9 @@
 @mixin contenteditable-border {
   border: 1px solid transparent;
   border-radius: 4px;
+  padding: 0 3px;
   &[contenteditable] {
     border-color: #eee;
-    padding: 0 3px;
   }
 }
 @mixin styleless-button {
@@ -18,4 +18,9 @@
   &:hover {
     color: gray;
   }
+}
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }

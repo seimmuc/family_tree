@@ -1,7 +1,7 @@
-import { PERSON_SCHEMA, type UpdatablePerson } from "$lib/types";
-import { ValidationError } from "yup";
+import { PERSON_SCHEMA, type UpdatablePerson } from '$lib/types';
+import { ValidationError } from 'yup';
 
-export type FailError = { code: number, message: string };
+export type FailError = { code: number; message: string };
 
 export function parseUpdatePerson(updateJson?: FormDataEntryValue | null): UpdatablePerson | FailError {
   if (typeof updateJson !== 'string') {
