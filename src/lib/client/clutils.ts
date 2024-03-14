@@ -94,3 +94,7 @@ export function getPersonChanges(original: Person, edits: PersonEdit): PersonCha
   };
   return clearUndefinedVals(res);
 }
+
+export function photoUrl(person: Person): string | undefined {
+  return person.photo ? `/media/${person.photo}` : undefined;
+}

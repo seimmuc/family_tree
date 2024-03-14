@@ -38,7 +38,7 @@
 <script lang="ts">
   import { filedrop, type FileDropOptions } from 'filedrop-svelte';
   import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
-  import { formatDate, nonewlines, toPersonEdit, getPersonChanges } from '$lib/client/clutils.js';
+  import { formatDate, nonewlines, toPersonEdit, getPersonChanges, photoUrl } from '$lib/client/clutils.js';
   import type { PersonEdit, PersonChanges } from '$lib/client/clutils.js';
   import type { Person, UpdatablePerson } from '$lib/types.js';
   import { enhance } from '$app/forms';
@@ -80,7 +80,7 @@
 
   function updatePerson(p: Person) {
     person = p;
-    image.src = p.photo ? `/media/${p.photo}` : undefined;
+    image.src = photoUrl(p);
     image.pSrc = undefined;
     editPerson = toPersonEdit(p);
   }
