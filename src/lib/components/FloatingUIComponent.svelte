@@ -18,6 +18,7 @@
 
   export let placementDir: Placement = 'bottom';
   export let offsetPx = 8;
+  export let enableArrow = false;
   export let arrowShiftPx = offsetPx / 2; // the default value isn't intended to be reactive
   export let autoPlace = false;
   export let virtualElement: VirtualElement | undefined = undefined;
@@ -26,51 +27,53 @@
 
   // ComputeConfig static values
   const arrowRef = writable<HTMLDivElement | null>(null);
-  const staticMiddleware: Array<Middleware> = [shift(), arrow({ element: arrowRef })];
+  const staticMiddleware: Array<Middleware> = [shift()];
   const computeConfig: ComputeConfig = {
     strategy: 'absolute',
     onComputed({ placement, middlewareData }) {
-      const { x, y } = middlewareData.arrow as { x?: number; y?: number };
-
-      const [staticSide, rotation] = {
-        top: ['bottom', 225],
-        right: ['left', 315],
-        bottom: ['top', 45],
-        left: ['right', 135]
-      }[placement.split('-')[0]] as [string, number];
-
-      const arrw = $arrowRef;
-      if (arrw !== null) {
-        Object.assign(arrw.style, {
-          position: 'absolute',
-          left: x !== undefined ? `${x}px` : '',
-          top: y !== undefined ? `${y}px` : '',
-          bottom: '',
-          right: '',
-          [staticSide]: `-${arrowShiftPx}px`,
-          transform: `rotate(${rotation}deg)`
-        });
+      if (middlewareData.arrow) {
+        const { x, y } = middlewareData.arrow as { x?: number; y?: number };
+        const [staticSide, rotation] = {
+          top: ['bottom', 225],
+          right: ['left', 315],
+          bottom: ['top', 45],
+          left: ['right', 135]
+        }[placement.split('-')[0]] as [string, number];
+        const arrw = $arrowRef;
+        if (arrw !== null) {
+          Object.assign(arrw.style, {
+            position: 'absolute',
+            left: x !== undefined ? `${x}px` : '',
+            top: y !== undefined ? `${y}px` : '',
+            bottom: '',
+            right: '',
+            [staticSide]: `-${arrowShiftPx}px`,
+            transform: `rotate(${rotation}deg)`
+          });
+        }
       }
     }
   };
   // ComputeConfig dynamic updates
   let mwOffset: Middleware | undefined;
   let mwPlace: Middleware;
+  let mwArrow: Middleware | undefined;
   function updateComputeConfig(
     placementDir: Placement,
     offsetPx: number,
+    enableArrow: boolean,
     arrowShiftPx: number,
     autoPlace: boolean
   ): boolean {
     // update things as lazily as possible
-    const newParams = { placementDir, offsetPx, arrowShiftPx, autoPlace };
+    const newParams = { placementDir, offsetPx, enableArrow, arrowShiftPx, autoPlace };
     const changes = Object.entries(newParams)
       .filter(([k, v]) => v !== oldParams[k])
       .map(e => e[0]);
     if (changes.length < 1) {
       return false;
     }
-    if (arrayHasAny(changes, ['offsetPx', 'autoPlace'])) {
+    if (arrayHasAny(changes, ['offsetPx', 'autoPlace', 'enableArrow'])) {
       // middleware
       if (changes.includes('offsetPx')) {
         mwOffset = offsetPx ? offset(offsetPx) : undefined;
@@ -78,7 +81,10 @@
       if (changes.includes('autoPlace')) {
         mwPlace = autoPlace ? autoPlacement() : flip();
       }
-      computeConfig.middleware = [...staticMiddleware, mwOffset, mwPlace];
+      if (changes.includes('enableArrow')) {
+        mwArrow = enableArrow ? arrow({ element: arrowRef }) : undefined;
+      }
+      computeConfig.middleware = [...staticMiddleware, mwOffset, mwPlace, mwArrow];
     }
     if (changes.includes('placementDir')) {
       computeConfig.placement = placementDir;
@@ -87,9 +93,9 @@
     return true;
   }
   // run the update initially (before createFloatingActions() call)
-  updateComputeConfig(placementDir, offsetPx, arrowShiftPx, autoPlace); // initial call (reactive updates will only run after dom mount)
+  updateComputeConfig(placementDir, offsetPx, enableArrow, arrowShiftPx, autoPlace); // initial call (reactive updates will only run after dom mount)
   // setup reactive updates on prop changes (initial call only happens after <script> completes)
-  $: if (updateComputeConfig(placementDir, offsetPx, arrowShiftPx, autoPlace)) {
+  $: if (updateComputeConfig(placementDir, offsetPx, enableArrow, arrowShiftPx, autoPlace)) {
     update(computeConfig);
   }
 
@@ -114,9 +120,11 @@
 {#if shown}
   <div class="tooltip" use:floatingContent>
     <slot name="tooltip" />
-    <div class="arrow" bind:this={$arrowRef}>
-      <slot name="arrow" />
-    </div>
+    {#if enableArrow}
+      <div class="arrow" bind:this={$arrowRef}>
+        <slot name="arrow" />
+      </div>
+    {/if}
   </div>
 {/if}
 

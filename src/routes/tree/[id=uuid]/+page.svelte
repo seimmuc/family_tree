@@ -228,6 +228,7 @@
     bind:control={popup.control}
     virtualElement={popup.virtElem}
     offsetPx={20}
+    enableArrow={true}
     arrowShiftPx={13}
     --popup-bg="color-mix(in hsl, var(--bg-color) 60%, gray)"
     --popup-border="2px solid black"
