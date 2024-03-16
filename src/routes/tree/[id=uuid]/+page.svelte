@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { browser } from '$app/environment';
   import FloatingUiComponent, { type FloatingUICompControl } from '$lib/components/FloatingUIComponent.svelte';
   import PersonNode from '$lib/components/PersonNode.svelte';
   import PopUp from '$lib/components/PopUp.svelte';
@@ -197,7 +198,6 @@
 
 <svelte:window on:click={onWindowClick} />
 
-<!-- Main Area -->
 <div
   class="tree-wrapper"
   bind:clientWidth={wrapperDimensions.width}
@@ -208,43 +208,41 @@
   </canvas>
   <div class="row parents">
     {#each parents as parent}
-      <!-- Parent Nodes -->
       <PersonNode bind:this={parent.node} person={parent.person} on:click={() => onPersonClick(parent)} />
     {/each}
   </div>
   <div class="row focus">
     {#each focusPeople as person}
-      <!-- Focus Nodes -->
       <PersonNode bind:this={person.node} person={person.person} on:click={() => onPersonClick(person)} />
     {/each}
   </div>
   <div class="row children">
     {#each children as child}
-      <!-- Children Nodes -->
       <PersonNode bind:this={child.node} person={child.person} on:click={() => onPersonClick(child)} />
     {/each}
   </div>
 </div>
 
-<!-- HTML Pop-Up -->
-<FloatingUiComponent
-  bind:control={popup.control}
-  virtualElement={popup.virtElem}
-  offsetPx={20}
-  arrowShiftPx={13}
-  --popup-bg="color-mix(in hsl, var(--bg-color) 60%, gray)"
-  --popup-border="2px solid black"
->
-  <PopUp
-    style="background-color: var(--popup-bg, gray); border: var(--popup-border, 1px solid black);"
-    slot="tooltip"
-    person={popup.person.person}
-    bind:this={popup.comp}
-    on:click={onPopUpClick}
-    on:close={popup.control?.hide}
-  />
-  <div slot="arrow" class="arrow" />
-</FloatingUiComponent>
+{#if browser}
+  <FloatingUiComponent
+    bind:control={popup.control}
+    virtualElement={popup.virtElem}
+    offsetPx={20}
+    arrowShiftPx={13}
+    --popup-bg="color-mix(in hsl, var(--bg-color) 60%, gray)"
+    --popup-border="2px solid black"
+  >
+    <PopUp
+      style="background-color: var(--popup-bg, gray); border: var(--popup-border, 1px solid black);"
+      slot="tooltip"
+      person={popup.person.person}
+      bind:this={popup.comp}
+      on:click={onPopUpClick}
+      on:close={popup.control?.hide}
+    />
+    <div slot="arrow" class="arrow" />
+  </FloatingUiComponent>
+{/if}
 
 <style>
   .tree-wrapper {
