@@ -8,6 +8,12 @@ export function clearEmptyVals(object: Record<string, any>): Record<string, any>
 export function clearKeys(object: Record<string, any>, keys: string[]): Record<string, any> {
   return Object.fromEntries(Object.entries(object).filter(([k, v]) => !keys.includes(k)));
 }
+export function hasAnyKey(object: Record<string, any>, keys: string[]): boolean {
+  return Object.keys(object).some(k => keys.includes(k));
+}
+export function arrayHasAny<T>(array: Array<T>, elements: Array<T>): boolean {
+  return elements.some(e => array.includes(e));
+}
 
 /**
  * Removes non-printable characters from string and normalizes newline and space characters (to unix newlines and ascii space)
