@@ -1,8 +1,8 @@
 <script context="module" lang="ts">
   export type FloatingUICompControl = {
-    show: () => boolean;
-    hide: () => boolean;
-    setVisible: (visible: boolean) => boolean;
+    show: () => void;
+    hide: () => void;
+    setVisible: (visible: boolean) => void;
     isVisible: () => boolean;
     update: UpdatePosition;
   };
@@ -103,9 +103,15 @@
 
   let shown: boolean = false;
   export const control: FloatingUICompControl = {
-    show: () => (shown = true),
-    hide: () => (shown = false),
-    setVisible: (visible: boolean) => (shown = visible),
+    show: () => {
+      shown = true;
+    },
+    hide: () => {
+      shown = false;
+    },
+    setVisible: (visible: boolean) => {
+      shown = visible;
+    },
     isVisible: () => shown,
     update
   };
