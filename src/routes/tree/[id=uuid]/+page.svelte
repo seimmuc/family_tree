@@ -54,6 +54,10 @@
         }
       }
     }
+    if (cnv !== undefined) {
+      // on navigation or person update
+      resizeTimer = setTimeout(redraw, 0);
+    }
   }
   $: data.people, peopleUpdate();
 
@@ -110,6 +114,7 @@
     context.lineWidth = 10;
     context.strokeStyle = 'rgb(0 0 0)';
     context.lineCap = 'square';
+    context.clearRect(0, 0, cnv.width, cnv.height);
     context.beginPath();
 
     // Middle of nodes in the "focus" group
