@@ -22,8 +22,9 @@
   export let arrowShiftPx = offsetPx / 2; // the default value isn't intended to be reactive
   export let autoPlace = false;
   export let virtualElement: VirtualElement | undefined = undefined;
+  export let style: string | undefined = undefined;
 
-  let oldParams: Record<string, any> = {}; // keeps track of all params except virtualElement
+  let oldParams: Record<string, any> = {}; // keeps track of all params except virtualElement and style
 
   // ComputeConfig static values
   const arrowRef = writable<HTMLDivElement | null>(null);
@@ -124,7 +125,7 @@
 <slot name="ref" {floatingRef} {control} />
 
 {#if shown}
-  <div class="tooltip" use:floatingContent>
+  <div class="tooltip" {style} use:floatingContent>
     <slot name="tooltip" />
     {#if enableArrow}
       <div class="arrow" bind:this={$arrowRef}>
