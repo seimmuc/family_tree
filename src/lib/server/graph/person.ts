@@ -3,13 +3,6 @@ import { Integer, ManagedTransaction, Relationship as Neo4jRel } from 'neo4j-dri
 import { readTransaction, writeTransaction } from './memgraph';
 import type { TransactionConfig } from 'neo4j-driver-core';
 
-// export async function findPersonById(id: string): Promise<Person<LocalDateTime> | undefined> {
-//   return await readTransaction(async tx => {
-//     const r = await tx.run('MATCH (p:Person) WHERE p.id = $id RETURN p LIMIT 1', {id});
-//     return r.records[0]?.get('p')?.properties;
-//   });
-// }
-
 type FilterOperator = '=' | '<>' | '<' | '<=' | '>' | '>=' | 'IN' | '=~' | 'CONTAINS' | 'STARTS WITH' | 'ENDS WITH';
 
 type Filter = {
@@ -67,7 +60,13 @@ export class ReadActions {
     return r.records[0]?.get('p')?.properties;
   }
   async findPeopleByName(name: string): Promise<Person[]> {
-    const r = await this.transaction.run('MATCH (p:Person {name: $fn}) RETURN p', { fn: name });
+    const r = await this.transaction.run('MATCH (p:Person {name: $n}) RETURN p', { n: name });
+    return r.records.map(rec => rec.get('p').properties as Person);
+  }
+  async findPeopleByNamePartial(name: string): Promise<Person[]> {
+    const r = await this.transaction.run('MATCH (p:Person) WHERE toLower(p.name) CONTAINS $n RETURN p', {
+      n: name.toLowerCase()
+    });
     return r.records.map(rec => rec.get('p').properties as Person);
   }
   async findMainPartner(personId: string): Promise<Person | undefined> {

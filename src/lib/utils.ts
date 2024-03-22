@@ -14,6 +14,16 @@ export function hasAnyKey(object: Record<string, any>, keys: string[]): boolean 
 export function arrayHasAny<T>(array: Array<T>, elements: Array<T>): boolean {
   return elements.some(e => array.includes(e));
 }
+export function arrayFilterInPlace<T>(array: T[], predicate: (value: T, index: number, array: T[]) => boolean) {
+  // this function is loosely based on https://stackoverflow.com/a/37319954/22374935 (CC BY-SA 3.0)
+  let ni = 0;
+  for (let i = 0; i < array.length; i++) {
+    if (predicate(array[i], i, array)) {
+      array[ni++] = array[i];
+    }
+  }
+  array.length = ni;
+}
 
 /**
  * Removes non-printable characters from string and normalizes newline and space characters (to unix newlines and ascii space)

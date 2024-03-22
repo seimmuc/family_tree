@@ -1,4 +1,4 @@
-import { object, string, ObjectSchema } from 'yup';
+import { object, string, ObjectSchema, type InferType, boolean } from 'yup';
 import { stripNonPrintableAndNormalize } from './utils';
 
 type OptionalKeysNullable<T extends Record<any, any>> = {
@@ -116,3 +116,11 @@ export function toRelationshipClass(relation: Relationship, people: { [id: strin
   }
   throw new Error(`unknown relation type "${relation.relType}"`);
 }
+
+export const SEARCH_QUERY_SCHEMA = object({
+  nameQuery: string().required().min(2).lowercase().trim(),
+  nameComplete: boolean().default(false).optional()
+});
+
+export type SearchQuery = InferType<typeof SEARCH_QUERY_SCHEMA>;
+export type SearchQueryCl = Partial<SearchQuery> & Required<Pick<SearchQuery, 'nameQuery'>>;

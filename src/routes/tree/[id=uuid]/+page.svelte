@@ -3,6 +3,7 @@
   import FloatingUiComponent, { type FloatingUICompControl } from '$lib/components/FloatingUIComponent.svelte';
   import PersonNode from '$lib/components/PersonNode.svelte';
   import PopUp from '$lib/components/PopUp.svelte';
+  import SearchBox from '$lib/components/SearchBox.svelte';
   import type { Point } from '$lib/components/types.js';
   import { type Person } from '$lib/types.js';
   import { type ClientRectObject } from '@floating-ui/core';
@@ -203,28 +204,33 @@
 
 <svelte:window on:click={onWindowClick} />
 
-<div
-  class="tree-wrapper"
-  bind:clientWidth={wrapperDimensions.width}
-  bind:clientHeight={wrapperDimensions.height}
-  bind:this={wrapperElem}
->
-  <canvas bind:this={cnv} class="lines-canvas" width={wrapperDimensions.width} height={wrapperDimensions.height}>
-  </canvas>
-  <div class="row parents">
-    {#each parents as parent}
-      <PersonNode bind:this={parent.node} person={parent.person} on:click={() => onPersonClick(parent)} />
-    {/each}
+<div class="root">
+  <div class="topbar">
+    <SearchBox />
   </div>
-  <div class="row focus">
-    {#each focusPeople as person}
-      <PersonNode bind:this={person.node} person={person.person} on:click={() => onPersonClick(person)} />
-    {/each}
-  </div>
-  <div class="row children">
-    {#each children as child}
-      <PersonNode bind:this={child.node} person={child.person} on:click={() => onPersonClick(child)} />
-    {/each}
+  <div
+    class="tree-wrapper"
+    bind:clientWidth={wrapperDimensions.width}
+    bind:clientHeight={wrapperDimensions.height}
+    bind:this={wrapperElem}
+  >
+    <canvas bind:this={cnv} class="lines-canvas" width={wrapperDimensions.width} height={wrapperDimensions.height}>
+    </canvas>
+    <div class="row parents">
+      {#each parents as parent}
+        <PersonNode bind:this={parent.node} person={parent.person} on:click={() => onPersonClick(parent)} />
+      {/each}
+    </div>
+    <div class="row focus">
+      {#each focusPeople as person}
+        <PersonNode bind:this={person.node} person={person.person} on:click={() => onPersonClick(person)} />
+      {/each}
+    </div>
+    <div class="row children">
+      {#each children as child}
+        <PersonNode bind:this={child.node} person={child.person} on:click={() => onPersonClick(child)} />
+      {/each}
+    </div>
   </div>
 </div>
 
@@ -250,7 +256,19 @@
   </FloatingUiComponent>
 {/if}
 
-<style>
+<style lang="scss">
+  .root {
+    display: flex;
+    flex-direction: column;
+    .topbar {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
+      padding: 10px 20px;
+    }
+  }
+
   .tree-wrapper {
     display: flex;
     flex-direction: column;
