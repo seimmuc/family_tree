@@ -20,7 +20,7 @@ export type UpdatablePerson = OptionalKeysNullable<Person>;
 export const PERSON_SCHEMA: ObjectSchema<UpdatablePerson> = object({
   id: string().required().lowercase().uuid().label('person id'),
   name: string()
-    .transform(v => stripNonPrintableAndNormalize(v, false, true))
+    .transform(v => stripNonPrintableAndNormalize(v, false, true).trim())
     .required()
     .min(1),
   gender: string().optional().nullable(),
