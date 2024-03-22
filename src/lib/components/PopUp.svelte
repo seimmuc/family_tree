@@ -190,7 +190,6 @@
     justify-content: space-between;
     align-items: stretch;
     margin-bottom: 4px;
-    z-index: 3;
 
     .personName {
       margin: 9px 2px 0;
@@ -198,8 +197,7 @@
       @include common.contenteditable-border;
       @include border-edited-highlight;
       a {
-        @include common.link-colors;
-        text-decoration: none;
+        @include common.link;
       }
     }
     .top-button {

@@ -13,11 +13,18 @@
   cursor: pointer;
   font: inherit;
 }
+@mixin styleless-link {
+  text-decoration: none;
+}
 @mixin link-colors {
   color: lightgray;
   &:hover {
     color: gray;
   }
+}
+@mixin link {
+  @include styleless-link;
+  @include link-colors;
 }
 @mixin flex-center {
   display: flex;
