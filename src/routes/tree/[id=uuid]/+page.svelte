@@ -16,14 +16,13 @@
   let resizeTimer: NodeJS.Timeout | number;
 
   type PersonData = { person: Person; node: PersonNode };
-  let pplMap: Record<string, Person>;
   let focusPeople: Array<PersonData & { parents: PersonData[] }>;
   let parents: Array<PersonData & { child: string }>;
   let children: Array<PersonData>;
 
   function peopleUpdate() {
     // Construct collections of people's data to be used throughout the page
-    pplMap = Object.fromEntries(data.people.map(p => [p.id as string, p]));
+    const pplMap: Record<string, Person> = Object.fromEntries(data.people.map(p => [p.id as string, p]));
     focusPeople = data.people
       .filter(element => data.focusPeopleIds.includes(element.id))
       .map(person => {
@@ -206,7 +205,7 @@
 
 <div class="root">
   <div class="topbar">
-    <SearchBox />
+    <SearchBox linkFunc={p => `/tree/${p.id}`} />
   </div>
   <div
     class="tree-wrapper"

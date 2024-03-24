@@ -48,7 +48,7 @@
   import { faMagnifyingGlass, faSpinner } from '@fortawesome/free-solid-svg-icons';
   import { faCircleXmark } from '@fortawesome/free-regular-svg-icons';
   import { createEventDispatcher, tick } from 'svelte';
-  import { slide } from 'svelte/transition';
+  import { fade, slide } from 'svelte/transition';
   import FloatingUiComponent from './FloatingUIComponent.svelte';
   import type { Person, SearchQueryCl } from '$lib/types';
   import { err, ok, type Result } from 'neverthrow';
@@ -56,8 +56,14 @@
   import { arrayFilterInPlace } from '$lib/utils';
   import { PUBLIC_SEARCH_CACHE_TTL } from '$env/static/public';
 
+  export let canHide = true;
+  export let startHidden = true;
+  export let enableXButton = true;
+  export let linkFunc = undefined as ((person: Person) => string) | undefined;
+  export let searchCache: SearchRequest[] | undefined = undefined;
+
   const dispatch = createEventDispatcher();
-  let boxShown = false;
+  let boxShown = !canHide || !startHidden;
   let query = '';
   let rootElem: HTMLDivElement;
   let inpElem: HTMLInputElement;
@@ -72,7 +78,7 @@
     // request: undefined as SearchRequest | undefined
   };
   let scheduledReqTimeoutId: NodeJS.Timeout | undefined = undefined;
-  const searchCache: SearchRequest[] = [];
+  const cache: SearchRequest[] = searchCache ?? [];
 
   function onSearchInput(e: Event & { currentTarget: EventTarget & HTMLInputElement }) {
     let qry: Query;
@@ -104,8 +110,8 @@
 
   function searchThroughCache(query: Query): ResultList | undefined {
     const time = new Date().getTime();
-    arrayFilterInPlace(searchCache, sr => sr.doneTime === undefined || time - sr.doneTime.getTime() < CTTL);
-    const request = searchCache.find(sr => sr.status !== 'error' && query.includes(sr.query));
+    arrayFilterInPlace(cache, sr => sr.doneTime === undefined || time - sr.doneTime.getTime() < CTTL);
+    const request = cache.find(sr => sr.status !== 'error' && query.includes(sr.query));
     if (request === undefined) {
       return undefined;
     }
@@ -153,7 +159,7 @@
       throw new Error('trying to re-execute finished search request');
     }
     searchRequest.status = 'pending';
-    searchCache.push(searchRequest);
+    cache.push(searchRequest);
     const qryObj: SearchQueryCl = { nameQuery: searchRequest.query };
     const reqPromise = fetch('/api/search', {
       method: 'POST',
@@ -183,15 +189,24 @@
     } else {
       resultsBox.comp?.control.hide(); // this has to be before boxShown is set
       query = '';
-      boxShown = false;
+      if (canHide) {
+        boxShown = false;
+      }
     }
   }
 
-  async function onNav(e: MouseEvent & { currentTarget: EventTarget & HTMLAnchorElement }) {
-    query = '';
-    resultsBox.comp?.control.hide();
-    const targetUrl = e.currentTarget.href;
-    dispatch('navigation', { targetUrl });
+  async function onSelect(person: Person, e: MouseEvent & { currentTarget: EventTarget & HTMLAnchorElement }) {
+    let nv = undefined;
+    const proceed = dispatch('selection', { person, setVal: (newVal: string) => (nv = newVal) }, { cancelable: true });
+    if (proceed) {
+      query = nv ?? '';
+      resultsBox.comp?.control.hide();
+    } else {
+      e.preventDefault();
+      if (nv) {
+        query = nv;
+      }
+    }
   }
 
   function onWindowClick(e: MouseEvent & { currentTarget: EventTarget & Window }) {
@@ -259,7 +274,7 @@
           {:else}
             {#each resultsBox.results.filteredResults as person (person.id)}
               <li class="person">
-                <a href="/tree/{person.id}" on:click={e => onNav(e)}>
+                <a href={linkFunc === undefined ? '' : linkFunc(person)} on:click={e => onSelect(person, e)}>
                   <span class="name">
                     {#each highlightMatch(person.name, resultsBox.results.query) as [fragment, hl]}
                       <span class:hl>{fragment}</span>
@@ -278,13 +293,16 @@
       </ul>
     </FloatingUiComponent>
   {/if}
-  <button class="search-btn" on:click={actionSearchBtn}>
-    {#if boxShown}
-      <FontAwesomeIcon icon={faCircleXmark} />
-    {:else}
-      <FontAwesomeIcon icon={faMagnifyingGlass} />
-    {/if}
-  </button>
+
+  {#if !boxShown || (enableXButton && (canHide || query.length > 0))}
+    <button transition:fade type="button" class="search-btn" on:click={actionSearchBtn}>
+      {#if boxShown}
+        <FontAwesomeIcon icon={faCircleXmark} />
+      {:else}
+        <FontAwesomeIcon icon={faMagnifyingGlass} />
+      {/if}
+    </button>
+  {/if}
 </div>
 
 <style lang="scss">
@@ -367,5 +385,7 @@
 
   .search-btn {
     @include common.styleless-button;
+    padding: 3px;
+    margin: 0 3px;
   }
 </style>
