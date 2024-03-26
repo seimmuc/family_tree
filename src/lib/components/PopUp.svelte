@@ -37,11 +37,9 @@
     const ch = getPersonChanges(person, editPerson);
     if (ch.name?.trim() === '') {
       // name is too short
-      cancel();
-      return;
+      return cancel();
     }
-    ch.name ??= person.name; // name cannot be removed, and should not be sent to server as undefined
-    const updatePerson: UpdatablePerson = { id: person.id, ...(ch as PersonChanges & { name: string }) };
+    const updatePerson: UpdatablePerson = { id: person.id, ...ch };
     formData.append('person-update', JSON.stringify(updatePerson));
     editMode = false;
   };

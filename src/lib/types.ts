@@ -1,9 +1,12 @@
-import { object, string, ObjectSchema, type InferType, boolean } from 'yup';
+import { object, string, ObjectSchema, type InferType, boolean, array } from 'yup';
 import { stripNonPrintableAndNormalize } from './utils';
 
 type OptionalKeysNullable<T extends Record<any, any>> = {
   [K in keyof T]: undefined extends T[K] ? T[K] | null : T[K];
 };
+
+const personId = string().required().lowercase().uuid();
+const personIdArr = array(personId).required();
 
 export interface Person {
   id: string;
@@ -15,14 +18,15 @@ export interface Person {
   photo?: string;
 }
 
-export type UpdatablePerson = OptionalKeysNullable<Person>;
+export type UpdatablePerson = Partial<OptionalKeysNullable<Person>> & Pick<Person, 'id'>;
 
 export const PERSON_SCHEMA: ObjectSchema<UpdatablePerson> = object({
-  id: string().required().lowercase().uuid().label('person id'),
+  id: personId.label('person id'),
   name: string()
     .transform(v => stripNonPrintableAndNormalize(v, false, true).trim())
-    .required()
-    .min(1),
+    .min(1)
+    .optional()
+    .nonNullable(),
   gender: string().optional().nullable(),
   birthDate: string()
     .matches(/^\d{4}-\d{2}-\d{2}$/)
@@ -124,3 +128,11 @@ export const SEARCH_QUERY_SCHEMA = object({
 
 export type SearchQuery = InferType<typeof SEARCH_QUERY_SCHEMA>;
 export type SearchQueryCl = Partial<SearchQuery> & Required<Pick<SearchQuery, 'nameQuery'>>;
+
+export const RELATIVES_SINGLE_TYPE_CHANGE_SCHEMA = object({
+  added: personIdArr,
+  removed: personIdArr
+}).noUnknown();
+
+export type RelativesSingleTypeChange = InferType<typeof RELATIVES_SINGLE_TYPE_CHANGE_SCHEMA>;
+export type RelativesChangeRequest = { [relType: string]: RelativesSingleTypeChange };

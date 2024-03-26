@@ -1,3 +1,5 @@
+import type { Person } from './types';
+
 export function clearUndefinedVals(object: Record<string, any>): Record<string, any> {
   return Object.fromEntries(Object.entries(object).filter(([k, v]) => v !== undefined));
 }
@@ -79,4 +81,8 @@ export function isDateString(dateString?: string): boolean {
 }
 export function isUUID(str: string): boolean {
   return /^[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}$/i.test(str);
+}
+
+export function peopleToIdArray(people: Person[]): string[] {
+  return people.map(p => p.id);
 }

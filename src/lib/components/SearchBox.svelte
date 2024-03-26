@@ -39,6 +39,8 @@
     request: SearchRequest;
     filteredResults: Person[] | undefined;
   };
+  export type SearchCache = SearchRequest[];
+  export type SelectionEventDetail = { person: Person; setVal: (newVal: string) => void };
 
   const CTTL = PUBLIC_SEARCH_CACHE_TTL ? parseInt(PUBLIC_SEARCH_CACHE_TTL) : 3 * 60 * 1000;
 </script>
@@ -59,14 +61,15 @@
   export let canHide = true;
   export let startHidden = true;
   export let enableXButton = true;
+  export let inputBoxStyle: string | undefined = undefined;
   export let linkFunc = undefined as ((person: Person) => string) | undefined;
-  export let searchCache: SearchRequest[] | undefined = undefined;
+  export let searchCache: SearchCache | undefined = undefined;
 
   const dispatch = createEventDispatcher();
   let boxShown = !canHide || !startHidden;
   let query = '';
   let rootElem: HTMLDivElement;
-  let inpElem: HTMLInputElement;
+  let inpElem: HTMLInputElement | undefined;
   let rootWidth: number;
 
   const resultsBox = {
@@ -78,7 +81,11 @@
     // request: undefined as SearchRequest | undefined
   };
   let scheduledReqTimeoutId: NodeJS.Timeout | undefined = undefined;
-  const cache: SearchRequest[] = searchCache ?? [];
+  const cache: SearchCache = searchCache ?? [];
+
+  export function getInputElement(): HTMLInputElement | undefined {
+    return inpElem;
+  }
 
   function onSearchInput(e: Event & { currentTarget: EventTarget & HTMLInputElement }) {
     let qry: Query;
@@ -185,7 +192,7 @@
     if (!boxShown) {
       boxShown = true;
       await tick();
-      inpElem.focus();
+      inpElem?.focus();
     } else {
       resultsBox.comp?.control.hide(); // this has to be before boxShown is set
       query = '';
@@ -197,7 +204,16 @@
 
   async function onSelect(person: Person, e: MouseEvent & { currentTarget: EventTarget & HTMLAnchorElement }) {
     let nv = undefined;
-    const proceed = dispatch('selection', { person, setVal: (newVal: string) => (nv = newVal) }, { cancelable: true });
+    const proceed = dispatch(
+      'selection',
+      {
+        person,
+        setVal: (newVal: string) => {
+          nv = newVal;
+        }
+      } as SelectionEventDetail,
+      { cancelable: true }
+    );
     if (proceed) {
       query = nv ?? '';
       resultsBox.comp?.control.hide();
@@ -248,6 +264,7 @@
       placeholder="Search by name"
       aria-label="Search people by name"
       spellcheck="false"
+      style={inputBoxStyle}
       bind:this={inpElem}
       bind:value={query}
       on:input={onSearchInput}
@@ -274,7 +291,7 @@
           {:else}
             {#each resultsBox.results.filteredResults as person (person.id)}
               <li class="person">
-                <a href={linkFunc === undefined ? '' : linkFunc(person)} on:click={e => onSelect(person, e)}>
+                <a href={linkFunc === undefined ? '#' : linkFunc(person)} on:click={e => onSelect(person, e)}>
                   <span class="name">
                     {#each highlightMatch(person.name, resultsBox.results.query) as [fragment, hl]}
                       <span class:hl>{fragment}</span>
@@ -360,7 +377,7 @@
         .photo {
           max-height: 1.35em;
           max-width: 2.5em;
-          margin-right: 8px;
+          margin-right: 0px;
         }
       }
     }

@@ -18,6 +18,16 @@ type WhereConditions<L extends number, OV extends string[] & { length: L }> = {
 
 type PersonRelationType = 'PARENT' | 'SIBLING' | 'PARTNER';
 
+function coerceIntoId(personOrId: string | Person): string {
+  if (typeof personOrId === 'object') {
+    personOrId = personOrId.id;
+  }
+  if (typeof personOrId !== 'string') {
+    throw new Error('missing person id');
+  }
+  return personOrId;
+}
+
 /**
  * Constructs a condition string that can be injected into the query and its parameters from an array of filters
  * @param filters the filters
@@ -251,15 +261,8 @@ export class WriteActions extends ReadActions {
     toPerson: string | Person,
     relationType: PersonRelationType
   ): Promise<Neo4jRel | undefined> {
-    if (typeof fromPerson === 'object') {
-      fromPerson = fromPerson.id;
-    }
-    if (typeof toPerson === 'object') {
-      toPerson = toPerson.id;
-    }
-    if (typeof fromPerson !== 'string' || typeof toPerson !== 'string') {
-      throw Error('missing person id');
-    }
+    fromPerson = coerceIntoId(fromPerson);
+    toPerson = coerceIntoId(toPerson);
     const r = await this.transaction.run(
       `MATCH (f:Person {id: $fid}), (t:Person {id: $tid}) CREATE (f)-[r:${relationType}]->(t) RETURN r`,
       { fid: fromPerson, tid: toPerson }
@@ -268,5 +271,18 @@ export class WriteActions extends ReadActions {
       throw Error('db returned multiple new relation records, probably because multiple people have the same id');
     }
     return r.records[0]?.get('r') as Neo4jRel;
+  }
+  async delPersonRelation(
+    fromPerson: string | Person,
+    toPerson: string | Person,
+    relationType: PersonRelationType | undefined
+  ): Promise<void> {
+    fromPerson = coerceIntoId(fromPerson);
+    toPerson = coerceIntoId(toPerson);
+    const relLabel = relationType === undefined ? '' : ':' + relationType;
+    const r = await this.transaction.run(`MATCH (f:Person {id: $fid})-[r${relLabel}]->(t:Person {id: $tid}) DELETE r`, {
+      fid: fromPerson,
+      tid: toPerson
+    });
   }
 }

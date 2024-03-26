@@ -40,18 +40,22 @@
   import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
   import { formatDate, nonewlines, toPersonEdit, getPersonChanges, photoUrl } from '$lib/client/clutils.js';
   import type { PersonEdit, PersonChanges } from '$lib/client/clutils.js';
-  import type { Person, UpdatablePerson } from '$lib/types.js';
+  import type { Person, RelativesChangeRequest, UpdatablePerson } from '$lib/types.js';
   import { enhance } from '$app/forms';
   import type { SubmitFunction } from '@sveltejs/kit';
   import { fade, slide } from 'svelte/transition';
+  import RelSection from './RelSection.svelte';
+  import { peopleToIdArray } from '$lib/utils';
 
   // params
   export let data;
 
-  $: updatePerson(data.person);
+  $: updateData(data.person, data.children, data.parents, data.relatives);
 
   // vars
   let person: Person;
+  let parents: Person[];
+  let children: Person[];
   let editPerson: PersonEdit;
   let editMode: boolean = false;
   const image = {
@@ -66,6 +70,10 @@
     messageTimeout: undefined as NodeJS.Timeout | undefined
   };
   let frm: HTMLFormElement | undefined;
+  const rels = {
+    parentsComp: undefined as any as RelSection,
+    childrenComp: undefined as any as RelSection
+  };
 
   // reactive vars
   $: filedropOptions = {
@@ -78,11 +86,13 @@
   } as FileDropOptions;
   $: photoSrc = getPhotoSrc(image.src, image.pSrc);
 
-  function updatePerson(p: Person) {
+  function updateData(p: Person, childrenIds: string[], parentIds: string[], otherPeople: Person[]) {
     person = p;
     image.src = photoUrl(p);
     image.pSrc = undefined;
     editPerson = toPersonEdit(p);
+    parents = otherPeople.filter(p => parentIds.includes(p.id));
+    children = otherPeople.filter(p => childrenIds.includes(p.id));
   }
   function getPhotoSrc(originalSrc?: string, previewSrc?: string | null): string | undefined {
     if (previewSrc) {
@@ -141,19 +151,44 @@
     image.pSrc = '';
   }
 
+  // form submission functions
+  function addRelChanges(chReq: RelativesChangeRequest, relType: string, section: RelSection): void {
+    const diffs = section.differences();
+    if (diffs.added.length > 0 || diffs.removed.length > 0) {
+      chReq[relType] = { added: peopleToIdArray(diffs.added), removed: peopleToIdArray(diffs.removed) };
+    }
+  }
   const submitUpdate: SubmitFunction = ({ formData, cancel }) => {
+    // person-update
     const ch = getPersonChanges(person, editPerson);
     if (ch.name?.trim() === '') {
       return cancel();
     }
-    ch.name ??= person.name;
-    const updatePerson: UpdatablePerson = { id: person.id, ...(ch as PersonChanges & { name: string }) };
+    const updatePerson: UpdatablePerson = { id: person.id, ...ch };
     if (image.pSrc == '') {
       // image was marked for deletion
       updatePerson.photo = null;
     }
-    console.log('updatePerson: ', updatePerson);
     formData.append('person-update', JSON.stringify(updatePerson));
+
+    // relatives-update
+    const relsUpd: RelativesChangeRequest = {};
+    addRelChanges(relsUpd, 'parents', rels.parentsComp);
+    addRelChanges(relsUpd, 'children', rels.childrenComp);
+    const sendRelsUpd = Object.keys(relsUpd).length > 0;
+    if (sendRelsUpd) {
+      formData.append('relatives-update', JSON.stringify(relsUpd));
+    }
+
+    // photo form data is added directly by the browser
+    const ph = formData.get('photo');
+
+    // check if there are any changes
+    if (Object.keys(ch).length < 1 && !sendRelsUpd && !(ph instanceof File && ph.size > 0)) {
+      cancel(); // empty update
+    }
+
+    // handle errors/success returned by the server
     return async ({ result, update }) => {
       removeFormMessage();
       if (result.type === 'failure' && result.data?.message) {
@@ -254,6 +289,12 @@
       {:else}
         <p class="bio">{person.bio}</p>
       {/if}
+
+      <div class="relations">
+        <RelSection {editMode} sectionName="Parents" people={parents} bind:this={rels.parentsComp} />
+        <RelSection {editMode} sectionName="Children" people={children} bind:this={rels.childrenComp} />
+      </div>
+
       {#if editMode}
         {#if formMsg.message}
           <p class="form-message" transition:slide={{ axis: 'y', duration: 200 }}>{formMsg.message}</p>
@@ -397,6 +438,16 @@
     white-space: pre-line;
     text-align: center;
     @include common.contenteditable-border;
+  }
+  .relations {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: space-evenly;
+    align-items: flex-start;
+    gap: 20px;
+    width: 100%;
+    margin-top: 15px;
   }
 
   .back-button {
