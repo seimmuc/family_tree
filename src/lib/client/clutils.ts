@@ -9,6 +9,8 @@ const DEFAULT_DATE_FORMAT_OPRIONS: Intl.DateTimeFormatOptions = {
   timeZone: 'UTC'
 };
 
+export const TRANS_DELAY = 250;
+
 export function truncateString(str: string, maxChars: number, maxLines: number): [string, boolean] {
   let result = str;
   let wasShortened = false;

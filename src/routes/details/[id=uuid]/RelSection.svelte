@@ -110,17 +110,20 @@
 
 <style lang="scss">
   @use '$lib/styles/common';
+  @use '$lib/styles/colors';
 
   .rel-section {
     .rel-header {
       margin: 0;
       margin-bottom: 0.5em;
+      @include colors.col-trans($bg: false, $fg: true, $br: false);
     }
     ul {
       list-style: none;
       padding: 0;
       margin: 0;
       margin-bottom: 15px;
+      @include colors.col-trans($bg: false, $fg: true, $br: false);
       li {
         display: flex;
         flex-direction: row;

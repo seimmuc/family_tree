@@ -335,7 +335,7 @@
     height: 1.45em;
   }
   .results {
-    background-color: var(--bg-color);
+    background-color: var(--col-bg);
     border: 3px solid gray;
     border-radius: 8px;
     box-sizing: border-box;

@@ -1,5 +1,70 @@
-$dark-bg: #2c2c2c;
-$dark-text: #f3f3f3;
+@use 'sass:color';
+@use 'sass:list';
+
+$fade-time: 0.25s;
+
 
 $light-bg: #ebebeb;
 $light-text: #080808;
+$light-primary-bg: color.scale($light-bg, $lightness: -7.5%);
+$light-primary-border: color.scale($light-primary-bg, $lightness: -20%);
+$light-secondary-bg: color.scale($light-bg, $lightness: -20%);
+$light-secondary-border: color.scale($light-secondary-bg, $lightness: -30%);
+$light-link-normal: color.scale($light-text, $lightness: +20%);
+$light-link-hover: color.scale($light-text, $lightness: +40%);
+$light-contenteditable-border: #000a;
+$light-topbar-bg: #c9c9c9;
+$light-topbar-border: color.scale($light-topbar-bg, $lightness: -40%);
+$light-details-image-overlay-bg: #68686890;
+$light-details-image-overlay-fg: $light-text;
+$light-details-image-overlay-accent: #fffa;
+
+
+$dark-bg: #2c2c2c;
+$dark-text: #f3f3f3;
+$dark-primary-bg: color.scale($dark-bg, $lightness: +7.5%);
+$dark-primary-border: color.scale($dark-primary-bg, $lightness: +20%);
+$dark-secondary-bg: color.scale($dark-bg, $lightness: +20%);
+$dark-secondary-border: color.scale($dark-secondary-bg, $lightness: +30%);
+$dark-link-normal: color.scale($dark-text, $lightness: -20%);
+$dark-link-hover: color.scale($dark-text, $lightness: -40%);
+$dark-contenteditable-border: #fffa;
+$dark-topbar-bg: #1a1a1a;
+$dark-topbar-border: color.scale($dark-topbar-bg, $lightness: +35%);
+$dark-details-image-overlay-bg: #a0a0a090;
+$dark-details-image-overlay-fg: $dark-text;
+$dark-details-image-overlay-accent: #000a;
+
+// $dark-accent-bg: color.scale($dark-bg, $lightness: +12%);
+// $dark-accent-border: color.scale($dark-secondary-bg, $lightness: +30%);
+// $dark-accent-fg: color.scale($dark-bg, $lightness: +12%);
+
+@function col-trans-str($props...) {
+  $res: '';
+  $i: list.length($props);
+  @each $pr in $props {
+    $i: $i - 1;
+    $res: $res + $pr + ' ' + $fade-time;
+    @if $i > 0 {
+      $res: $res + ', ';
+    }
+  }
+  @return $res;
+}
+@function col-props($bg: true, $fg: true, $br: true) {
+  $res: [];
+  @if $bg {
+    $res: list.append($res, 'background-color');
+  }
+  @if $fg {
+    $res: list.append($res, 'color');
+  }
+  @if $br {
+    $res: list.append($res, 'border-color');
+  }
+  @return $res;
+}
+
+@mixin col-trans($bg: true, $fg: true, $br: true) {
+  transition: #{col-trans-str(col-props($bg, $fg, $br)...)};
+}

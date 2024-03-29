@@ -1,9 +1,12 @@
+@use "./colors";
+
 @mixin contenteditable-border {
   border: 1px solid transparent;
   border-radius: 4px;
   padding: 0 3px;
+  @include colors.col-trans($bg: false, $fg: false, $br: true);
   &[contenteditable] {
-    border-color: #eee;
+    border-color: var(--col-contenteditable-border, colors.$light-contenteditable-border);
   }
 }
 @mixin styleless-button {
@@ -17,9 +20,10 @@
   text-decoration: none;
 }
 @mixin link-colors {
-  color: lightgray;
+  @include colors.col-trans($bg: false, $fg: true, $br: false);
+  color: var(--col-link-normal, colors.$light-link-normal);
   &:hover {
-    color: gray;
+    color: var(--col-link-hover, colors.$light-link-hover);
   }
 }
 @mixin link {

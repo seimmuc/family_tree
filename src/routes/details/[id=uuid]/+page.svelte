@@ -26,7 +26,7 @@
   }
 
   const TRANS_OPT = {
-    duration: 400,
+    duration: TRANS_DELAY,
     easing: quadOut // cubicOut
   };
 
@@ -38,7 +38,7 @@
 <script lang="ts">
   import { filedrop, type FileDropOptions } from 'filedrop-svelte';
   import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
-  import { formatDate, nonewlines, toPersonEdit, getPersonChanges, photoUrl } from '$lib/client/clutils.js';
+  import { formatDate, nonewlines, toPersonEdit, getPersonChanges, photoUrl, TRANS_DELAY } from '$lib/client/clutils.js';
   import type { PersonEdit, PersonChanges } from '$lib/client/clutils.js';
   import type { Person, RelativesChangeRequest, UpdatablePerson } from '$lib/types.js';
   import { enhance } from '$app/forms';
@@ -297,7 +297,7 @@
 
       {#if editMode}
         {#if formMsg.message}
-          <p class="form-message" transition:slide={{ axis: 'y', duration: 200 }}>{formMsg.message}</p>
+          <p class="form-message" transition:slide={{ axis: 'y', ...TRANS_OPT }}>{formMsg.message}</p>
         {/if}
         <div class="form-buttons" transition:slide={{ axis: 'y', ...TRANS_OPT }}>
           <button type="submit">Save</button>
@@ -314,9 +314,10 @@
 
 <style lang="scss">
   @use '$lib/styles/common';
+  @use '$lib/styles/colors';
 
   $image-scale: 1;
-  $edit-anim-duration: 0.4s;
+  $edit-anim-duration: colors.$fade-time;
 
   .root {
     display: flex;
@@ -331,9 +332,10 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    border: 3px solid gray;
+    background-color: var(--col-primary-bg, colors.$light-primary-bg);
+    border: 3px solid var(--col-primary-border, colors.$light-primary-border);
     border-radius: 16px;
-    background-color: #3c3c3c;
+    @include colors.col-trans($bg: true, $fg: false, $br: true);
     padding: 10px 20px;
     form {
       display: contents;
@@ -360,14 +362,14 @@
   }
 
   .image-box {
-    border: 3px * $image-scale solid #777;
+    border: 3px * $image-scale solid var(--col-primary-border, colors.$light-primary-border);
     border-radius: 12px * $image-scale;
     @include common.flex-center;
     min-width: 180px * $image-scale;
     min-height: 120px * $image-scale;
     overflow: hidden;
     position: relative;
-    transition: border-color $edit-anim-duration;
+    @include colors.col-trans($bg: false, $fg: true, $br: true);
     &.edit {
       border-color: yellowgreen;
       .photo-small.missing {
@@ -398,7 +400,8 @@
       width: 100%;
       font-size: 26px * $image-scale;
       height: 54px * $image-scale;
-      background-color: #a0a0a090;
+      background-color: var(--col-details-image-overlay-bg, colors.$light-details-image-overlay-bg);
+      @include colors.col-trans($bg: true, $fg: false, $br: false);
       display: flex;
       flex-direction: row;
       justify-content: space-around;
@@ -406,7 +409,9 @@
       .photo-edit-btn {
         @include common.styleless-button;
         @include common.flex-center;
-        background-color: #000a;
+        background-color: var(--col-details-image-overlay-accent, colors.$light-details-image-overlay-accent);
+        color: var(--col-details-image-overlay-fg, colors.$light-details-image-overlay-fg);
+        @include colors.col-trans($bg: true, $fg: true, $br: false);
         width: 48px * $image-scale;
         height: 48px * $image-scale;
         padding: 0;
@@ -418,17 +423,20 @@
   .name {
     margin: 0.2em 0 0;
     @include common.contenteditable-border;
-    transition: border-color $edit-anim-duration; // doesn't actually affect anything because svelte replaces the element
+    @include colors.col-trans($bg: false, $fg: true, $br: true);
   }
 
   .date {
     margin: 4px 0 0;
+    @include colors.col-trans($bg: true, $fg: true, $br: true);
     &.display {
       border: 1px solid transparent;
     }
     &.input {
-      border: 1px solid gray;
+      background-color: var(--col-secondary-bg, colors.$light-secondary-bg);
+      border: 1px solid var(--col-secondary-border, colors.$light-secondary-border);
       border-radius: 2px;
+      color: var(--col-fg, colors.$light-text);
     }
   }
 
@@ -438,6 +446,7 @@
     white-space: pre-line;
     text-align: center;
     @include common.contenteditable-border;
+    @include colors.col-trans($bg: false, $fg: true, $br: true);
   }
   .relations {
     display: flex;

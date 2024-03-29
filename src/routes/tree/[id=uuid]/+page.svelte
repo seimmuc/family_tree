@@ -1,5 +1,7 @@
 <script lang="ts">
   import { browser } from '$app/environment';
+  import { TRANS_DELAY } from '$lib/client/clutils.js';
+  import { theme } from '$lib/client/stores.js';
   import FloatingUiComponent, { type FloatingUICompControl } from '$lib/components/FloatingUIComponent.svelte';
   import PersonNode from '$lib/components/PersonNode.svelte';
   import PopUp from '$lib/components/PopUp.svelte';
@@ -8,12 +10,16 @@
   import { type Person } from '$lib/types.js';
   import { type ClientRectObject } from '@floating-ui/core';
   import { onMount } from 'svelte';
+  import { tweened } from 'svelte/motion';
 
   export let data;
 
   let cnv: HTMLCanvasElement;
   let resize: ResizeObserver;
   let resizeTimer: NodeJS.Timeout | number;
+  let themeDarkVal = data.theme === 'dark' ? 1 : 0;
+  const themeTween = tweened(themeDarkVal, { duration: TRANS_DELAY });
+  let themeDarkLastRedraw: number = 0;
 
   type PersonData = { person: Person; node: PersonNode };
   let focusPeople: Array<PersonData & { parents: PersonData[] }>;
@@ -112,7 +118,8 @@
     // Init canvas context
     const context = cnv.getContext('2d') as CanvasRenderingContext2D;
     context.lineWidth = 10;
-    context.strokeStyle = 'rgb(0 0 0)';
+    const lineBrightness = 255 * themeDarkVal;
+    context.strokeStyle = `rgb(${lineBrightness} ${lineBrightness} ${lineBrightness})`;
     context.lineCap = 'square';
     context.clearRect(0, 0, cnv.width, cnv.height);
     context.beginPath();
@@ -193,10 +200,21 @@
       resizeTimer = setTimeout(redraw, 5);
     });
     resize.observe(cnv);
+    const themeUnsub = theme.subscribe(val => themeTween.set(val === 'dark' ? 1 : 0));
+    const themeDarkUnsub = themeTween.subscribe(dark => {
+      const changed = themeDarkVal !== dark;
+      themeDarkVal = dark;
+      if (changed && (dark === 0 || dark === 1 || Date.now() - themeDarkLastRedraw > 80)) {
+        redraw();
+        themeDarkLastRedraw = Date.now();
+      }
+    });
 
     return () => {
       resize.unobserve(cnv);
       clearTimeout(resizeTimer);
+      themeUnsub();
+      themeDarkUnsub();
     };
   });
 </script>
@@ -240,11 +258,11 @@
     offsetPx={20}
     enableArrow={true}
     arrowShiftPx={13}
-    --popup-bg="color-mix(in hsl, var(--bg-color) 60%, gray)"
-    --popup-border="2px solid black"
+    --popup-bg="var(--col-secondary-bg)"
+    --popup-border="2px solid var(--col-secondary-border)"
   >
     <PopUp
-      style="background-color: var(--popup-bg, gray); border: var(--popup-border, 1px solid black);"
+      style="background-color: var(--popup-bg, gray); border: var(--popup-border, 1px solid black); transition: background-color {(TRANS_DELAY / 1000).toFixed(3)}s, border-color {(TRANS_DELAY / 1000).toFixed(3)}s;"
       slot="tooltip"
       person={popup.person.person}
       bind:this={popup.comp}
@@ -256,6 +274,7 @@
 {/if}
 
 <style lang="scss">
+  @use '$lib/styles/colors';
   .root {
     display: flex;
     flex-direction: column;
@@ -302,6 +321,7 @@
   .arrow {
     background-color: var(--popup-bg, gray);
     border: var(--popup-border, 1px solid black);
+    @include colors.col-trans($bg: true, $fg: false, $br: true);
     border-right-width: 0;
     border-bottom-width: 0;
     border-bottom-right-radius: 100%;

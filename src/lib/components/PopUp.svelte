@@ -171,9 +171,9 @@
 
 <style lang="scss">
   @use '$lib/styles/common';
+  @use '$lib/styles/colors';
 
   @mixin border-edited-highlight {
-    transition: border-color 0.2s;
     &.edited {
       border-color: red;
     }
@@ -188,6 +188,7 @@
     justify-content: space-between;
     align-items: stretch;
     margin-bottom: 4px;
+    @include colors.col-trans($bg: false, $fg: true, $br: true);
 
     .personName {
       margin: 9px 2px 0;
@@ -210,6 +211,7 @@
     flex-direction: column;
     padding: 0 10px 20px;
     align-items: center;
+    @include colors.col-trans($bg: false, $fg: true, $br: true);
     .dates {
       display: flex;
       flex-direction: column;

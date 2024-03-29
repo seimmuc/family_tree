@@ -3,19 +3,44 @@
 :root {
   background-color: black;
   color: white;
+  @include colors.col-trans($bg: true, $fg: false, $br: false);
 }
 
-:root[data-theme="light"] {
-  --bg-color: #{colors.$light-bg};
-  --fg-color: #{colors.$light-text};
+:root[data-theme="light"],
+:root:not([data-theme="dark"]) {
+  --col-bg: #{colors.$light-bg};
+  --col-fg: #{colors.$light-text};
+  --col-primary-bg: #{colors.$light-primary-bg};
+  --col-primary-border: #{colors.$light-primary-border};
+  --col-secondary-bg: #{colors.$light-secondary-bg};
+  --col-secondary-border: #{colors.$light-secondary-border};
+  --col-link-normal: #{colors.$light-link-normal};
+  --col-link-hover: #{colors.$light-link-hover};
+  --col-contenteditable-border: #{colors.$light-contenteditable-border};
+  --col-topbar-bg: #{colors.$light-topbar-bg};
+  --col-topbar-border: #{colors.$light-topbar-border};
+  --col-details-image-overlay-bg: #{colors.$light-details-image-overlay-bg};
+  --col-details-image-overlay-fg: #{colors.$light-details-image-overlay-fg};
+  --col-details-image-overlay-accent: #{colors.$light-details-image-overlay-accent};
   background-color: colors.$light-bg;
   color: colors.$light-text;
 }
 
-:root[data-theme="dark"],
-:root:not([data-theme="light"]) {
-  --bg-color: #{colors.$dark-bg};
-  --fg-color: #{colors.$dark-text};
+:root[data-theme="dark"] {
+  --col-bg: #{colors.$dark-bg};
+  --col-fg: #{colors.$dark-text};
+  --col-primary-bg: #{colors.$dark-primary-bg};
+  --col-primary-border: #{colors.$dark-primary-border};
+  --col-secondary-bg: #{colors.$dark-secondary-bg};
+  --col-secondary-border: #{colors.$dark-secondary-border};
+  --col-link-normal: #{colors.$dark-link-normal};
+  --col-link-hover: #{colors.$dark-link-hover};
+  --col-contenteditable-border: #{colors.$dark-contenteditable-border};
+  --col-topbar-bg: #{colors.$dark-topbar-bg};
+  --col-topbar-border: #{colors.$dark-topbar-border};
+  --col-details-image-overlay-bg: #{colors.$dark-details-image-overlay-bg};
+  --col-details-image-overlay-fg: #{colors.$dark-details-image-overlay-fg};
+  --col-details-image-overlay-accent: #{colors.$dark-details-image-overlay-accent};
   background-color: colors.$dark-bg;
   color: colors.$dark-text;
 }

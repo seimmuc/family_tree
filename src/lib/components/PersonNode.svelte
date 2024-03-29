@@ -42,7 +42,6 @@
 
   .person {
     background-color: white;
-    color: black;
     width: 12em;
     aspect-ratio: 1/1;
     border-radius: 50%;
