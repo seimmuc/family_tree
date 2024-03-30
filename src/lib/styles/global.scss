@@ -22,6 +22,7 @@
   --col-details-image-overlay-bg: #{colors.$light-details-image-overlay-bg};
   --col-details-image-overlay-fg: #{colors.$light-details-image-overlay-fg};
   --col-details-image-overlay-accent: #{colors.$light-details-image-overlay-accent};
+  --col-search-match-fg: #{colors.$light-search-match-fg};
   background-color: colors.$light-bg;
   color: colors.$light-text;
 }
@@ -41,6 +42,7 @@
   --col-details-image-overlay-bg: #{colors.$dark-details-image-overlay-bg};
   --col-details-image-overlay-fg: #{colors.$dark-details-image-overlay-fg};
   --col-details-image-overlay-accent: #{colors.$dark-details-image-overlay-accent};
+  --col-search-match-fg: #{colors.$dark-search-match-fg};
   background-color: colors.$dark-bg;
   color: colors.$dark-text;
 }

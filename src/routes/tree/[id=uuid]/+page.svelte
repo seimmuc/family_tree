@@ -5,7 +5,7 @@
   import FloatingUiComponent, { type FloatingUICompControl } from '$lib/components/FloatingUIComponent.svelte';
   import PersonNode from '$lib/components/PersonNode.svelte';
   import PopUp from '$lib/components/PopUp.svelte';
-  import SearchBox from '$lib/components/SearchBox.svelte';
+  import SearchBox, { type SearchBoxLinkFunc } from '$lib/components/SearchBox.svelte';
   import type { Point } from '$lib/components/types.js';
   import { type Person } from '$lib/types.js';
   import { type ClientRectObject } from '@floating-ui/core';
@@ -217,14 +217,13 @@
       themeDarkUnsub();
     };
   });
+
+  data.dynamicMenu.set({comp: SearchBox, compProps: { linkFunc: (p => `/tree/${p.id}`) satisfies SearchBoxLinkFunc }});
 </script>
 
 <svelte:window on:click={onWindowClick} />
 
 <div class="root">
-  <div class="topbar">
-    <SearchBox linkFunc={p => `/tree/${p.id}`} />
-  </div>
   <div
     class="tree-wrapper"
     bind:clientWidth={wrapperDimensions.width}
@@ -278,13 +277,6 @@
   .root {
     display: flex;
     flex-direction: column;
-    .topbar {
-      display: flex;
-      flex-direction: row;
-      justify-content: center;
-      align-items: center;
-      padding: 10px 20px;
-    }
   }
 
   .tree-wrapper {

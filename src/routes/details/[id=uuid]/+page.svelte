@@ -46,6 +46,7 @@
   import { fade, slide } from 'svelte/transition';
   import RelSection from './RelSection.svelte';
   import { peopleToIdArray } from '$lib/utils';
+  import SearchBox, { type SearchBoxLinkFunc } from '$lib/components/SearchBox.svelte';
 
   // params
   export let data;
@@ -213,6 +214,7 @@
   }
 
   setEditMode(false);
+  data.dynamicMenu.set({comp: SearchBox, compProps: { linkFunc: (p => `/details/${p.id}`) satisfies SearchBoxLinkFunc }});
 </script>
 
 <div class="root">

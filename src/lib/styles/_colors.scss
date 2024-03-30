@@ -18,6 +18,7 @@ $light-topbar-border: color.scale($light-topbar-bg, $lightness: -40%);
 $light-details-image-overlay-bg: #68686890;
 $light-details-image-overlay-fg: $light-text;
 $light-details-image-overlay-accent: #fffa;
+$light-search-match-fg: hsl(30, 100%, 29%);
 
 
 $dark-bg: #2c2c2c;
@@ -34,6 +35,7 @@ $dark-topbar-border: color.scale($dark-topbar-bg, $lightness: +35%);
 $dark-details-image-overlay-bg: #a0a0a090;
 $dark-details-image-overlay-fg: $dark-text;
 $dark-details-image-overlay-accent: #000a;
+$dark-search-match-fg: hsl(30, 100%, 74%);
 
 // $dark-accent-bg: color.scale($dark-bg, $lightness: +12%);
 // $dark-accent-border: color.scale($dark-secondary-bg, $lightness: +30%);

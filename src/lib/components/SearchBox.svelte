@@ -41,6 +41,7 @@
   };
   export type SearchCache = SearchRequest[];
   export type SelectionEventDetail = { person: Person; setVal: (newVal: string) => void };
+  export type SearchBoxLinkFunc = ((person: Person) => string) | undefined;
 
   const CTTL = PUBLIC_SEARCH_CACHE_TTL ? parseInt(PUBLIC_SEARCH_CACHE_TTL) : 3 * 60 * 1000;
 </script>
@@ -49,7 +50,7 @@
   import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
   import { faMagnifyingGlass, faSpinner } from '@fortawesome/free-solid-svg-icons';
   import { faCircleXmark } from '@fortawesome/free-regular-svg-icons';
-  import { createEventDispatcher, tick } from 'svelte';
+  import { createEventDispatcher, onMount, tick } from 'svelte';
   import { fade, slide } from 'svelte/transition';
   import FloatingUiComponent from './FloatingUIComponent.svelte';
   import type { Person, SearchQueryCl } from '$lib/types';
@@ -57,12 +58,14 @@
   import { photoUrl } from '$lib/client/clutils';
   import { arrayFilterInPlace } from '$lib/utils';
   import { PUBLIC_SEARCH_CACHE_TTL } from '$env/static/public';
+  import { navigating } from '$app/stores';
 
   export let canHide = true;
   export let startHidden = true;
   export let enableXButton = true;
+  export let hideOnNav = true;
   export let inputBoxStyle: string | undefined = undefined;
-  export let linkFunc = undefined as ((person: Person) => string) | undefined;
+  export let linkFunc = undefined as SearchBoxLinkFunc;
   export let searchCache: SearchCache | undefined = undefined;
 
   const dispatch = createEventDispatcher();
@@ -78,7 +81,6 @@
     get status(): SearchRequestStatus | undefined {
       return this.results?.request.status;
     }
-    // request: undefined as SearchRequest | undefined
   };
   let scheduledReqTimeoutId: NodeJS.Timeout | undefined = undefined;
   const cache: SearchCache = searchCache ?? [];
@@ -251,6 +253,17 @@
     }
     return result;
   }
+
+  onMount(() => {
+    const navUnsub = navigating.subscribe(nav => {
+      if (nav !== null && hideOnNav && canHide) {
+        boxShown = false;
+      }
+    });
+    return () => {
+      navUnsub();
+    };
+  });
 </script>
 
 <svelte:window on:click={onWindowClick} />
@@ -324,6 +337,7 @@
 
 <style lang="scss">
   @use '$lib/styles/common';
+  @use '$lib/styles/colors';
 
   .root {
     display: flex;
@@ -335,9 +349,10 @@
     height: 1.45em;
   }
   .results {
-    background-color: var(--col-bg);
-    border: 3px solid gray;
+    background-color: var(--col-primary-bg, colors.$light-primary-bg);
+    border: 3px solid var(--col-primary-border, colors.$light-primary-border);
     border-radius: 8px;
+    @include colors.col-trans($bg: true, $fg: false, $br: true);
     box-sizing: border-box;
     list-style: none;
     margin: 0;
@@ -357,7 +372,7 @@
     .person {
       font-size: 1.35em;
       &:not(:last-of-type) {
-        border-bottom: 2px solid gray;
+        border-bottom: 2px solid var(--col-primary-border, colors.$light-primary-border);
       }
       a {
         display: flex;
@@ -371,8 +386,12 @@
         .name {
           margin: 4px 0;
           .hl {
-            background-color: darkorange;
+            color: var(--col-search-match-fg, colors.$light-search-match-fg);
+            @include colors.col-trans($bg: false, $fg: true, $br: false);
           }
+        }
+        &:hover .name > .hl {
+          color: color-mix(in srgb, var(--col-search-match-fg, colors.$light-search-match-fg), gray 50%);
         }
         .photo {
           max-height: 1.35em;
@@ -385,10 +404,11 @@
   .search-box {
     width: 15em;
     transition: width 0.4s;
-    border: 2px solid gray;
+    background-color: var(--col-primary-bg, #88888830);
+    border: 2px solid var(--col-primary-border, gray);
     border-radius: 5px;
+    @include colors.col-trans($bg: true, $fg: false, $br: true);
     color: inherit;
-    background-color: #88888830;
     font-size: inherit;
     &:focus {
       outline-color: rgb(127, 199, 68);
