@@ -1,29 +1,32 @@
 <script lang="ts">
   import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
   import { faXmark } from '@fortawesome/free-solid-svg-icons';
-  import { faPenToSquare, faFloppyDisk } from '@fortawesome/free-regular-svg-icons';
+  import { faPenToSquare } from '@fortawesome/free-regular-svg-icons';
   import type { Person, UpdatablePerson } from '$lib/types';
   import { createEventDispatcher } from 'svelte';
   import { enhance } from '$app/forms';
   import type { SubmitFunction } from '@sveltejs/kit';
   import { slide } from 'svelte/transition';
-  import { formatDate, nonewlines, truncateString, toPersonEdit, getPersonChanges } from '$lib/client/clutils';
-  import type { PersonEdit } from '$lib/client/clutils';
+  import { truncateString, TRANS_DELAY } from '$lib/client/clutils';
+  import PersonInfo from './PersonInfo.svelte';
+  import { quadOut } from 'svelte/easing';
+
+  const TRANS_OPT = { duration: TRANS_DELAY, easing: quadOut };
 
   export let person: Person;
   export let style: string = '';
 
   const bioMaxLength = 50;
   const bioMaxLines = 4;
-  type PersonChanges = { name?: string; bio?: string | null; birthDate?: string | null; deathDate?: string | null };
 
   const dispatch = createEventDispatcher();
   let editMode: boolean = false;
-  let editPerson: PersonEdit;
   let shortenedBio: string | undefined = undefined;
   let bioIsLong: boolean = false;
   let showFullBio: boolean = false;
+  let canSubmit: boolean = true;
   let frm: HTMLFormElement | undefined = undefined;
+  let piComp: PersonInfo;
   let unsavedEdits = { fields: [] as string[], timer: undefined as NodeJS.Timeout | undefined };
 
   function toggleEditMode() {
@@ -34,7 +37,7 @@
     editMode = false;
   }
   const submitUpdate: SubmitFunction = ({ formData, cancel }) => {
-    const ch = getPersonChanges(person, editPerson);
+    const ch = piComp.getChanges();
     if (ch.name?.trim() === '') {
       // name is too short
       return cancel();
@@ -47,17 +50,18 @@
   export function reset(newPerson?: Person) {
     editMode = false;
     const p = newPerson ?? person;
-    editPerson = toPersonEdit(p);
+    piComp?.reset(newPerson);
     const [sb, lb] = truncateString(p.bio ?? '', bioMaxLength, bioMaxLines);
     shortenedBio = lb ? sb.trimEnd() + '…' : undefined;
     bioIsLong = lb;
     showFullBio = false;
+    canSubmit = true;
   }
   export function tryClose(): boolean {
     if (!editMode) {
       return true;
     }
-    const uc = [...Object.keys(getPersonChanges(person, editPerson))];
+    const uc = [...Object.keys(piComp.getChanges())];
     if (uc.length < 1) {
       return true;
     }
@@ -89,83 +93,38 @@
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <div class="pop-up" {style} on:click>
   <form method="POST" action="?/updatePerson" enctype="multipart/form-data" use:enhance={submitUpdate} bind:this={frm}>
-    <input type="hidden" name="id" value={person.id} />
-    <div class="top-bar">
-      {#if editMode && false}
-        <button class="top-button" type="submit">
-          <FontAwesomeIcon icon={faFloppyDisk} />
-        </button>
-      {:else}
-        <button class="top-button" type="button" on:click={toggleEditMode}>
-          <FontAwesomeIcon icon={faPenToSquare} />
-        </button>
-      {/if}
-      {#if editMode}
-        <h1
-          class="personName"
-          class:edited={unsavedEdits.fields.includes('name')}
-          contenteditable="plaintext-only"
-          bind:textContent={editPerson.name}
-          use:nonewlines
-          on:returnkey={() => frm?.requestSubmit()}
-        />
-      {:else}
-        <h1 class="personName"><a href="/details/{person.id}">{person.name}</a></h1>
-      {/if}
-      <button class="top-button" type="button" on:click={close}>
+    <PersonInfo
+      {editMode}
+      {person}
+      bioDisplay={!bioIsLong || showFullBio ? undefined : shortenedBio}
+      nameLink="/details/{person.id}"
+      transOptions={TRANS_OPT}
+      on:returnkey={() => frm?.requestSubmit()}
+      on:edit={e => (canSubmit = e.detail.edit.name.trim().length > 0)}
+      bind:this={piComp}
+    >
+      <button slot="name-left" class="top-button" type="button" on:click={toggleEditMode}>
+        <FontAwesomeIcon icon={faPenToSquare} />
+      </button>
+      <button slot="name-right" class="top-button" type="button" on:click={close}>
         <FontAwesomeIcon icon={faXmark} />
       </button>
-    </div>
-
-    <div class="main-content">
-      <div class="dates">
-        {#if editMode}
-          <div transition:slide={{ duration: 200, axis: 'y' }}>
-            <input
-              type="date"
-              class="date-input"
-              class:edited={unsavedEdits.fields.includes('birthDate')}
-              bind:value={editPerson.birthDate}
-            />
-            <input
-              type="date"
-              class="date-input"
-              class:edited={unsavedEdits.fields.includes('deathDate')}
-              bind:value={editPerson.deathDate}
-            />
-          </div>
-        {:else}
-          <h3 class="date-display" transition:slide={{ duration: 200, axis: 'y' }}>
-            {formatDate(person.birthDate, 'birth')} - {formatDate(person.deathDate, 'death')}
-          </h3>
-        {/if}
+    </PersonInfo>
+    <!-- <FontAwesomeIcon icon={faFloppyDisk} /> -->
+    {#if !editMode && bioIsLong}
+      <button
+        type="button"
+        class="button-show-more"
+        transition:slide={{ ...TRANS_OPT, axis: 'y' }}
+        on:click={() => (showFullBio = !showFullBio)}>{showFullBio ? 'Show less' : 'Show more'}</button
+      >
+    {/if}
+    {#if editMode}
+      <div class="form-buttons" transition:slide={{ ...TRANS_OPT, axis: 'y' }}>
+        <button type="submit" disabled={!canSubmit}>Save</button>
+        <button type="button" on:click={actionCancel}>Cancel</button>
       </div>
-      {#if editMode}
-        <p
-          class="bio"
-          class:edited={unsavedEdits.fields.includes('bio')}
-          contenteditable="plaintext-only"
-          bind:textContent={editPerson.bio}
-        />
-      {:else}
-        <!-- <p class="bio">{person.bio ? (person.bio.length > bioMaxLength ? person.bio.substring(0, bioMaxLength) + "…" : person.bio) : ""}</p> -->
-        <p class="bio">{!bioIsLong || showFullBio ? person.bio : shortenedBio}</p>
-        {#if bioIsLong}
-          <button
-            type="button"
-            class="button-show-more"
-            transition:slide={{ duration: 200, axis: 'y' }}
-            on:click={() => (showFullBio = !showFullBio)}>{showFullBio ? 'Show less' : 'Show more'}</button
-          >
-        {/if}
-      {/if}
-      {#if editMode}
-        <div class="form-buttons" transition:slide={{ duration: 200, axis: 'y' }}>
-          <button type="submit" disabled={editPerson.name.length < 1}>Save</button>
-          <button type="button" on:click={actionCancel}>Cancel</button>
-        </div>
-      {/if}
-    </div>
+    {/if}
   </form>
 </div>
 
@@ -181,57 +140,23 @@
 
   .pop-up {
     max-width: 600px;
-  }
-
-  .top-bar {
     display: flex;
-    justify-content: space-between;
-    align-items: stretch;
-    margin-bottom: 4px;
-    @include colors.col-trans($bg: false, $fg: true, $br: true);
-
-    .personName {
-      margin: 9px 2px 0;
-      font-size: 2em;
-      @include common.contenteditable-border;
-      @include border-edited-highlight;
-      a {
-        @include common.link;
-      }
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: center;
+    padding-bottom: 20px;
+    --pi-name-margin-bottom: 4px;
+    --pi-date-margin: 15px 10px;
+    --pi-date-font-size: 1.1em;
+    --pi-bio-margin: 0 10px;
+    form {
+      display: contents;
     }
     .top-button {
       @include common.styleless-button;
+      @include colors.col-trans($bg: false, $fg: true, $br: false);
       padding: 11px;
       font-size: 1.4em;
-    }
-  }
-
-  .main-content {
-    display: flex;
-    flex-direction: column;
-    padding: 0 10px 20px;
-    align-items: center;
-    @include colors.col-trans($bg: false, $fg: true, $br: true);
-    .dates {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      margin: 15px 0;
-      .date-display,
-      .date-input {
-        margin: 0;
-      }
-      .date-input {
-        @include border-edited-highlight;
-      }
-    }
-    .bio {
-      overflow-wrap: anywhere;
-      white-space: pre-line;
-      text-align: center;
-      margin: 0;
-      @include common.contenteditable-border;
-      @include border-edited-highlight;
     }
     .button-show-more {
       @include common.styleless-button;
