@@ -46,6 +46,9 @@ export const actions: Actions = {
       return fail(pupRes.error.code, { message: pupRes.error.message });
     }
     const personUpdate = pupRes.value;
+    if (personUpdate.photo) {
+      return fail(422, { message: 'setting photo field is prohibited' });
+    }
     const { id: pid } = personUpdate;
     const photo = data.get('photo');
     let relativesUpdate: RelativesChangeRequest | undefined = undefined;
@@ -87,7 +90,7 @@ export const actions: Actions = {
       }
 
       // person's fields
-      if (updFields) {
+      if (updFields || personUpdate.photo !== undefined) {
         act.updatePerson(personUpdate);
       }
 
