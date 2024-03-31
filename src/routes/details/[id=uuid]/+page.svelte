@@ -38,8 +38,7 @@
 <script lang="ts">
   import { filedrop, type FileDropOptions } from 'filedrop-svelte';
   import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
-  import { formatDate, nonewlines, toPersonEdit, getPersonChanges, photoUrl, TRANS_DELAY } from '$lib/client/clutils.js';
-  import type { PersonEdit, PersonChanges } from '$lib/client/clutils.js';
+  import { photoUrl, TRANS_DELAY } from '$lib/client/clutils.js';
   import type { Person, RelativesChangeRequest, UpdatablePerson } from '$lib/types.js';
   import { enhance } from '$app/forms';
   import type { SubmitFunction } from '@sveltejs/kit';
@@ -47,6 +46,7 @@
   import RelSection from './RelSection.svelte';
   import { peopleToIdArray } from '$lib/utils';
   import SearchBox, { type SearchBoxLinkFunc } from '$lib/components/SearchBox.svelte';
+  import PersonInfo from '$lib/components/PersonInfo.svelte';
 
   // params
   export let data;
@@ -57,7 +57,6 @@
   let person: Person;
   let parents: Person[];
   let children: Person[];
-  let editPerson: PersonEdit;
   let editMode: boolean = false;
   const image = {
     fileInput: undefined as HTMLInputElement | undefined,
@@ -75,6 +74,7 @@
     parentsComp: undefined as any as RelSection,
     childrenComp: undefined as any as RelSection
   };
+  let piComp: PersonInfo;
 
   // reactive vars
   $: filedropOptions = {
@@ -91,7 +91,7 @@
     person = p;
     image.src = photoUrl(p);
     image.pSrc = undefined;
-    editPerson = toPersonEdit(p);
+    piComp?.reset(person);
     parents = otherPeople.filter(p => parentIds.includes(p.id));
     children = otherPeople.filter(p => childrenIds.includes(p.id));
   }
@@ -161,7 +161,7 @@
   }
   const submitUpdate: SubmitFunction = ({ formData, cancel }) => {
     // person-update
-    const ch = getPersonChanges(person, editPerson);
+    const ch = piComp.getChanges();
     if (ch.name?.trim() === '') {
       return cancel();
     }
@@ -185,7 +185,7 @@
     const ph = formData.get('photo');
 
     // check if there are any changes
-    if (Object.keys(ch).length < 1 && !sendRelsUpd && !(ph instanceof File && ph.size > 0)) {
+    if (Object.keys(ch).length < 1 && updatePerson.photo !== null && !sendRelsUpd && !(ph instanceof File && ph.size > 0)) {
       cancel(); // empty update
     }
 
@@ -263,34 +263,12 @@
         <input type="file" name="photo" style="display: none;" bind:this={image.fileInput} />
       </div>
 
-      {#if editMode}
-        <h1
-          class="name"
-          contenteditable="plaintext-only"
-          bind:textContent={editPerson.name}
-          use:nonewlines
-          on:returnkey={() => frm?.requestSubmit()}
-        />
-      {:else}
-        <h1 class="name">{person.name}</h1>
-      {/if}
-
-      {#if editMode}
-        <div class="date" transition:slide={{ axis: 'y', ...TRANS_OPT }}>
-          <input type="date" class="date input" bind:value={editPerson.birthDate} />
-          <input type="date" class="date input" bind:value={editPerson.deathDate} />
-        </div>
-      {:else}
-        <p class="date display" transition:slide={{ axis: 'y', ...TRANS_OPT }}>
-          {formatDate(person.birthDate, 'birth')} - {formatDate(person.deathDate, 'death')}
-        </p>
-      {/if}
-
-      {#if editMode}
-        <p class="bio" contenteditable="plaintext-only" bind:textContent={editPerson.bio} />
-      {:else}
-        <p class="bio">{person.bio}</p>
-      {/if}
+      <PersonInfo
+        {editMode}
+        person={person}
+        transOptions={TRANS_OPT}
+        on:returnkey={() => frm?.requestSubmit()} bind:this={piComp}
+      />
 
       <div class="relations">
         <RelSection {editMode} sectionName="Parents" people={parents} bind:this={rels.parentsComp} />
@@ -422,34 +400,6 @@
     }
   }
 
-  .name {
-    margin: 0.2em 0 0;
-    @include common.contenteditable-border;
-    @include colors.col-trans($bg: false, $fg: true, $br: true);
-  }
-
-  .date {
-    margin: 4px 0 0;
-    @include colors.col-trans($bg: true, $fg: true, $br: true);
-    &.display {
-      border: 1px solid transparent;
-    }
-    &.input {
-      background-color: var(--col-secondary-bg, colors.$light-secondary-bg);
-      border: 1px solid var(--col-secondary-border, colors.$light-secondary-border);
-      border-radius: 2px;
-      color: var(--col-fg, colors.$light-text);
-    }
-  }
-
-  .bio {
-    margin: 1.8em 0 1em;
-    overflow-wrap: anywhere;
-    white-space: pre-line;
-    text-align: center;
-    @include common.contenteditable-border;
-    @include colors.col-trans($bg: false, $fg: true, $br: true);
-  }
   .relations {
     display: flex;
     flex-direction: row;
