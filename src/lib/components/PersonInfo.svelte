@@ -1,12 +1,12 @@
 <script lang="ts">
   import { nonewlines, toPersonEdit, formatDate, getPersonChanges } from '$lib/client/clutils';
   import type { PersonEdit, PersonChanges } from '$lib/client/clutils';
-  import type { Person } from '$lib/types';
+  import type { PersonData } from '$lib/types';
   import { createEventDispatcher } from 'svelte';
   import { slide, type TransitionConfig } from 'svelte/transition';
 
   export let editMode = false;
-  export let person: Person;
+  export let person: PersonData;
   export let bioDisplay: string | undefined = undefined;
   export let nameLink: string | undefined = undefined;
   export let transOptions: TransitionConfig = {};
@@ -14,7 +14,7 @@
   const dispatch = createEventDispatcher();
   let editPerson: PersonEdit;
 
-  export function reset(newPerson?: Person) {
+  export function reset(newPerson?: PersonData) {
     if (newPerson === undefined) {
       newPerson = person;
     }

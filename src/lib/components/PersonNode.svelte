@@ -1,9 +1,9 @@
 <script lang="ts">
   import { photoUrl } from '$lib/client/clutils';
-  import type { Person } from '$lib/types';
+  import type { PersonData } from '$lib/types';
   import type { Point } from './types';
 
-  export let person: Person;
+  export let person: PersonData;
 
   $: bgImgSt = person.photo ? `url(${photoUrl(person)})` : 'none';
 

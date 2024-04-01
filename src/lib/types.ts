@@ -2,13 +2,13 @@ import { object, string, ObjectSchema, type InferType, boolean, array } from 'yu
 import { stripNonPrintableAndNormalize } from './utils';
 
 export const THEMES = ['light', 'dark'] as const;
-export type Theme = typeof THEMES[number];
+export type Theme = (typeof THEMES)[number];
 
 export function isTheme(theme: string | undefined): boolean {
   return THEMES.includes(theme as Theme);
 }
 export function getTheme(theme: string | undefined): Theme {
-  return THEMES.includes(theme as Theme) ? theme as Theme : THEMES[0];
+  return THEMES.includes(theme as Theme) ? (theme as Theme) : THEMES[0];
 }
 
 type OptionalKeysNullable<T extends Record<any, any>> = {
@@ -28,7 +28,8 @@ export interface Person {
   photo?: string;
 }
 
-export type UpdatablePerson = Partial<OptionalKeysNullable<Person>> & Pick<Person, 'id'>;
+export type PersonData = Omit<Person, 'id'>;
+export type UpdatablePerson = Partial<OptionalKeysNullable<PersonData>> & Pick<Person, 'id'>;
 
 export const PERSON_SCHEMA: ObjectSchema<UpdatablePerson> = object({
   id: personId.label('person id'),

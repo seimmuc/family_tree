@@ -1,4 +1,4 @@
-import type { Person } from '$lib/types';
+import type { PersonData } from '$lib/types';
 import { clearUndefinedVals, isDateString, stripNonPrintableAndNormalize } from '$lib/utils';
 import type { Action } from 'svelte/action';
 
@@ -72,7 +72,7 @@ export type PersonChanges = {
   birthDate?: string | null;
   deathDate?: string | null;
 };
-export function toPersonEdit(person: Person): PersonEdit {
+export function toPersonEdit(person: PersonData): PersonEdit {
   return {
     name: person.name,
     birthDate: person.birthDate ?? '',
@@ -83,7 +83,7 @@ export function toPersonEdit(person: Person): PersonEdit {
 /**
  * Returns an object with person properties that need to be changed, null value means that that property should be removed, undefined values should be ignored
  */
-export function getPersonChanges(original: Person, edits: PersonEdit): PersonChanges {
+export function getPersonChanges(original: PersonData, edits: PersonEdit): PersonChanges {
   const name = stripNonPrintableAndNormalize(edits.name, false, true);
   const bio = stripNonPrintableAndNormalize(edits.bio, false, false) || undefined;
   const bd = isDateString(edits.birthDate) ? edits.birthDate : undefined;
@@ -97,6 +97,6 @@ export function getPersonChanges(original: Person, edits: PersonEdit): PersonCha
   return clearUndefinedVals(res);
 }
 
-export function photoUrl(person: Person): string | undefined {
+export function photoUrl(person: PersonData): string | undefined {
   return person.photo ? `/media/${person.photo}` : undefined;
 }

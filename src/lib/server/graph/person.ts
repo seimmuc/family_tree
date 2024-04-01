@@ -1,4 +1,11 @@
-import type { ParentRelationship, PartnerRelationship, Person, Relationship, UpdatablePerson } from '$lib/types';
+import type {
+  ParentRelationship,
+  PartnerRelationship,
+  Person,
+  PersonData,
+  Relationship,
+  UpdatablePerson
+} from '$lib/types';
 import { Integer, ManagedTransaction, Relationship as Neo4jRel } from 'neo4j-driver';
 import { readTransaction, writeTransaction } from './memgraph';
 import type { TransactionConfig } from 'neo4j-driver-core';
@@ -224,7 +231,7 @@ export class WriteActions extends ReadActions {
    * @param person the person object, do not include id property as it'll be assigned by the server
    * @returns the person object, as it is returned from the database server
    */
-  async addPerson(person: Omit<Person, 'id'>): Promise<Person> {
+  async addPerson(person: PersonData): Promise<Person> {
     const r = await this.transaction.run('CREATE (p:Person $pdata) SET p.id = randomUUID() RETURN p', {
       pdata: person
     });
