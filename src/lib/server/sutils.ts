@@ -2,6 +2,7 @@ import { PERSON_SCHEMA, RELATIVES_SINGLE_TYPE_CHANGE_SCHEMA } from '$lib/types';
 import type { RelativesChangeRequest, UpdatablePerson } from '$lib/types';
 import { ValidationError } from 'yup';
 import { Result, err, ok } from 'neverthrow';
+import { validatePassword, validateUsername } from '$lib/utils';
 
 export type FailError = { code: number; message: string };
 
@@ -68,4 +69,22 @@ export function parseUpdateRelatives(
     }
     throw error;
   }
+}
+
+export function validateUsernameAndPassword(
+  formData: FormData,
+  uKey = 'username',
+  pKey = 'password'
+): Result<[string, string], string> {
+  const username = formData.get(uKey) as string;
+  const usernameValidResult = validateUsername(username);
+  if (usernameValidResult.isErr()) {
+    return err(usernameValidResult.error);
+  }
+  const password = formData.get(pKey) as string;
+  const passwordValidResult = validatePassword(password);
+  if (passwordValidResult.isErr()) {
+    return err(passwordValidResult.error);
+  }
+  return ok([username, password]);
 }

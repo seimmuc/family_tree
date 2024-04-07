@@ -1,5 +1,6 @@
 import { object, string, ObjectSchema, type InferType, boolean, array } from 'yup';
 import { stripNonPrintableAndNormalize } from './utils';
+import type { UUID } from 'crypto';
 
 export const THEMES = ['light', 'dark'] as const;
 export type Theme = (typeof THEMES)[number];
@@ -147,3 +148,16 @@ export const RELATIVES_SINGLE_TYPE_CHANGE_SCHEMA = object({
 
 export type RelativesSingleTypeChange = InferType<typeof RELATIVES_SINGLE_TYPE_CHANGE_SCHEMA>;
 export type RelativesChangeRequest = { [relType: string]: RelativesSingleTypeChange };
+
+export const USER_PERMISSIONS = ['view', 'edit', 'admin'] as const;
+export type UserPermission = (typeof USER_PERMISSIONS)[number];
+
+export type UserID = UUID;
+// UserMinimal is the minimal representation of a user and should be safe to send to other users and unauthenticated clients when appropriate
+export type UserMinimal = { id: UserID; username: string };
+// own User object can be safely sent to authenticated client
+export type User = UserMinimal & { creationTime: number; permissions: UserPermission[] };
+// UserDB represents user's database object and should never be sent to the client, not even the currently signed-in user's own object
+export type UserDB = User & { passwordHash: string };
+// Future use
+export type UserOptions = {};

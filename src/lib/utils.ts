@@ -1,3 +1,4 @@
+import { err, ok, type Result } from 'neverthrow';
 import type { Person } from './types';
 
 export function clearUndefinedVals(object: Record<string, any>): Record<string, any> {
@@ -58,6 +59,40 @@ export function stripNonPrintableAndNormalize(
   // normalize newline and space
   text = text.replace(/\r\n|\p{Zl}|\p{Zp}/gu, '\n').replace(/\p{Zs}/gu, ' ');
   return text.trim();
+}
+
+export function validateUsername(username: string): Result<void, string> {
+  // https://unicode.org/reports/tr18/#General_Category_Property
+  // may consider using \p{Alphabetic} instead of \p{Letter} in the future
+  // \p{Mark} (combining marks) and most \p{Punctuation} is currently explicitly prohibited in usernames
+  if (!(typeof username === 'string')) {
+    return err('invalid username');
+  }
+  if (username.length > 32) {
+    return err('username is too long');
+  }
+  if (!/^[\p{Letter}\p{Number}_.\(\)\[\]\-]+$/v.test(username)) {
+    return err('username contains prohibited characters');
+  }
+  if (username.length < 2) {
+    return err('username is too short');
+  }
+  return ok(undefined);
+}
+export function validatePassword(password: string): Result<void, string> {
+  if (!(typeof password === 'string')) {
+    return err('invalid password');
+  }
+  if (password.length > 64) {
+    return err('password is too long');
+  }
+  if (!/^[^\p{Control}\p{Private_Use}\p{Unassigned}]+$/v.test(password)) {
+    return err('password contains prohibited characters');
+  }
+  if (password.length < 8) {
+    return err('password is too short');
+  }
+  return ok(undefined);
 }
 
 export function dateToString(date: Date): string {
