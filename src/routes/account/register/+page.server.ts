@@ -3,7 +3,11 @@ import type { Actions } from './$types';
 import { UserWriteActions } from '$lib/server/graph/user';
 import { Argon2id } from 'oslo/password';
 import { lucia } from '$lib/server/auth';
-import { validateUsernameAndPassword } from '$lib/server/sutils';
+import { parseConfigBool, validateUsernameAndPassword } from '$lib/server/sutils';
+import type { UserPermission } from '$lib/types';
+import { USERS_MAKE_FIRST_ADMIN } from '$env/static/private';
+
+const makeFirstUserAdmin = parseConfigBool(USERS_MAKE_FIRST_ADMIN);
 
 export const load = async ({ locals, url }) => {
   const redirectTo = url.searchParams.get('redirectTo');
@@ -29,7 +33,14 @@ export const actions: Actions = {
       // create user
       const passwordHash = await new Argon2id().hash(password);
       const dbUserRes = await UserWriteActions.perform(async act => {
-        return await act.addUser({ username, passwordHash, permissions: [] });
+        const permissions: UserPermission[] = [];
+        if (makeFirstUserAdmin) {
+          const userCount = await act.getUserCount();
+          if (userCount < 1) {
+            permissions.push('admin');
+          }
+        }
+        return await act.addUser({ username, passwordHash, permissions });
       });
       if (dbUserRes.isErr()) {
         if (dbUserRes.error === 'username is already in use') {

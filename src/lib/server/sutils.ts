@@ -1,10 +1,38 @@
 import { PERSON_SCHEMA, RELATIVES_SINGLE_TYPE_CHANGE_SCHEMA } from '$lib/types';
-import type { RelativesChangeRequest, UpdatablePerson } from '$lib/types';
+import type { RelativesChangeRequest, UpdatablePerson, UserPermission } from '$lib/types';
 import { ValidationError } from 'yup';
 import { Result, err, ok } from 'neverthrow';
 import { validatePassword, validateUsername } from '$lib/utils';
+import type { User } from 'lucia';
+import { USERS_ADMINS } from '$env/static/private';
 
 export type FailError = { code: number; message: string };
+
+const ADMINISTRATORS = parseConfigList(USERS_ADMINS);
+
+const configBools: Record<string, boolean> = { true: true, false: false, yes: true, no: false, y: true, n: false };
+export function parseConfigBool(configValue: string | undefined, def: boolean = false): boolean {
+  if (configValue === undefined) {
+    return def;
+  }
+  return configBools[configValue.trim().toLowerCase()] ?? def;
+}
+export function parseConfigList(configValue: string | undefined, splitOnComma = true): string[] {
+  if (configValue === undefined) {
+    return [];
+  }
+  configValue = configValue.trim();
+  if (configValue[0] === '[' && configValue[configValue.length - 1] === ']') {
+    return JSON.parse(configValue);
+  }
+  if (configValue.length < 1) {
+    return [];
+  }
+  if (splitOnComma && configValue.includes(',')) {
+    return configValue.split(',').map(s => s.trim());
+  }
+  return [configValue];
+}
 
 export function parseUpdatePerson(updateJson?: FormDataEntryValue | null): Result<UpdatablePerson, FailError> {
   if (typeof updateJson !== 'string') {
@@ -87,4 +115,14 @@ export function validateUsernameAndPassword(
     return err(passwordValidResult.error);
   }
   return ok([username, password]);
+}
+
+export function userHasPermission(user: User | null, permission: UserPermission): boolean {
+  if (user === null) {
+    return false;
+  }
+  if (ADMINISTRATORS.includes(user.username)) {
+    return true;
+  }
+  return user.permissions.includes(permission) || user.permissions.includes('admin');
 }

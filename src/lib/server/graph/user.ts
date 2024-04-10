@@ -1,4 +1,4 @@
-import type { ManagedTransaction } from 'neo4j-driver';
+import type { ManagedTransaction, Integer } from 'neo4j-driver';
 import { readTransaction, writeTransaction } from './memgraph';
 import type { TransactionConfig } from 'neo4j-driver-core';
 import type { UserDB } from '$lib/types';
@@ -13,6 +13,10 @@ export class UserReadActions {
     return readTransaction(async tx => {
       return cb(new UserReadActions(tx));
     }, config);
+  }
+  async getUserCount(): Promise<number> {
+    const r = await this.transaction.run('MATCH (u:User) RETURN count(u) as uc');
+    return (r.records[0].get('uc') as Integer).toInt();
   }
   async getUserById(id: string): Promise<UserDB | undefined> {
     const r = await this.transaction.run('MATCH (u:User) WHERE u.id = $id RETURN u LIMIT 1', { id });
