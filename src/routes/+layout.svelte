@@ -10,6 +10,8 @@
   import { faGear, faUser, faSun, faMoon } from '@fortawesome/free-solid-svg-icons';
   import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
   import { onMount } from 'svelte';
+  import { config as faconfig } from '@fortawesome/fontawesome-svg-core';
+  import '@fortawesome/fontawesome-svg-core/styles.css'; // TODO test impact of this import on initial/subsequent load times
 
   export let data;
 
@@ -20,6 +22,8 @@
     userComp: undefined as UserMenu | undefined
   };
   let ignoreWinClick = false;
+
+  faconfig.autoAddCss = false;
 
   function setTheme(newTheme: Theme) {
     theme.set(newTheme);
@@ -40,7 +44,7 @@
 
   function onLogout(e: MouseEvent & { currentTarget: EventTarget & HTMLAnchorElement }) {
     e.preventDefault();
-    fetch('/account/logout', { method: 'POST' }).then((res) => {
+    fetch('/account/logout', { method: 'POST' }).then(res => {
       if (res.ok) {
         invalidate('data:user');
       } else {
@@ -94,7 +98,7 @@
       <button slot="ref" type="button" let:floatingRef use:floatingRef on:click={onUserClick}>
         <FontAwesomeIcon icon={faUser} />
       </button>
-      <UserMenu slot="tooltip" user={data.user} logoutClickHandler={onLogout} bind:this={userBox.userComp}/>
+      <UserMenu slot="tooltip" user={data.user} logoutClickHandler={onLogout} bind:this={userBox.userComp} />
     </FloatingUiComponent>
   </div>
 </div>
