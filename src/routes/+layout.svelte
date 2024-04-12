@@ -1,21 +1,30 @@
 <script lang="ts">
   import { browser } from '$app/environment';
+  import { invalidate, invalidateAll } from '$app/navigation';
   import { navigating } from '$app/stores';
   import { theme } from '$lib/client/stores.js';
+  import FloatingUiComponent from '$lib/components/FloatingUIComponent.svelte';
+  import UserMenu from '$lib/components/UserMenu.svelte';
   import '$lib/styles/global.scss';
   import type { Theme } from '$lib/types.js';
   import { faGear, faUser, faSun, faMoon } from '@fortawesome/free-solid-svg-icons';
   import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
   import { onMount } from 'svelte';
-  
+
   export let data;
 
   const dMenu = data.dynamicMenu;
 
+  const userBox = {
+    floatComp: undefined as FloatingUiComponent | undefined,
+    userComp: undefined as UserMenu | undefined
+  };
+  let ignoreWinClick = false;
+
   function setTheme(newTheme: Theme) {
     theme.set(newTheme);
     data.theme = newTheme;
-    document.cookie = `theme=${newTheme};max-age=${60*60*24*365};path=/;SameSite=Lax`;
+    document.cookie = `theme=${newTheme};max-age=${60 * 60 * 24 * 365};path=/;SameSite=Lax`;
   }
   const toggleTheme = () => setTheme(data.theme === 'dark' ? 'light' : 'dark');
 
@@ -24,17 +33,49 @@
     document.documentElement.dataset.theme = data.theme;
   }
 
+  function onUserClick() {
+    userBox.floatComp?.control.toggle();
+    ignoreWinClick = true;
+  }
+
+  function onLogout(e: MouseEvent & { currentTarget: EventTarget & HTMLAnchorElement }) {
+    e.preventDefault();
+    fetch('/account/logout', { method: 'POST' }).then((res) => {
+      if (res.ok) {
+        invalidate('data:user');
+      } else {
+        // something went wrong, invalidate everything
+        invalidateAll();
+      }
+      // TODO create and update a user store so that individual pages can choose to reload or redirect on logout
+    });
+    userBox.floatComp?.control.hide();
+  }
+
+  function onWindowClick(e: MouseEvent & { currentTarget: EventTarget & Window }) {
+    if (ignoreWinClick || !userBox.floatComp?.control.isVisible()) {
+      ignoreWinClick = false;
+      return;
+    }
+    if (!(e.target instanceof Node && userBox.userComp?.getRoot().contains(e.target))) {
+      userBox.floatComp.control.hide();
+    }
+  }
+
   onMount(() => {
     const navUnsub = navigating.subscribe(nav => {
       if (nav !== null && nav.from?.route.id !== nav.to?.route.id) {
         dMenu.set({ comp: undefined, compProps: {} });
       }
+      userBox.floatComp?.control.hide();
     });
     return () => {
       navUnsub();
     };
   });
 </script>
+
+<svelte:window on:click={onWindowClick} />
 
 <div class="menu-bar">
   <div class="menu-section left">
@@ -49,7 +90,12 @@
       {/if}
     </button>
     <button><FontAwesomeIcon icon={faGear} /></button>
-    <button><FontAwesomeIcon icon={faUser} /></button>
+    <FloatingUiComponent enableArrow={false} offsetPx={-6} bind:this={userBox.floatComp}>
+      <button slot="ref" type="button" let:floatingRef use:floatingRef on:click={onUserClick}>
+        <FontAwesomeIcon icon={faUser} />
+      </button>
+      <UserMenu slot="tooltip" user={data.user} logoutClickHandler={onLogout} bind:this={userBox.userComp}/>
+    </FloatingUiComponent>
   </div>
 </div>
 <slot />

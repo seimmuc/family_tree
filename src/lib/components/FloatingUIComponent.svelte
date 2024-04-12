@@ -2,6 +2,7 @@
   export type FloatingUICompControl = {
     show: () => void;
     hide: () => void;
+    toggle: () => void;
     setVisible: (visible: boolean) => void;
     isVisible: () => boolean;
     update: UpdatePosition;
@@ -109,6 +110,9 @@
     },
     hide: () => {
       shown = false;
+    },
+    toggle: () => {
+      shown = !shown;
     },
     setVisible: (visible: boolean) => {
       shown = visible;
