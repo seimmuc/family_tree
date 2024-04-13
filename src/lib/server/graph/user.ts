@@ -1,4 +1,4 @@
-import type { ManagedTransaction, Integer } from 'neo4j-driver';
+import { type ManagedTransaction, Integer } from 'neo4j-driver';
 import { readTransaction, writeTransaction } from './memgraph';
 import type { TransactionConfig } from 'neo4j-driver-core';
 import type { UserDB } from '$lib/types';
@@ -23,7 +23,8 @@ export class UserReadActions {
     return r.records[0]?.get('u')?.properties;
   }
   async getUserByUsername(username: string): Promise<UserDB | undefined> {
-    const r = await this.transaction.run('MATCH (u:User) WHERE u.username = $username RETURN u LIMIT 1', { username });
+    username = username.trim().toLowerCase();
+    const r = await this.transaction.run('MATCH (u:User) WHERE toLower(u.username) = $username RETURN u LIMIT 1', { username });
     return r.records[0]?.get('u')?.properties;
   }
 }
