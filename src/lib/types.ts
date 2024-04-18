@@ -1,4 +1,5 @@
-import { object, string, ObjectSchema, type InferType, boolean, array } from 'yup';
+import { object, string, ObjectSchema, boolean, array, number as yupnumber, StringSchema } from 'yup';
+import type { InferType, AnyObject } from 'yup';
 import { stripNonPrintableAndNormalize } from './utils';
 import type { UUID } from 'crypto';
 
@@ -161,3 +162,15 @@ export type User = UserMinimal & { creationTime: number; permissions: UserPermis
 export type UserDB = User & { passwordHash: string };
 // Future use
 export type UserOptions = {};
+
+export const USER_ID_SCHEMA = string().uuid().required() as StringSchema<UUID, AnyObject, undefined, ''>;
+export const USER_PERMISSION_SCHEMA = string().required().oneOf(USER_PERMISSIONS);
+export const USER_SCHEMA: ObjectSchema<User> = object({
+  id: USER_ID_SCHEMA,
+  username: string().required().min(2).max(32),
+  creationTime: yupnumber().required(),
+  permissions: array(USER_PERMISSION_SCHEMA).required()
+}).noUnknown();
+
+export type UserPermChanges = { perm: UserPermission; change: 'add' | 'del' }[];
+export type UserPermChangesReq = { user: UserID; changes: UserPermChanges };

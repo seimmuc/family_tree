@@ -28,6 +28,13 @@ export function arrayFilterInPlace<T>(array: T[], predicate: (value: T, index: n
   array.length = ni;
 }
 
+export function titleCaseWord<S extends string | undefined>(word: S): S {
+  if (word === undefined || word.length < 1) {
+    return word;
+  }
+  return (word.charAt(0).toUpperCase() + word.slice(1)) as S;
+}
+
 /**
  * Removes non-printable characters from string and normalizes newline and space characters (to unix newlines and ascii space)
  *

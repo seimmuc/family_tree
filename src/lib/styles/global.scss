@@ -16,6 +16,7 @@
   --col-secondary-border: #{colors.$light-secondary-border};
   --col-link-normal: #{colors.$light-link-normal};
   --col-link-hover: #{colors.$light-link-hover};
+  --col-warning-fg: #{colors.$light-warning-fg};
   --col-contenteditable-border: #{colors.$light-contenteditable-border};
   --col-topbar-bg: #{colors.$light-topbar-bg};
   --col-topbar-border: #{colors.$light-topbar-border};
@@ -36,6 +37,7 @@
   --col-secondary-border: #{colors.$dark-secondary-border};
   --col-link-normal: #{colors.$dark-link-normal};
   --col-link-hover: #{colors.$dark-link-hover};
+  --col-warning-fg: #{colors.$dark-warning-fg};
   --col-contenteditable-border: #{colors.$dark-contenteditable-border};
   --col-topbar-bg: #{colors.$dark-topbar-bg};
   --col-topbar-border: #{colors.$dark-topbar-border};

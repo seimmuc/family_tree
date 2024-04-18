@@ -3,6 +3,7 @@
 
 $fade-time: 0.25s;
 
+$warning-fg: rgb(255, 128, 0);
 
 $light-bg: #ebebeb;
 $light-text: #080808;
@@ -12,6 +13,7 @@ $light-secondary-bg: color.scale($light-bg, $lightness: -20%);
 $light-secondary-border: color.scale($light-secondary-bg, $lightness: -30%);
 $light-link-normal: color.scale($light-text, $lightness: +20%);
 $light-link-hover: color.scale($light-text, $lightness: +40%);
+$light-warning-fg: color.scale(color.adjust($warning-fg, $hue: -5), $lightness: -40%);
 $light-contenteditable-border: #000a;
 $light-topbar-bg: #c9c9c9;
 $light-topbar-border: color.scale($light-topbar-bg, $lightness: -40%);
@@ -29,6 +31,7 @@ $dark-secondary-bg: color.scale($dark-bg, $lightness: +20%);
 $dark-secondary-border: color.scale($dark-secondary-bg, $lightness: +30%);
 $dark-link-normal: color.scale($dark-text, $lightness: -20%);
 $dark-link-hover: color.scale($dark-text, $lightness: -40%);
+$dark-warning-fg: color.scale($warning-fg, $lightness: +15%);
 $dark-contenteditable-border: #fffa;
 $dark-topbar-bg: #1a1a1a;
 $dark-topbar-border: color.scale($dark-topbar-bg, $lightness: +35%);
