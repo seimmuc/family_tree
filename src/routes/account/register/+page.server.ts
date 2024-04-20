@@ -3,7 +3,8 @@ import type { Actions } from './$types';
 import { UserWriteActions } from '$lib/server/graph/user';
 import { Argon2id } from 'oslo/password';
 import { lucia } from '$lib/server/auth';
-import { parseConfigBool, validateUsernameAndPassword } from '$lib/server/sutils';
+import { parseConfigBool } from '$lib/server/sutils';
+import { validateUsernameAndPassword } from '$lib/utils';
 import type { UserPermission } from '$lib/types';
 import { USERS_MAKE_FIRST_ADMIN } from '$env/static/private';
 

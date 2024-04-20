@@ -1,4 +1,4 @@
-import { validateUsernameAndPassword } from '$lib/server/sutils';
+import { validateUsernameAndPassword } from '$lib/utils';
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions } from './$types';
 import { UserReadActions } from '$lib/server/graph/user';
@@ -16,7 +16,7 @@ export const load = async ({ locals, url }) => {
 export const actions: Actions = {
   default: async ({ request, cookies, locals }) => {
     const formData = await request.formData();
-    
+
     // logged in users must sign out manually before logging in again
     if (locals.user === null) {
       // validate input data

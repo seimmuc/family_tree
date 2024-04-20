@@ -1,14 +1,34 @@
 <script lang="ts">
   import { enhance } from '$app/forms';
   import { page } from '$app/stores';
-  import { createUrl } from '$lib/utils';
+  import TimedMessage from '$lib/components/TimedMessage.svelte';
+  import { createUrl, validateUsernameAndPassword } from '$lib/utils';
+  import { slide } from 'svelte/transition';
+  import type { SubmitFunction } from './$types.js';
+  import { TRANS_DELAY } from '$lib/client/clutils.js';
 
   export let data;
+
+  let errComp: TimedMessage;
+  const submit: SubmitFunction = ({ formData, cancel }) => {
+    const valRes = validateUsernameAndPassword(formData);
+    if (valRes.isErr()) {
+      errComp.setMessage(valRes.error);
+      cancel();
+      return;
+    }
+    return async ({ result, update }) => {
+      if (result.type === 'failure' && result.data?.message) {
+        errComp.setMessage(result.data.message);
+      }
+      update();
+    };
+  };
 </script>
 
 <h1 class="head">Log in</h1>
 <div class="main">
-  <form method="POST" use:enhance>
+  <form method="POST" use:enhance={submit}>
     {#if data.redirectTo}
       <input type="hidden" name="redir" value={data.redirectTo} />
     {/if}
@@ -20,9 +40,12 @@
       <span class="lbl">Password</span>
       <input name="password" type="password" autocomplete="current-password" required />
     </label>
+    <TimedMessage bind:this={errComp} let:msg>
+      <span class="error" transition:slide={{ duration: TRANS_DELAY, axis: 'y' }}>{msg}</span>
+    </TimedMessage>
     <button class="btn" type="submit">Login</button>
     <span class="info">
-      Don't have an account? 
+      Don't have an account?
       <a href={createUrl('/account/register', $page.url, $page.url.searchParams).toString()}>Sign Up</a>
     </span>
   </form>
@@ -63,8 +86,13 @@
         align-self: center;
       }
     }
-    .btn, .info {
+    .error,
+    .btn,
+    .info {
       grid-column: 1 / span 2;
+    }
+    .error {
+      color: red;
     }
     .btn {
       width: max-content;
