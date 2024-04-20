@@ -13,7 +13,7 @@
   import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
   import { fade, slide, type SlideParams } from 'svelte/transition';
   import { page } from '$app/stores';
-  import { TRANS_DELAY, redirUserChange } from '$lib/client/clutils.js';
+  import { TRANS_DELAY, redirUserChange, timestampToFormattedTime } from '$lib/client/clutils.js';
   import { invalidate } from '$app/navigation';
 
   const TRANS_OPTS: SlideParams = { axis: 'x', duration: TRANS_DELAY };
@@ -289,7 +289,7 @@
           <FontAwesomeIcon icon={faTrashCan} />
         </button>
         <div slot="tooltip" class="delete-tooltip" bind:this={del.tooltipRoot}>
-          <span class="confirm-text">Delete <span class="uname">{selectedUser.username}</span> user?</span>
+          <span class="confirm-text">Delete <span class="uname">{selectedUser.username}</span>?</span>
           <button type="button" on:click={actionDelete}>Confirm</button>
           {#if del.processing}
             <FontAwesomeIcon icon={faSpinner} spinPulse />
@@ -300,6 +300,7 @@
         </div>
       </FloatingUiComponent>
     </h2>
+    <p class="user-ctime">Created: {timestampToFormattedTime(selectedUser.creationTime)}</p>
     <h4 class="user-header">Permissions</h4>
     <ul class="user-permissons">
       {#each USER_PERMISSIONS as perm}
@@ -394,7 +395,7 @@
   .user-view {
     margin: 0;
     .user-name {
-      margin: 0.5em 0;
+      margin: 0.5em 0 0;
       > button {
         @include common.styleless-button;
         font-size: 0.65em;
@@ -426,8 +427,12 @@
         }
       }
     }
+    .user-ctime {
+      margin: 0.2em 0 0;
+      font-size: 0.8em;
+    }
     .user-header {
-      margin: 0.25em 0;
+      margin: 0.8em 0 0.2em;
     }
     .user-permissons {
       list-style: none;

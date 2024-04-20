@@ -2,8 +2,8 @@ import { PERSON_SCHEMA, RELATIVES_SINGLE_TYPE_CHANGE_SCHEMA } from '$lib/types';
 import type { RelativesChangeRequest, UpdatablePerson, UserPermission } from '$lib/types';
 import { ValidationError } from 'yup';
 import { Result, err, ok } from 'neverthrow';
-import { createUrl, validatePassword, validateUsername } from '$lib/utils';
-import type { User } from 'lucia';
+import { createUrl } from '$lib/utils';
+import type { User } from '$lib/types';
 import { USERS_ADMINS } from '$env/static/private';
 import { error, redirect } from '@sveltejs/kit';
 

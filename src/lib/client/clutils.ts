@@ -43,6 +43,14 @@ export function formatDate(
   const d = new Date(dateString);
   return d.toLocaleDateString(undefined, dateFormatOptions);
 }
+export function timestampToFormattedTime(
+  utcTimestamp: number,
+  dateFormatOptions: Intl.DateTimeFormatOptions | undefined = DEFAULT_DATE_FORMAT_OPRIONS
+): string {
+  dateFormatOptions ??= DEFAULT_DATE_FORMAT_OPRIONS;
+  const d = new Date(utcTimestamp);
+  return d.toLocaleTimeString(undefined, dateFormatOptions);
+}
 
 export function validateDateString(dateString: string): string | undefined {
   dateString = dateString.trim();

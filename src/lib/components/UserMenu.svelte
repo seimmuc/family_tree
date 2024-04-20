@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { User } from 'lucia';
+  import type { User } from '$lib/types';
   import { page } from '$app/stores';
   import { createUrl } from '$lib/utils';
   type CEv = MouseEvent & { currentTarget: EventTarget & HTMLAnchorElement };

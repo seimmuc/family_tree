@@ -1,7 +1,7 @@
 import { Lucia, TimeSpan } from 'lucia';
 import { LuciaCypherAdapter } from './graph/lucia-adapter';
 import { dev } from '$app/environment';
-import type { UserDB, UserID } from '$lib/types';
+import type { User, UserDB, UserID } from '$lib/types';
 
 const adapter = new LuciaCypherAdapter();
 
@@ -15,8 +15,9 @@ export const lucia = new Lucia(adapter, {
   getUserAttributes: attributes => {
     return {
       username: attributes.username,
-      permissions: attributes.permissions
-    };
+      permissions: attributes.permissions,
+      creationTime: attributes.creationTime
+    } satisfies Omit<User, 'id'>;
   }
 });
 
