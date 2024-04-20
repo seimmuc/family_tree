@@ -105,10 +105,13 @@ export function photoUrl(person: PersonData): string | undefined {
 export function redirUserChange(
   user: Pick<User, 'permissions'> | null,
   requiredPermission: UserPermission | undefined,
-  currentUrl: URL
+  currentUrl: URL,
+  loginIfNoUser = true,
+  noPermRedirPath = '/'
 ) {
   if (user === null || (requiredPermission && !user.permissions.includes(requiredPermission))) {
-    const url = createUrl('/account/login', currentUrl, { redirectTo: currentUrl.pathname });
+    const targetPath = user === null && loginIfNoUser ? '/account/login' : noPermRedirPath || '/';
+    const url = createUrl(targetPath, currentUrl, { redirectTo: currentUrl.pathname });
     const gotoPromise = goto(url, { invalidateAll: false });
     gotoPromise.catch(() => {
       window.location.assign(url);
