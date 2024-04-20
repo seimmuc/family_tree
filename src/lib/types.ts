@@ -33,6 +33,8 @@ export interface Person {
 export type PersonData = Omit<Person, 'id'>;
 export type UpdatablePerson = Partial<OptionalKeysNullable<PersonData>> & Pick<Person, 'id'>;
 
+export const DATE_MAX_LEN = 30;
+export const DATE_SCHEMA = string().trim().max(DATE_MAX_LEN).optional().nullable();
 export const PERSON_SCHEMA: ObjectSchema<UpdatablePerson> = object({
   id: personId.label('person id'),
   name: string()
@@ -41,16 +43,8 @@ export const PERSON_SCHEMA: ObjectSchema<UpdatablePerson> = object({
     .optional()
     .nonNullable(),
   gender: string().optional().nullable(),
-  birthDate: string()
-    .matches(/^\d{4}-\d{2}-\d{2}$/)
-    .optional()
-    .nullable()
-    .label('birth date'),
-  deathDate: string()
-    .matches(/^\d{4}-\d{2}-\d{2}$/)
-    .optional()
-    .nullable()
-    .label('death date'),
+  birthDate: DATE_SCHEMA.label('birth date'),
+  deathDate: DATE_SCHEMA.label('death date'),
   bio: string()
     .transform(v => stripNonPrintableAndNormalize(v, false, false))
     .optional()

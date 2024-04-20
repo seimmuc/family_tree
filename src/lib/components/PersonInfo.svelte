@@ -1,24 +1,32 @@
 <script lang="ts">
   import { nonewlines, toPersonEdit, formatDate, getPersonChanges } from '$lib/client/clutils';
   import type { PersonEdit, PersonChanges } from '$lib/client/clutils';
-  import type { PersonData } from '$lib/types';
+  import { DATE_MAX_LEN, type PersonData } from '$lib/types';
+  import { isDateString } from '$lib/utils';
   import { createEventDispatcher } from 'svelte';
   import { slide, type TransitionConfig } from 'svelte/transition';
+
+  type DateMode = 'date' | 'str';
 
   export let editMode = false;
   export let person: PersonData;
   export let bioDisplay: string | undefined = undefined;
   export let nameLink: string | undefined = undefined;
   export let transOptions: TransitionConfig = {};
+  export let initDateMode: DateMode = 'date';
 
   const dispatch = createEventDispatcher();
   let editPerson: PersonEdit;
+  let birthDM: DateMode;
+  let deathDM: DateMode;
 
   export function reset(newPerson?: PersonData) {
     if (newPerson === undefined) {
       newPerson = person;
     }
     editPerson = toPersonEdit(newPerson);
+    birthDM = toViableDM(initDateMode, editPerson.birthDate);
+    deathDM = toViableDM(initDateMode, editPerson.deathDate);
   }
 
   export function getChanges(): PersonChanges {
@@ -30,6 +38,17 @@
   }
 
   $: dispatch('edit', { edit: editPerson });
+
+  function toViableDM(dateMode: DateMode, dateString: string): DateMode {
+    dateString = dateString.trim();
+    return dateMode === 'date' && (dateString === '' || isDateString(dateString)) ? 'date' : 'str';
+  }
+
+  function toggleDM() {
+    const newDM: DateMode = birthDM === 'date' || deathDM === 'date' ? 'str' : 'date';
+    birthDM = toViableDM(newDM, editPerson.birthDate);
+    deathDM = toViableDM(newDM, editPerson.deathDate);
+  }
 
   reset(person);
 </script>
@@ -52,8 +71,17 @@
 
 {#if editMode}
   <div class="date input" transition:slide={{ axis: 'y', ...transOptions }}>
-    <input type="date" bind:value={editPerson.birthDate} />
-    <input type="date" bind:value={editPerson.deathDate} />
+    {#if birthDM === 'date'}
+      <input type="date" bind:value={editPerson.birthDate} />
+    {:else}
+      <input type="text" maxlength={DATE_MAX_LEN} bind:value={editPerson.birthDate} />
+    {/if}
+    <button type="button" class="switch-format-btn" on:click={toggleDM}>-</button>
+    {#if deathDM === 'date'}
+      <input type="date" bind:value={editPerson.deathDate} />
+    {:else}
+      <input type="text" maxlength={DATE_MAX_LEN} bind:value={editPerson.deathDate} />
+    {/if}
   </div>
 {:else}
   <h4 class="date display" transition:slide={{ axis: 'y', ...transOptions }}>
@@ -93,14 +121,32 @@
     font-size: var(--pi-date-font-size, inherit);
     font-weight: var(--pi-date-font-weight, bold);
     @include colors.col-trans($bg: true, $fg: true, $br: true);
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    gap: 0.4em;
     &.display {
       border: 1px solid transparent;
     }
-    &.input input {
-      background-color: var(--col-secondary-bg, colors.$light-secondary-bg);
-      border: 1px solid var(--col-secondary-border, colors.$light-secondary-border);
-      border-radius: 2px;
-      color: var(--col-fg, colors.$light-text);
+    &.input {
+      input {
+        background-color: var(--col-secondary-bg, colors.$light-secondary-bg);
+        border: 1px solid var(--col-secondary-border, colors.$light-secondary-border);
+        border-radius: 2px;
+        color: var(--col-fg, colors.$light-text);
+        width: 10em;
+      }
+      .switch-format-btn {
+        @include common.styleless-button;
+        background-color: var(--col-secondary-bg, colors.$light-secondary-bg);
+        border: 1px solid var(--col-secondary-border, colors.$light-secondary-border);
+        border-radius: 3px;
+        color: var(--col-fg, colors.$light-text);
+        @include colors.col-trans($bg: true, $fg: true, $br: true);
+        &:hover {
+          background-color: var(--col-secondary-border, colors.$light-secondary-border);
+        }
+      }
     }
   }
   .bio {

@@ -77,6 +77,7 @@
         <a href={editMode ? undefined : `/details/${p.id}`} on:click={e => onNameClick(e, p)}>{p.name}</a>
         {#if editMode}
           <button
+            type="button"
             transition:slide={{ duration: 400, axis: 'x' }}
             class="remove-button"
             on:click={() => removePerson(p)}

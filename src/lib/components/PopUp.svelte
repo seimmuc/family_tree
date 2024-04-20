@@ -46,8 +46,8 @@
       return;
     }
     const ch = piComp.getChanges();
-    if (ch.name?.trim() === '') {
-      // name is too short
+    if (ch.name?.trim() === '' || Object.keys(ch).length < 1) {
+      // name is too short or empty update
       return cancel();
     }
     const updatePerson: UpdatablePerson = { id: person.id, ...ch };

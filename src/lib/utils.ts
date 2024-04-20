@@ -128,7 +128,7 @@ export function dateFromString(dateString: string): Date | null {
   return match === null ? null : new Date(match[0]);
 }
 
-export function isDateString(dateString?: string): boolean {
+export function isDateString(dateString: string | undefined): boolean {
   if (dateString === undefined) {
     return false;
   }

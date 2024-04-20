@@ -1,6 +1,6 @@
 import { browser } from '$app/environment';
 import { goto } from '$app/navigation';
-import type { PersonData, User, UserPermission } from '$lib/types';
+import { DATE_SCHEMA, type PersonData, type User, type UserPermission } from '$lib/types';
 import { clearUndefinedVals, createUrl, isDateString, stripNonPrintableAndNormalize } from '$lib/utils';
 import type { Action } from 'svelte/action';
 
@@ -36,9 +36,17 @@ export function formatDate(
   if (!dateString) {
     return `unknown ${dateType ? dateType + ' ' : ''}date`;
   }
+  if (!isDateString(dateString)) {
+    return dateString;
+  }
   dateFormatOptions ??= DEFAULT_DATE_FORMAT_OPRIONS;
   const d = new Date(dateString);
   return d.toLocaleDateString(undefined, dateFormatOptions);
+}
+
+export function validateDateString(dateString: string): string | undefined {
+  dateString = dateString.trim();
+  return dateString && DATE_SCHEMA.isValidSync(dateString) ? dateString : undefined;
 }
 
 export const nonewlines: Action<HTMLElement, undefined, { 'on:returnkey': (e: CustomEvent<KeyboardEvent>) => void }> = (
@@ -88,8 +96,8 @@ export function toPersonEdit(person: PersonData): PersonEdit {
 export function getPersonChanges(original: PersonData, edits: PersonEdit): PersonChanges {
   const name = stripNonPrintableAndNormalize(edits.name, false, true);
   const bio = stripNonPrintableAndNormalize(edits.bio, false, false) || undefined;
-  const bd = isDateString(edits.birthDate) ? edits.birthDate : undefined;
-  const dd = isDateString(edits.deathDate) ? edits.deathDate : undefined;
+  const bd = validateDateString(edits.birthDate);
+  const dd = validateDateString(edits.deathDate);
   const res = {
     name: name !== original.name ? name : undefined,
     bio: bio !== original.bio ? bio ?? null : undefined,
