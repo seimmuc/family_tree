@@ -14,6 +14,7 @@
   import { fade, slide, type SlideParams } from 'svelte/transition';
   import { page } from '$app/stores';
   import { TRANS_DELAY, redirUserChange } from '$lib/client/clutils.js';
+  import { invalidate } from '$app/navigation';
 
   const TRANS_OPTS: SlideParams = { axis: 'x', duration: TRANS_DELAY };
 
@@ -162,6 +163,9 @@
         addKnownUsers([result]);
         if (selectedUser?.id === result?.id) {
           setSelectedUser(result, true);
+        }
+        if (result.id === data.user?.id) {
+          invalidate('data:user');
         }
       } else {
         const { error }: { error: string } = await response.json();

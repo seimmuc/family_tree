@@ -1,3 +1,4 @@
+import { browser } from '$app/environment';
 import { goto } from '$app/navigation';
 import type { PersonData, User, UserPermission } from '$lib/types';
 import { clearUndefinedVals, createUrl, isDateString, stripNonPrintableAndNormalize } from '$lib/utils';
@@ -102,6 +103,13 @@ export function photoUrl(person: PersonData): string | undefined {
   return person.photo ? `/media/${person.photo}` : undefined;
 }
 
+function userHasPermission(user: Pick<User, 'permissions'> | null, permission: UserPermission): boolean {
+  if (user === null) {
+    return false;
+  }
+  return user.permissions.includes(permission) || user.permissions.includes('admin');
+}
+
 export function redirUserChange(
   user: Pick<User, 'permissions'> | null,
   requiredPermission: UserPermission | undefined,
@@ -109,9 +117,13 @@ export function redirUserChange(
   loginIfNoUser = true,
   noPermRedirPath = '/'
 ) {
-  if (user === null || (requiredPermission && !user.permissions.includes(requiredPermission))) {
-    const targetPath = user === null && loginIfNoUser ? '/account/login' : noPermRedirPath || '/';
-    const url = createUrl(targetPath, currentUrl, { redirectTo: currentUrl.pathname });
+  if (!browser) {
+    return;
+  }
+  if (user === null || (requiredPermission && !userHasPermission(user, requiredPermission))) {
+    const redirToLogin = user === null && loginIfNoUser;
+    const targetPath = redirToLogin ? '/account/login' : noPermRedirPath || '/';
+    const url = createUrl(targetPath, currentUrl, redirToLogin ? { redirectTo: currentUrl.pathname } : undefined);
     const gotoPromise = goto(url, { invalidateAll: false });
     gotoPromise.catch(() => {
       window.location.assign(url);
