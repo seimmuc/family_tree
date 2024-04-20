@@ -2,9 +2,10 @@ import { PERSON_SCHEMA, RELATIVES_SINGLE_TYPE_CHANGE_SCHEMA } from '$lib/types';
 import type { RelativesChangeRequest, UpdatablePerson, UserPermission } from '$lib/types';
 import { ValidationError } from 'yup';
 import { Result, err, ok } from 'neverthrow';
-import { validatePassword, validateUsername } from '$lib/utils';
+import { createUrl, validatePassword, validateUsername } from '$lib/utils';
 import type { User } from 'lucia';
 import { USERS_ADMINS } from '$env/static/private';
+import { error, redirect } from '@sveltejs/kit';
 
 export type FailError = { code: number; message: string };
 
@@ -125,4 +126,19 @@ export function userHasPermission(user: User | null, permission: UserPermission)
     return true;
   }
   return user.permissions.includes(permission) || user.permissions.includes('admin');
+}
+
+export function userLoginRedirOrErrorIfNotAuthorized(
+  user: User | null,
+  permission: UserPermission,
+  curUrl: URL,
+  errorMsg?: string
+) {
+  if (!userHasPermission(user, permission)) {
+    if (user === null) {
+      redirect(302, createUrl('/account/login', curUrl, { redirectTo: curUrl.pathname }));
+    }
+    error(403, { message: errorMsg ?? 'Unauthorized' });
+    throw new Error('this should never happen');
+  }
 }

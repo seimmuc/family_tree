@@ -1,10 +1,17 @@
 import { ReadActions, WriteActions } from '$lib/server/graph/person.js';
 import { addOrReplacePhoto, tryDeletePhoto } from '$lib/server/media.js';
-import { parseUpdatePerson, parseUpdateRelatives } from '$lib/server/sutils.js';
+import {
+  parseUpdatePerson,
+  parseUpdateRelatives,
+  userHasPermission,
+  userLoginRedirOrErrorIfNotAuthorized
+} from '$lib/server/sutils.js';
 import type { RelativesChangeRequest } from '$lib/types.js';
 import { error, type Actions, fail } from '@sveltejs/kit';
 
-export async function load({ params }) {
+export async function load({ params, locals, url }) {
+  userLoginRedirOrErrorIfNotAuthorized(locals.user, 'view', url);
+  const canEdit = userHasPermission(locals.user, 'edit');
   const pid = params.id;
   const [allPeople, relations] = await ReadActions.perform(async act => {
     return await act.findFamily([pid], 1);
@@ -33,11 +40,15 @@ export async function load({ params }) {
   const rids = children.concat(parents);
   const relatives = allPeople.filter(p => rids.includes(p.id));
 
-  return { person, children, parents, relatives };
+  return { person, children, parents, relatives, canEdit };
 }
 
 export const actions: Actions = {
-  update: async ({ request }) => {
+  update: async ({ request, locals }) => {
+    if (!userHasPermission(locals.user, 'edit')) {
+      return fail(403, { message: 'unauthorized' });
+    }
+
     const data = await request.formData();
 
     // parse update data

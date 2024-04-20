@@ -38,7 +38,7 @@
 <script lang="ts">
   import { filedrop, type FileDropOptions } from 'filedrop-svelte';
   import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
-  import { photoUrl, TRANS_DELAY } from '$lib/client/clutils.js';
+  import { photoUrl, redirUserChange, TRANS_DELAY } from '$lib/client/clutils.js';
   import type { Person, RelativesChangeRequest, UpdatablePerson } from '$lib/types.js';
   import { enhance } from '$app/forms';
   import type { SubmitFunction } from '@sveltejs/kit';
@@ -47,6 +47,7 @@
   import { peopleToIdArray } from '$lib/utils';
   import SearchBox, { type SearchBoxLinkFunc } from '$lib/components/SearchBox.svelte';
   import PersonInfo from '$lib/components/PersonInfo.svelte';
+  import { page } from '$app/stores';
 
   // params
   export let data;
@@ -106,7 +107,9 @@
 
   // html callbacks
   function setEditMode(newVal: boolean) {
-    editMode = newVal;
+    if (!newVal || data.canEdit) {
+      editMode = newVal;
+    }
     if (!editMode) {
       clearImage();
       removeFormMessage();
@@ -160,6 +163,10 @@
     }
   }
   const submitUpdate: SubmitFunction = ({ formData, cancel }) => {
+    if (!data.canEdit) {
+      cancel();
+      return;
+    }
     // person-update
     const ch = piComp.getChanges();
     if (ch.name?.trim() === '') {
@@ -213,6 +220,12 @@
     formMsg.messageTimeout = undefined;
   }
 
+  // login on user change
+  function authChange(user: typeof data.user) {
+    redirUserChange(user, 'view', $page.url);
+  }
+  $: authChange(data.user);
+
   setEditMode(false);
   data.dynamicMenu.set({comp: SearchBox, compProps: { linkFunc: (p => `/details/${p.id}`) satisfies SearchBoxLinkFunc }});
 </script>
@@ -221,7 +234,9 @@
   <div class="main-area">
     <div class="top-controls">
       <a class="btn tree" href="/tree/{person.id}">view tree</a>
-      <button class="btn edit" type="button" on:click={toggleEditMode}>toggle edit mode</button>
+      {#if data.canEdit || editMode}
+        <button class="btn edit" type="button" on:click={toggleEditMode}>toggle edit mode</button>
+      {/if}
     </div>
 
     <form method="POST" action="?/update" enctype="multipart/form-data" use:enhance={submitUpdate} bind:this={frm}>
@@ -275,7 +290,7 @@
         <RelSection {editMode} sectionName="Children" people={children} bind:this={rels.childrenComp} />
       </div>
 
-      {#if editMode}
+      {#if editMode && data.canEdit}
         {#if formMsg.message}
           <p class="form-message" transition:slide={{ axis: 'y', ...TRANS_OPT }}>{formMsg.message}</p>
         {/if}

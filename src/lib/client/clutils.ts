@@ -1,5 +1,6 @@
-import type { PersonData } from '$lib/types';
-import { clearUndefinedVals, isDateString, stripNonPrintableAndNormalize } from '$lib/utils';
+import { goto } from '$app/navigation';
+import type { PersonData, User, UserPermission } from '$lib/types';
+import { clearUndefinedVals, createUrl, isDateString, stripNonPrintableAndNormalize } from '$lib/utils';
 import type { Action } from 'svelte/action';
 
 const DEFAULT_DATE_FORMAT_OPRIONS: Intl.DateTimeFormatOptions = {
@@ -99,4 +100,18 @@ export function getPersonChanges(original: PersonData, edits: PersonEdit): Perso
 
 export function photoUrl(person: PersonData): string | undefined {
   return person.photo ? `/media/${person.photo}` : undefined;
+}
+
+export function redirUserChange(
+  user: Pick<User, 'permissions'> | null,
+  requiredPermission: UserPermission | undefined,
+  currentUrl: URL
+) {
+  if (user === null || (requiredPermission && !user.permissions.includes(requiredPermission))) {
+    const url = createUrl('/account/login', currentUrl, { redirectTo: currentUrl.pathname });
+    const gotoPromise = goto(url, { invalidateAll: false });
+    gotoPromise.catch(() => {
+      window.location.assign(url);
+    });
+  }
 }

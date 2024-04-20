@@ -14,6 +14,7 @@
   const TRANS_OPT = { duration: TRANS_DELAY, easing: quadOut };
 
   export let person: Person;
+  export let canEdit: boolean;
   export let style: string = '';
 
   const bioMaxLength = 50;
@@ -30,13 +31,20 @@
   let unsavedEdits = { fields: [] as string[], timer: undefined as NodeJS.Timeout | undefined };
 
   function toggleEditMode() {
-    editMode = !editMode;
+    if (editMode || canEdit) {
+      editMode = !editMode;
+    }
   }
 
   function actionCancel() {
     editMode = false;
   }
   const submitUpdate: SubmitFunction = ({ formData, cancel }) => {
+    if (!canEdit) {
+      // extra redundancy in case canEdit changes without a reset() call
+      cancel();
+      return;
+    }
     const ch = piComp.getChanges();
     if (ch.name?.trim() === '') {
       // name is too short
@@ -103,7 +111,13 @@
       on:edit={e => (canSubmit = e.detail.edit.name.trim().length > 0)}
       bind:this={piComp}
     >
-      <button slot="name-left" class="top-button" type="button" on:click={toggleEditMode}>
+      <button
+        slot="name-left"
+        class="top-button"
+        type="button"
+        on:click={toggleEditMode}
+        disabled={!canEdit || editMode}
+      >
         <FontAwesomeIcon icon={faPenToSquare} />
       </button>
       <button slot="name-right" class="top-button" type="button" on:click={close}>
@@ -119,7 +133,7 @@
         on:click={() => (showFullBio = !showFullBio)}>{showFullBio ? 'Show less' : 'Show more'}</button
       >
     {/if}
-    {#if editMode}
+    {#if editMode && canEdit}
       <div class="form-buttons" transition:slide={{ ...TRANS_OPT, axis: 'y' }}>
         <button type="submit" disabled={!canSubmit}>Save</button>
         <button type="button" on:click={actionCancel}>Cancel</button>
@@ -157,6 +171,9 @@
       @include colors.col-trans($bg: false, $fg: true, $br: false);
       padding: 11px;
       font-size: 1.4em;
+      &:is([disabled]) {
+        color: gray;
+      }
     }
     .button-show-more {
       @include common.styleless-button;

@@ -2,7 +2,7 @@
   import FloatingUiComponent, { type FloatingUICompControl } from '$lib/components/FloatingUIComponent.svelte';
   import { USER_PERMISSIONS } from '$lib/types.js';
   import type { User, UserID, UserPermChanges, UserPermChangesReq, UserPermission } from '$lib/types.js';
-  import { createUrl, titleCaseWord, validateUsername } from '$lib/utils';
+  import { titleCaseWord, validateUsername } from '$lib/utils';
   import {
     faCircleCheck,
     faCircleChevronRight,
@@ -12,9 +12,8 @@
   } from '@fortawesome/free-solid-svg-icons';
   import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
   import { fade, slide, type SlideParams } from 'svelte/transition';
-  import type { User as LUser } from 'lucia';
-  import { goto } from '$app/navigation';
   import { page } from '$app/stores';
+  import { redirUserChange } from '$lib/client/clutils.js';
 
   const TRANS_OPTS: SlideParams = { axis: 'x', duration: 200 };
 
@@ -49,15 +48,9 @@
     queries: [] as string[]
   };
 
-  function authChange(newUser: LUser | null) {
-    if (newUser === null || !newUser.permissions.includes('admin')) {
-      const gotoPromise = goto('/account/login', { invalidateAll: false });
-      gotoPromise.catch(() => {
-        console.debug('Svelte goto failed, falling back to standard JS');
-        const newUrl = createUrl('/account/login', $page.url, undefined);
-        window.location.assign(newUrl);
-      });
-    }
+  // login on user change
+  function authChange(user: typeof data.user) {
+    redirUserChange(user, 'admin', $page.url);
   }
   $: authChange(data.user);
 

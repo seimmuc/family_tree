@@ -1,8 +1,12 @@
 import { ReadActions } from '$lib/server/graph/person.js';
+import { userHasPermission } from '$lib/server/sutils.js';
 import { SEARCH_QUERY_SCHEMA, type SearchQuery } from '$lib/types.js';
 import { json } from '@sveltejs/kit';
 
-export async function POST({ request }) {
+export async function POST({ request, locals }) {
+  if (!userHasPermission(locals.user, 'view')) {
+    return new Response(null, { status: 403 });
+  }
   const qry: SearchQuery = SEARCH_QUERY_SCHEMA.validateSync(await request.json());
   const people = await ReadActions.perform(act => {
     if (qry.nameComplete) {
