@@ -100,6 +100,13 @@ export function parseUpdateRelatives(
   }
 }
 
+export function addConfigAdmin<U extends User>(user: U): U {
+  if (ADMINISTRATORS.includes(user.username) && !user.permissions.includes('admin')) {
+    user.permissions.push('admin');
+  }
+  return user;
+}
+
 export function userHasPermission(user: User | null, permission: UserPermission): boolean {
   if (user === null) {
     return false;

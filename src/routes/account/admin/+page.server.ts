@@ -1,5 +1,5 @@
 import type { PageServerLoad } from './$types';
-import { userLoginRedirOrErrorIfNotAuthorized } from '$lib/server/sutils';
+import { addConfigAdmin, userLoginRedirOrErrorIfNotAuthorized } from '$lib/server/sutils';
 import { UserReadActions } from '$lib/server/graph/user';
 import { USER_SCHEMA, type User } from '$lib/types';
 
@@ -12,7 +12,7 @@ export const load = (async ({ locals, url }) => {
     return await act.getAllUsers(FETCHED_USER_LIMIT, 0);
   });
 
-  const users: User[] = usersDb.map(u => USER_SCHEMA.cast(u));
+  const users: User[] = usersDb.map(u => addConfigAdmin(USER_SCHEMA.cast(u)));
 
   return { users, maxFetched: users.length >= FETCHED_USER_LIMIT };
 }) satisfies PageServerLoad;

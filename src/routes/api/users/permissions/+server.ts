@@ -1,5 +1,5 @@
 import { UserWriteActions } from '$lib/server/graph/user.js';
-import { userHasPermission } from '$lib/server/sutils.js';
+import { addConfigAdmin, userHasPermission } from '$lib/server/sutils.js';
 import { USER_ID_SCHEMA, USER_PERMISSION_SCHEMA, USER_SCHEMA } from '$lib/types.js';
 import type { UserID, UserPermChangesReq, UserPermission } from '$lib/types.js';
 import { json } from '@sveltejs/kit';
@@ -33,5 +33,5 @@ export async function POST({ request, locals }) {
   if (userDb === undefined) {
     return json({ error: 'user not found' }, { status: 404 });
   }
-  return json({ result: USER_SCHEMA.cast(userDb) }, { status: 200 });
+  return json({ result: addConfigAdmin(USER_SCHEMA.cast(userDb)) }, { status: 200 });
 }
