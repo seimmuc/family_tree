@@ -19,10 +19,10 @@ export class UserReadActions {
     return (r.records[0].get('uc') as Integer).toInt();
   }
   async getAllUsers(limit: number = 50, skip: number = 0): Promise<UserDB[]> {
-    const r = await this.transaction.run(
-      'MATCH (u:User) RETURN u ORDER BY u.creationTime SKIP $s LIMIT $l',
-      { l: Integer.fromInt(limit), s: Integer.fromInt(skip) }
-    );
+    const r = await this.transaction.run('MATCH (u:User) RETURN u ORDER BY u.creationTime SKIP $s LIMIT $l', {
+      l: Integer.fromInt(limit),
+      s: Integer.fromInt(skip)
+    });
     return r.records.map(r => r.get('u').properties);
   }
   async getUserById(id: UserID): Promise<UserDB | undefined> {
@@ -31,7 +31,9 @@ export class UserReadActions {
   }
   async getUserByUsername(username: string): Promise<UserDB | undefined> {
     username = username.trim().toLowerCase();
-    const r = await this.transaction.run('MATCH (u:User) WHERE toLower(u.username) = $username RETURN u LIMIT 1', { username });
+    const r = await this.transaction.run('MATCH (u:User) WHERE toLower(u.username) = $username RETURN u LIMIT 1', {
+      username
+    });
     return r.records[0]?.get('u')?.properties;
   }
 }

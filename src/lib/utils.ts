@@ -147,13 +147,17 @@ export function peopleToIdArray(people: Person[]): string[] {
   return people.map(p => p.id);
 }
 
-export function createUrl(url: string, base: URL, searchParams: Record<string, string> | URLSearchParams | undefined): URL {
+export function createUrl(
+  url: string,
+  base: URL,
+  searchParams: Record<string, string> | URLSearchParams | undefined
+): URL {
   const result = new URL(url, base);
   if (searchParams !== undefined) {
     if (searchParams instanceof URLSearchParams) {
       searchParams.forEach((val, name) => {
         result.searchParams.append(name, val);
-      })
+      });
     } else {
       Object.entries(searchParams).forEach(([name, val]) => {
         result.searchParams.append(name, val);

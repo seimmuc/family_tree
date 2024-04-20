@@ -192,7 +192,12 @@
     const ph = formData.get('photo');
 
     // check if there are any changes
-    if (Object.keys(ch).length < 1 && updatePerson.photo !== null && !sendRelsUpd && !(ph instanceof File && ph.size > 0)) {
+    if (
+      Object.keys(ch).length < 1 &&
+      updatePerson.photo !== null &&
+      !sendRelsUpd &&
+      !(ph instanceof File && ph.size > 0)
+    ) {
       cancel(); // empty update
     }
 
@@ -227,7 +232,10 @@
   $: authChange(data.user);
 
   setEditMode(false);
-  data.dynamicMenu.set({comp: SearchBox, compProps: { linkFunc: (p => `/details/${p.id}`) satisfies SearchBoxLinkFunc }});
+  data.dynamicMenu.set({
+    comp: SearchBox,
+    compProps: { linkFunc: (p => `/details/${p.id}`) satisfies SearchBoxLinkFunc }
+  });
 </script>
 
 <div class="root">
@@ -280,9 +288,10 @@
 
       <PersonInfo
         {editMode}
-        person={person}
+        {person}
         transOptions={TRANS_OPT}
-        on:returnkey={() => frm?.requestSubmit()} bind:this={piComp}
+        on:returnkey={() => frm?.requestSubmit()}
+        bind:this={piComp}
       />
 
       <div class="relations">

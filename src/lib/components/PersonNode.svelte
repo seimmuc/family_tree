@@ -62,9 +62,24 @@
     // font-weight: 1000;
     -webkit-text-stroke: 0.5px #fff;
     &.blurbg {
-      text-shadow: white 0 0 4px, white 0 0 4px;
+      text-shadow:
+        white 0 0 4px,
+        white 0 0 4px;
       padding: ($name-edge-blur-y + $name-edge-blur-y-pad) ($name-edge-blur-x + $name-edge-blur-x-pad);
-      mask: linear-gradient(to bottom, transparent 0%, black $name-edge-blur-y, black calc(100% - $name-edge-blur-y), transparent 100%), linear-gradient(to right, black 0%, transparent $name-edge-blur-x, transparent calc(100% - $name-edge-blur-x), black 100%);
+      mask: linear-gradient(
+          to bottom,
+          transparent 0%,
+          black $name-edge-blur-y,
+          black calc(100% - $name-edge-blur-y),
+          transparent 100%
+        ),
+        linear-gradient(
+          to right,
+          black 0%,
+          transparent $name-edge-blur-x,
+          transparent calc(100% - $name-edge-blur-x),
+          black 100%
+        );
       mask-composite: subtract;
       background-color: #fff2;
       backdrop-filter: blur(2px);

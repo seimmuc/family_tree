@@ -13,9 +13,9 @@
   import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
   import { fade, slide, type SlideParams } from 'svelte/transition';
   import { page } from '$app/stores';
-  import { redirUserChange } from '$lib/client/clutils.js';
+  import { TRANS_DELAY, redirUserChange } from '$lib/client/clutils.js';
 
-  const TRANS_OPTS: SlideParams = { axis: 'x', duration: 200 };
+  const TRANS_OPTS: SlideParams = { axis: 'x', duration: TRANS_DELAY };
 
   export let data;
 

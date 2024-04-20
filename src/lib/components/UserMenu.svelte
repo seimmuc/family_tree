@@ -1,8 +1,8 @@
 <script lang="ts">
-  import type { User } from "lucia";
+  import type { User } from 'lucia';
   import { page } from '$app/stores';
-  import { createUrl } from "$lib/utils";
-    type CEv = MouseEvent & { currentTarget: EventTarget & HTMLAnchorElement };
+  import { createUrl } from '$lib/utils';
+  type CEv = MouseEvent & { currentTarget: EventTarget & HTMLAnchorElement };
 
   export let user: User | null;
   export let logoutClickHandler: ((event: CEv) => void) | undefined = undefined;
@@ -35,7 +35,7 @@
       Signed in as <span class="username">{user.username}</span>
     {/if}
   </li>
-  
+
   {#if user === null}
     <li><a href={hrefWithRedir('/account/login')}>Sign in</a></li>
     <li><a href={hrefWithRedir('/account/register')}>Register</a></li>

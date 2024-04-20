@@ -1,5 +1,5 @@
-@use 'sass:color';
-@use 'sass:list';
+@use "sass:color";
+@use "sass:list";
 
 $fade-time: 0.25s;
 
@@ -21,7 +21,6 @@ $light-details-image-overlay-bg: #68686890;
 $light-details-image-overlay-fg: $light-text;
 $light-details-image-overlay-accent: #fffa;
 $light-search-match-fg: hsl(30, 100%, 29%);
-
 
 $dark-bg: #2c2c2c;
 $dark-text: #f3f3f3;
@@ -45,13 +44,13 @@ $dark-search-match-fg: hsl(30, 100%, 74%);
 // $dark-accent-fg: color.scale($dark-bg, $lightness: +12%);
 
 @function col-trans-str($props...) {
-  $res: '';
+  $res: "";
   $i: list.length($props);
   @each $pr in $props {
     $i: $i - 1;
-    $res: $res + $pr + ' ' + $fade-time;
+    $res: $res + $pr + " " + $fade-time;
     @if $i > 0 {
-      $res: $res + ', ';
+      $res: $res + ", ";
     }
   }
   @return $res;
@@ -59,13 +58,13 @@ $dark-search-match-fg: hsl(30, 100%, 74%);
 @function col-props($bg: true, $fg: true, $br: true) {
   $res: [];
   @if $bg {
-    $res: list.append($res, 'background-color');
+    $res: list.append($res, "background-color");
   }
   @if $fg {
-    $res: list.append($res, 'color');
+    $res: list.append($res, "color");
   }
   @if $br {
-    $res: list.append($res, 'border-color');
+    $res: list.append($res, "border-color");
   }
   @return $res;
 }
