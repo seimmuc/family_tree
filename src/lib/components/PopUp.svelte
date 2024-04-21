@@ -116,7 +116,7 @@
         class="top-button"
         type="button"
         on:click={toggleEditMode}
-        disabled={!canEdit || editMode}
+        disabled={!canEdit && !editMode}
       >
         <FontAwesomeIcon icon={faPenToSquare} />
       </button>
