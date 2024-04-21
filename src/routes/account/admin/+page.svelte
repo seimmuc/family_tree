@@ -1,5 +1,6 @@
 <script lang="ts">
   import FloatingUiComponent, { type FloatingUICompControl } from '$lib/components/FloatingUIComponent.svelte';
+  import TimedMessage from '$lib/components/TimedMessage.svelte';
   import { USER_PERMISSIONS } from '$lib/types.js';
   import type { User, UserID, UserPermChanges, UserPermChangesReq, UserPermission } from '$lib/types.js';
   import { titleCaseWord, validateUsername } from '$lib/utils';
@@ -26,6 +27,8 @@
   let unsavedChanges = false;
   const pOptions: Record<UserPermission, boolean> = { view: false, edit: false, admin: false };
   let requestPending = false;
+  let saveErrMsgSet: ((message: string | undefined) => void) | undefined = undefined;
+  let delErrMsgSet: ((message: string | undefined) => void) | undefined = undefined;
   const removeOwnAdmin = {
     attempting: false,
     allow: false
@@ -34,14 +37,12 @@
     button: undefined as HTMLButtonElement | undefined,
     tooltipRoot: undefined as HTMLDivElement | undefined,
     tooltipControl: undefined as FloatingUICompControl | undefined,
-    processing: false,
-    error: undefined as [string, NodeJS.Timeout] | undefined
+    processing: false
   };
   const show = {
     forceSet: false,
     fetchUser: false,
-    saving: false,
-    error: undefined as [string, NodeJS.Timeout] | undefined
+    saving: false
   };
   const searchReq = {
     prohibit: false,
@@ -102,7 +103,7 @@
   }
 
   function onUserInput(force = false) {
-    const uinp = userInp.trim().toLowerCase();
+    const uinp = (userInp ?? '').trim().toLowerCase();
     const su = users.find(u => u.username.toLowerCase() === uinp);
     const userChanged = su === selectedUser || setSelectedUser(su, force);
     show.forceSet = !force && !userChanged && su !== undefined;
@@ -169,15 +170,7 @@
         }
       } else {
         const { error }: { error: string } = await response.json();
-        if (show.error) {
-          clearTimeout(show.error[1]);
-        }
-        show.error = [
-          error ?? 'server error',
-          setTimeout(() => {
-            show.error = undefined;
-          }, 8_000)
-        ];
+        saveErrMsgSet?.(error ?? 'server error');
       }
       show.saving = false;
     });
@@ -216,15 +209,7 @@
         }
       } else {
         const { error }: { error: string } = await response.json();
-        if (del.error) {
-          clearTimeout(del.error[1]);
-        }
-        del.error = [
-          error ?? 'server error',
-          setTimeout(() => {
-            del.error = undefined;
-          }, 8_000)
-        ];
+        delErrMsgSet?.(error ?? 'server error');
       }
       del.processing = false;
     });
@@ -240,6 +225,7 @@
       type="search"
       list="usernames-list"
       maxlength="32"
+      disabled={searchReq.prohibit}
       bind:value={userInp}
       on:input={() => onUserInput()}
       on:keydown={e => {
@@ -249,11 +235,11 @@
       }}
     /></label
   >
-  {#if show.forceSet}
+  {#if show.forceSet && !searchReq.prohibit}
     <button type="button" class="uin-btn" transition:slide={TRANS_OPTS} on:click={() => onUserInput(true)}>
       <FontAwesomeIcon icon={faCircleCheck} />
     </button>
-  {:else if show.fetchUser}
+  {:else if show.fetchUser && !searchReq.prohibit}
     <button
       type="button"
       class="uin-btn"
@@ -294,9 +280,9 @@
           {#if del.processing}
             <FontAwesomeIcon icon={faSpinner} spinPulse />
           {/if}
-          {#if del.error}
-            <span class="error-text" transition:fade={{ duration: TRANS_OPTS.duration }}>{del.error[0]}</span>
-          {/if}
+          <TimedMessage bind:setMessage={delErrMsgSet} let:msg>
+            <span class="error-text" transition:fade={{ duration: TRANS_OPTS.duration }}>{msg}</span>
+          </TimedMessage>
         </div>
       </FloatingUiComponent>
     </h2>
@@ -327,9 +313,9 @@
         {#if show.saving}
           <FontAwesomeIcon icon={faSpinner} spinPulse />
         {/if}
-        {#if show.error}
-          <span class="error-text" transition:fade={{ duration: TRANS_OPTS.duration }}>{show.error[0]}</span>
-        {/if}
+        <TimedMessage bind:setMessage={saveErrMsgSet} let:msg>
+          <span class="error-text" transition:fade={{ duration: TRANS_OPTS.duration }}>{msg}</span>
+        </TimedMessage>
       </div>
     {/if}
   </div>
@@ -352,6 +338,7 @@
   .user-select {
     display: flex;
     align-items: center;
+    padding-bottom: 1em;
     label {
       display: contents;
       color: var(--col-fg, colors.$light-text);
@@ -386,7 +373,6 @@
     }
   }
   .separator {
-    margin-top: 1em;
     height: 3px;
     width: calc(100% + 2 * var(--account-hpad, 0px));
     margin-left: calc(0px - var(--account-hpad, 0px));

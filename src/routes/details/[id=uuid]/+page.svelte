@@ -47,6 +47,7 @@
   import { peopleToIdArray } from '$lib/utils';
   import SearchBox, { type SearchBoxLinkFunc } from '$lib/components/SearchBox.svelte';
   import PersonInfo from '$lib/components/PersonInfo.svelte';
+  import TimedMessage from '$lib/components/TimedMessage.svelte';
   import { page } from '$app/stores';
 
   // params
@@ -65,6 +66,7 @@
     src: undefined as string | undefined,
     pSrc: undefined as string | undefined
   };
+  let formMsgg: TimedMessage | undefined = undefined;
   const formMsg = {
     message: undefined as string | undefined,
     messageType: undefined as 'success' | 'error' | undefined,
@@ -112,7 +114,7 @@
     }
     if (!editMode) {
       clearImage();
-      removeFormMessage();
+      formMsgg?.hide();
     }
   }
   function toggleEditMode() {
@@ -203,27 +205,15 @@
 
     // handle errors/success returned by the server
     return async ({ result, update }) => {
-      removeFormMessage();
+      formMsgg?.hide();
       if (result.type === 'failure' && result.data?.message) {
-        formMsg.message = result.data.message;
-        formMsg.messageType = 'error';
-        formMsg.messageTimeout = setTimeout(() => {
-          removeFormMessage();
-        }, 7000);
+        formMsgg?.setMessage(result.data.message);
       } else if (result.type === 'success') {
-        editMode = false;
+        setEditMode(false);
       }
       update();
     };
   };
-
-  // other functions
-  function removeFormMessage() {
-    clearTimeout(formMsg.messageTimeout);
-    formMsg.message = undefined;
-    formMsg.messageType = undefined;
-    formMsg.messageTimeout = undefined;
-  }
 
   // login on user change
   function authChange(user: typeof data.user) {
@@ -300,9 +290,9 @@
       </div>
 
       {#if editMode && data.canEdit}
-        {#if formMsg.message}
-          <p class="form-message" transition:slide={{ axis: 'y', ...TRANS_OPT }}>{formMsg.message}</p>
-        {/if}
+        <TimedMessage bind:this={formMsgg} let:msg>
+          <p class="form-message" transition:slide={{ axis: 'y', ...TRANS_OPT }}>{msg}</p>
+        </TimedMessage>
         <div class="form-buttons" transition:slide={{ axis: 'y', ...TRANS_OPT }}>
           <button type="submit">Save</button>
           <button type="button" on:click={() => setEditMode(false)}>Cancel</button>

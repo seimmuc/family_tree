@@ -11,7 +11,7 @@
     show = true;
     timeout = setTimeout(hide, duration);
   }
-  function hide() {
+  export function hide() {
     show = false;
     if (timeout !== undefined) {
       clearTimeout(timeout);
