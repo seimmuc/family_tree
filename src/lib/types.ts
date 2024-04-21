@@ -38,19 +38,28 @@ export const DATE_SCHEMA = string().trim().max(DATE_MAX_LEN).optional().nullable
 export const PERSON_SCHEMA: ObjectSchema<UpdatablePerson> = object({
   id: personId.label('person id'),
   name: string()
-    .transform(v => stripNonPrintableAndNormalize(v, false, true).trim())
     .min(1)
+    .max(75)
+    .trim()
+    .transform(v => stripNonPrintableAndNormalize(v, false, true))
     .optional()
     .nonNullable(),
-  gender: string().optional().nullable(),
+  gender: string()
+    .max(30)
+    .trim()
+    .transform(v => stripNonPrintableAndNormalize(v, false, true))
+    .optional()
+    .nullable(),
   birthDate: DATE_SCHEMA.label('birth date'),
   deathDate: DATE_SCHEMA.label('death date'),
   bio: string()
+    .max(1000)
+    .trim()
     .transform(v => stripNonPrintableAndNormalize(v, false, false))
     .optional()
     .nullable(),
   photo: string()
-    .matches(/^[^/.][^/]*$/)
+    .matches(/^[^/.][^/]{0,127}$/)
     .optional()
     .nullable()
 }).noUnknown();
