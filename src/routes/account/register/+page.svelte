@@ -6,6 +6,7 @@
   import { slide } from 'svelte/transition';
   import type { SubmitFunction } from './$types.js';
   import { TRANS_DELAY } from '$lib/client/clutils.js';
+  import { LANGUAGES } from '$lib/types.js';
 
   export let data;
 
@@ -39,6 +40,14 @@
     <label>
       <span class="lbl">Password</span>
       <input name="password" type="password" autocomplete="current-password" required />
+    </label>
+    <label>
+      <span class="lbl">Language</span>
+      <select name="language">
+        {#each LANGUAGES as l}
+          <option value={l.code} selected={l.code === 'en'}>{l.name}</option>
+        {/each}
+      </select>
     </label>
     <TimedMessage bind:this={errComp} let:msg>
       <span class="error" transition:slide={{ duration: TRANS_DELAY, axis: 'y' }}>{msg}</span>

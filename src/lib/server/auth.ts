@@ -16,7 +16,8 @@ export const lucia = new Lucia(adapter, {
     return {
       username: attributes.username,
       permissions: attributes.permissions,
-      creationTime: attributes.creationTime
+      creationTime: attributes.creationTime,
+      options: attributes.options ?? {}
     } satisfies Omit<User, 'id'>;
   }
 });

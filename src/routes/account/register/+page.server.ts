@@ -5,7 +5,7 @@ import { Argon2id } from 'oslo/password';
 import { lucia } from '$lib/server/auth';
 import { parseConfigBool } from '$lib/server/sutils';
 import { validateUsernameAndPassword } from '$lib/utils';
-import type { UserPermission } from '$lib/types';
+import { LANGUAGES, type UserOptions, type UserPermission } from '$lib/types';
 import { USERS_MAKE_FIRST_ADMIN } from '$env/static/private';
 
 const makeFirstUserAdmin = parseConfigBool(USERS_MAKE_FIRST_ADMIN);
@@ -30,6 +30,12 @@ export const actions: Actions = {
         return fail(422, { message: upvr.error });
       }
       const [username, password] = upvr.value;
+      const lc = formData.get('language') ?? 'en';
+      const language = LANGUAGES.find(l => l.code === lc);
+      if (language === undefined) {
+        return fail(422, { message: 'unknown language' });
+      }
+      const options: UserOptions = { language: language.code };
 
       // create user
       const passwordHash = await new Argon2id().hash(password);
@@ -41,7 +47,7 @@ export const actions: Actions = {
             permissions.push('admin');
           }
         }
-        return await act.addUser({ username, passwordHash, permissions });
+        return await act.addUser({ username, passwordHash, permissions, options });
       });
       if (dbUserRes.isErr()) {
         if (dbUserRes.error === 'username is already in use') {

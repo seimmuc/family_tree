@@ -157,15 +157,21 @@ export type RelativesChangeRequest = { [relType: string]: RelativesSingleTypeCha
 export const USER_PERMISSIONS = ['view', 'edit', 'admin'] as const;
 export type UserPermission = (typeof USER_PERMISSIONS)[number];
 
+export const LANGUAGES = [
+  { code: 'en', name: 'English' },
+  { code: 'ru', name: 'Русский' }
+] as const;
+export type LangCode = (typeof LANGUAGES)[number]['code'];
+
 export type UserID = UUID;
+export type UserOptions = { language?: LangCode };
+
 // UserMinimal is the minimal representation of a user and should be safe to send to other users and unauthenticated clients when appropriate
 export type UserMinimal = { id: UserID; username: string };
 // own User object can be safely sent to authenticated client
-export type User = UserMinimal & { creationTime: number; permissions: UserPermission[] };
+export type User = UserMinimal & { creationTime: number; permissions: UserPermission[]; options: UserOptions };
 // UserDB represents user's database object and should never be sent to the client, not even the currently signed-in user's own object
 export type UserDB = User & { passwordHash: string };
-// Future use
-export type UserOptions = {};
 
 export const USER_ID_SCHEMA = string().uuid().required() as StringSchema<UUID, AnyObject, undefined, ''>;
 export const USER_PERMISSION_SCHEMA = string().required().oneOf(USER_PERMISSIONS);
@@ -173,7 +179,12 @@ export const USER_SCHEMA: ObjectSchema<User> = object({
   id: USER_ID_SCHEMA,
   username: string().required().min(2).max(32),
   creationTime: yupnumber().required(),
-  permissions: array(USER_PERMISSION_SCHEMA).required()
+  permissions: array(USER_PERMISSION_SCHEMA).required(),
+  options: object({
+    language: string()
+      .optional()
+      .oneOf(LANGUAGES.map(l => l.code))
+  })
 }).noUnknown();
 
 export type UserPermChanges = { perm: UserPermission; change: 'add' | 'del' }[];
