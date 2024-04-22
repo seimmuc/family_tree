@@ -34,7 +34,7 @@ export type PersonData = Omit<Person, 'id'>;
 export type UpdatablePerson = Partial<OptionalKeysNullable<PersonData>> & Pick<Person, 'id'>;
 
 export const DATE_MAX_LEN = 30;
-export const DATE_SCHEMA = string().trim().max(DATE_MAX_LEN).optional().nullable();
+const DATE_SCHEMA = string().trim().max(DATE_MAX_LEN).optional().nullable();
 export const PERSON_SCHEMA: ObjectSchema<UpdatablePerson> = object({
   id: personId.label('person id'),
   name: string()
@@ -63,6 +63,7 @@ export const PERSON_SCHEMA: ObjectSchema<UpdatablePerson> = object({
     .optional()
     .nullable()
 }).noUnknown();
+export const PERSON_EDIT_SCHEMA = PERSON_SCHEMA.pick(['name', 'bio', 'birthDate', 'deathDate']);
 
 export const PERSON_KEYS = Object.keys(PERSON_SCHEMA.fields);
 

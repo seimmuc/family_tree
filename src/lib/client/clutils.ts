@@ -1,8 +1,10 @@
 import { browser } from '$app/environment';
 import { goto } from '$app/navigation';
-import { DATE_SCHEMA, type PersonData, type User, type UserPermission } from '$lib/types';
-import { clearUndefinedVals, createUrl, isDateString, stripNonPrintableAndNormalize } from '$lib/utils';
+import { PERSON_EDIT_SCHEMA, type PersonData, type User, type UserPermission } from '$lib/types';
+import { clearUndefinedVals, createUrl, isDateString } from '$lib/utils';
+import { err, ok, type Result } from 'neverthrow';
 import type { Action } from 'svelte/action';
+import { ValidationError } from 'yup';
 
 const DEFAULT_DATE_FORMAT_OPRIONS: Intl.DateTimeFormatOptions = {
   year: 'numeric',
@@ -12,6 +14,9 @@ const DEFAULT_DATE_FORMAT_OPRIONS: Intl.DateTimeFormatOptions = {
 };
 
 export const TRANS_DELAY = 250;
+
+// will change to { key: string, values: Record<string, any> } once we start using yup.setLocale()
+export type YupErr = string;
 
 export function truncateString(str: string, maxChars: number, maxLines: number): [string, boolean] {
   let result = str;
@@ -50,11 +55,6 @@ export function timestampToFormattedTime(
   dateFormatOptions ??= DEFAULT_DATE_FORMAT_OPRIONS;
   const d = new Date(utcTimestamp);
   return d.toLocaleTimeString(undefined, dateFormatOptions);
-}
-
-export function validateDateString(dateString: string): string | undefined {
-  dateString = dateString.trim();
-  return dateString && DATE_SCHEMA.isValidSync(dateString) ? dateString : undefined;
 }
 
 export const nonewlines: Action<HTMLElement, undefined, { 'on:returnkey': (e: CustomEvent<KeyboardEvent>) => void }> = (
@@ -101,18 +101,22 @@ export function toPersonEdit(person: PersonData): PersonEdit {
 /**
  * Returns an object with person properties that need to be changed, null value means that that property should be removed, undefined values should be ignored
  */
-export function getPersonChanges(original: PersonData, edits: PersonEdit): PersonChanges {
-  const name = stripNonPrintableAndNormalize(edits.name, false, true);
-  const bio = stripNonPrintableAndNormalize(edits.bio, false, false) || undefined;
-  const bd = validateDateString(edits.birthDate);
-  const dd = validateDateString(edits.deathDate);
-  const res = {
-    name: name !== original.name ? name : undefined,
-    bio: bio !== original.bio ? bio ?? null : undefined,
-    birthDate: bd !== original.birthDate ? bd ?? null : undefined,
-    deathDate: dd !== original.deathDate ? dd ?? null : undefined
-  };
-  return clearUndefinedVals(res);
+export function getPersonChanges(original: PersonData, edits: PersonEdit): Result<PersonChanges, YupErr> {
+  try {
+    const vp = PERSON_EDIT_SCHEMA.validateSync(edits);
+    const res = {
+      name: vp.name !== original.name ? vp.name : undefined,
+      bio: vp.bio !== original.bio ? vp.bio || null : undefined,
+      birthDate: vp.birthDate !== original.birthDate ? vp.birthDate || null : undefined,
+      deathDate: vp.deathDate !== original.deathDate ? vp.deathDate || null : undefined
+    };
+    return ok(clearUndefinedVals(res));
+  } catch (e) {
+    if (e instanceof ValidationError) {
+      return err(e.message);
+    }
+    throw e;
+  }
 }
 
 export function photoUrl(person: PersonData): string | undefined {

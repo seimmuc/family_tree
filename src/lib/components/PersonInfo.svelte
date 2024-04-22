@@ -1,8 +1,9 @@
 <script lang="ts">
   import { nonewlines, toPersonEdit, formatDate, getPersonChanges } from '$lib/client/clutils';
-  import type { PersonEdit, PersonChanges } from '$lib/client/clutils';
+  import type { PersonEdit, PersonChanges, YupErr } from '$lib/client/clutils';
   import { DATE_MAX_LEN, type PersonData } from '$lib/types';
   import { isDateString } from '$lib/utils';
+  import type { Result } from 'neverthrow';
   import { createEventDispatcher } from 'svelte';
   import { slide, type TransitionConfig } from 'svelte/transition';
 
@@ -29,7 +30,7 @@
     deathDM = toViableDM(initDateMode, editPerson.deathDate);
   }
 
-  export function getChanges(): PersonChanges {
+  export function getChanges(): Result<PersonChanges, YupErr> {
     return getPersonChanges(person, editPerson);
   }
 

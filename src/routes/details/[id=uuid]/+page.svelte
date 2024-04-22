@@ -66,12 +66,7 @@
     src: undefined as string | undefined,
     pSrc: undefined as string | undefined
   };
-  let formMsgg: TimedMessage | undefined = undefined;
-  const formMsg = {
-    message: undefined as string | undefined,
-    messageType: undefined as 'success' | 'error' | undefined,
-    messageTimeout: undefined as NodeJS.Timeout | undefined
-  };
+  let formMsg: TimedMessage | undefined = undefined;
   let frm: HTMLFormElement | undefined;
   const rels = {
     parentsComp: undefined as any as RelSection,
@@ -114,7 +109,7 @@
     }
     if (!editMode) {
       clearImage();
-      formMsgg?.hide();
+      formMsg?.hide();
     }
   }
   function toggleEditMode() {
@@ -170,11 +165,12 @@
       return;
     }
     // person-update
-    const ch = piComp.getChanges();
-    if (ch.name?.trim() === '') {
+    const chRes = piComp.getChanges();
+    if (chRes.isErr()) {
+      formMsg?.setMessage(chRes.error);
       return cancel();
     }
-    const updatePerson: UpdatablePerson = { id: person.id, ...ch };
+    const updatePerson: UpdatablePerson = { id: person.id, ...chRes.value };
     if (image.pSrc == '') {
       // image was marked for deletion
       updatePerson.photo = null;
@@ -195,19 +191,20 @@
 
     // check if there are any changes
     if (
-      Object.keys(ch).length < 1 &&
+      Object.keys(chRes.value).length < 1 &&
       updatePerson.photo !== null &&
       !sendRelsUpd &&
       !(ph instanceof File && ph.size > 0)
     ) {
+      formMsg?.setMessage('nothing to update');
       cancel(); // empty update
     }
 
     // handle errors/success returned by the server
     return async ({ result, update }) => {
-      formMsgg?.hide();
+      formMsg?.hide();
       if (result.type === 'failure' && result.data?.message) {
-        formMsgg?.setMessage(result.data.message);
+        formMsg?.setMessage(result.data.message);
       } else if (result.type === 'success') {
         setEditMode(false);
       }
@@ -290,7 +287,7 @@
       </div>
 
       {#if editMode && data.canEdit}
-        <TimedMessage bind:this={formMsgg} let:msg>
+        <TimedMessage bind:this={formMsg} let:msg>
           <p class="form-message" transition:slide={{ axis: 'y', ...TRANS_OPT }}>{msg}</p>
         </TimedMessage>
         <div class="form-buttons" transition:slide={{ axis: 'y', ...TRANS_OPT }}>

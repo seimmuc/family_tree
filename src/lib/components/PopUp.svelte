@@ -10,6 +10,7 @@
   import { truncateString, TRANS_DELAY } from '$lib/client/clutils';
   import PersonInfo from './PersonInfo.svelte';
   import { quadOut } from 'svelte/easing';
+  import TimedMessage from './TimedMessage.svelte';
 
   const TRANS_OPT = { duration: TRANS_DELAY, easing: quadOut };
 
@@ -28,6 +29,7 @@
   let canSubmit: boolean = true;
   let frm: HTMLFormElement | undefined = undefined;
   let piComp: PersonInfo;
+  let formMsg: TimedMessage | undefined = undefined;
   let unsavedEdits = { fields: [] as string[], timer: undefined as NodeJS.Timeout | undefined };
 
   function toggleEditMode() {
@@ -45,12 +47,16 @@
       cancel();
       return;
     }
-    const ch = piComp.getChanges();
-    if (ch.name?.trim() === '' || Object.keys(ch).length < 1) {
-      // name is too short or empty update
+    const chRes = piComp.getChanges();
+    if (chRes.isErr()) {
+      formMsg?.setMessage(chRes.error);
       return cancel();
     }
-    const updatePerson: UpdatablePerson = { id: person.id, ...ch };
+    if (Object.keys(chRes).length < 1) {
+      formMsg?.setMessage('nothing to update');
+      return cancel();
+    }
+    const updatePerson: UpdatablePerson = { id: person.id, ...chRes.value };
     formData.append('person-update', JSON.stringify(updatePerson));
     editMode = false;
   };
@@ -134,6 +140,9 @@
       >
     {/if}
     {#if editMode && canEdit}
+      <TimedMessage bind:this={formMsg} let:msg>
+        <p class="form-message" transition:slide={{ axis: 'y', ...TRANS_OPT }}>{msg}</p>
+      </TimedMessage>
       <div class="form-buttons" transition:slide={{ ...TRANS_OPT, axis: 'y' }}>
         <button type="submit" disabled={!canSubmit}>Save</button>
         <button type="button" on:click={actionCancel}>Cancel</button>
@@ -178,6 +187,10 @@
     .button-show-more {
       @include common.styleless-button;
       @include common.link-colors;
+    }
+    .form-message {
+      margin: 0.5em 0 0;
+      color: red;
     }
     .form-buttons {
       margin-top: 12px;
