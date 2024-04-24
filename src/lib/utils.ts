@@ -1,5 +1,5 @@
 import { err, ok, type Result } from 'neverthrow';
-import type { Person } from './types';
+import { DEFAULT_USER_OPTIONS, type Person, type UserOptions } from './types';
 
 export function clearUndefinedVals(object: Record<string, any>): Record<string, any> {
   return Object.fromEntries(Object.entries(object).filter(([k, v]) => v !== undefined));
@@ -165,4 +165,12 @@ export function createUrl(
     }
   }
   return result;
+}
+
+export function getUserOption<K extends keyof UserOptions>(o: UserOptions, key: K): NonNullable<UserOptions[K]> {
+  return o[key] ?? DEFAULT_USER_OPTIONS[key];
+}
+
+export function toFullUserOptions(o: UserOptions): Required<UserOptions> {
+  return Object.assign({}, DEFAULT_USER_OPTIONS, o);
 }

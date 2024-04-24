@@ -1,6 +1,6 @@
 <script lang="ts">
   import { browser } from '$app/environment';
-  import { invalidate, invalidateAll } from '$app/navigation';
+  import { goto, invalidate, invalidateAll } from '$app/navigation';
   import { navigating } from '$app/stores';
   import { theme } from '$lib/client/stores.js';
   import FloatingUiComponent from '$lib/components/FloatingUIComponent.svelte';
@@ -93,7 +93,11 @@
         <FontAwesomeIcon icon={faMoon} />
       {/if}
     </button>
-    <button><FontAwesomeIcon icon={faGear} /></button>
+    <button
+      on:click={() => {
+        goto('/account/settings');
+      }}><FontAwesomeIcon icon={faGear} /></button
+    >
     <FloatingUiComponent enableArrow={false} offsetPx={-6} bind:this={userBox.floatComp}>
       <button slot="ref" type="button" let:floatingRef use:floatingRef on:click={onUserClick}>
         <FontAwesomeIcon icon={faUser} />

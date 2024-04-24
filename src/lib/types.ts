@@ -166,6 +166,15 @@ export type LangCode = (typeof LANGUAGES)[number]['code'];
 export type UserID = UUID;
 export type UserOptions = { language?: LangCode };
 
+export const USER_OPTIONS_SCHEMA = object({
+  language: string()
+    .oneOf(LANGUAGES.map(l => l.code))
+    .optional()
+}).noUnknown();
+export const USER_OPTIONS_UPDATE_SCHEMA = USER_OPTIONS_SCHEMA.partial();
+
+export const DEFAULT_USER_OPTIONS: Required<UserOptions> = { language: 'en' };
+
 // UserMinimal is the minimal representation of a user and should be safe to send to other users and unauthenticated clients when appropriate
 export type UserMinimal = { id: UserID; username: string };
 // own User object can be safely sent to authenticated client
@@ -180,11 +189,7 @@ export const USER_SCHEMA: ObjectSchema<User> = object({
   username: string().required().min(2).max(32),
   creationTime: yupnumber().required(),
   permissions: array(USER_PERMISSION_SCHEMA).required(),
-  options: object({
-    language: string()
-      .optional()
-      .oneOf(LANGUAGES.map(l => l.code))
-  })
+  options: USER_OPTIONS_SCHEMA
 }).noUnknown();
 
 export type UserPermChanges = { perm: UserPermission; change: 'add' | 'del' }[];

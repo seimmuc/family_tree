@@ -119,11 +119,11 @@ export function userHasPermission(user: User | null, permission: UserPermission)
 
 export function userLoginRedirOrErrorIfNotAuthorized(
   user: User | null,
-  permission: UserPermission,
+  permission: UserPermission | null,
   curUrl: URL,
   errorMsg?: string
 ) {
-  if (!userHasPermission(user, permission)) {
+  if (permission === null ? user === null : !userHasPermission(user, permission)) {
     if (user === null) {
       redirect(302, createUrl('/account/login', curUrl, { redirectTo: curUrl.pathname }));
     }
