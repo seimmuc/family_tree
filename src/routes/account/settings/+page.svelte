@@ -3,11 +3,13 @@
   import { page } from '$app/stores';
   import { TRANS_DELAY, redirUserChange } from '$lib/client/clutils';
   import TimedMessage from '$lib/components/TimedMessage.svelte';
-  import { LANGUAGES, USER_OPTIONS_UPDATE_SCHEMA, type User, type UserOptions } from '$lib/types';
+  import { LANGUAGES, USER_OPTIONS_UPDATE_SCHEMA, type LangCode, type User, type UserOptions, DEFAULT_USER_OPTIONS } from '$lib/types';
   import { toFullUserOptions } from '$lib/utils.js';
   import { slide } from 'svelte/transition';
   import type { SubmitFunction } from './$types.js';
   import { ValidationError } from 'yup';
+  import * as m from '$lib/paraglide/messages.js';
+  import { getContext } from 'svelte';
 
   export let data;
 
@@ -16,6 +18,8 @@
   let user: User;
   let options: Required<UserOptions>;
   let editOptions: Required<UserOptions>;
+
+  const setLanguage: (lang: LangCode) => void = getContext('setLanguage');
 
   function reset(u: User | null) {
     if (u === null) {
@@ -62,6 +66,9 @@
       } else if (result.type === 'success' && result.data?.options) {
         if (data.user) {
           data.user.options = result.data.options;
+          if (setLanguage !== undefined) {
+            setLanguage(data.user.options.language ?? DEFAULT_USER_OPTIONS.language);
+          }
         }
         reset(data.user);
       }
@@ -75,11 +82,11 @@
   reset(data.user);
 </script>
 
-<h1 class="head">Settings</h1>
+<h1 class="head">{m.settingsTitle()}</h1>
 <form method="POST" use:enhance={submitUpdate}>
   <div class="settings">
     <label>
-      <span class="lbl">Language</span>
+      <span class="lbl">{m.languageTitle()}</span>
       <select bind:value={editOptions.language} on:change={onSettingChange}>
         {#each LANGUAGES as l}
           <option value={l.code} selected={l.code === options.language}>{l.name}</option>

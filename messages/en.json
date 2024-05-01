@@ -1,0 +1,8 @@
+{
+  "$schema": "https://inlang.com/schema/inlang-message-format",
+  "hello": "hello world",
+  "hi": "Hi {name}!",
+  "settingsTitle": "Settings",
+  "languageTitle": "Language",
+  "signOut": "Sign out"
+}

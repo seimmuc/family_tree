@@ -6,14 +6,33 @@
   import FloatingUiComponent from '$lib/components/FloatingUIComponent.svelte';
   import UserMenu from '$lib/components/UserMenu.svelte';
   import '$lib/styles/global.scss';
-  import type { Theme } from '$lib/types.js';
+  import { DEFAULT_USER_OPTIONS, type LangCode, type Theme } from '$lib/types.js';
   import { faGear, faUser, faSun, faMoon } from '@fortawesome/free-solid-svg-icons';
   import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
-  import { onMount } from 'svelte';
+  import { onMount, setContext } from 'svelte';
   import { config as faconfig } from '@fortawesome/fontawesome-svg-core';
   import '@fortawesome/fontawesome-svg-core/styles.css'; // TODO test impact of this import on initial/subsequent load times
+  import { i18n } from '$lib/i18n';
 
   export let data;
+
+  let language: LangCode;
+  function setLanguage(lang: LangCode) {
+    if (lang === language) {
+      return;
+    }
+    if (browser && language !== undefined) {
+      invalidate('paraglide:lang');
+    }
+    language = lang;
+    i18n.config.runtime.setLanguageTag(lang);
+    if (browser) {
+      document.documentElement.lang = lang;
+      document.documentElement.dir = i18n.config.textDirection[lang] ?? "ltr";
+    }
+  }
+  setContext('setLanguage', setLanguage);
+  setLanguage(data.user?.options.language ?? DEFAULT_USER_OPTIONS.language);
 
   const dMenu = data.dynamicMenu;
 
@@ -81,32 +100,34 @@
 
 <svelte:window on:click={onWindowClick} />
 
-<div class="menu-bar">
-  <div class="menu-section left">
-    <svelte:component this={$dMenu.comp} {...$dMenu.compProps} />
-  </div>
-  <div class="menu-section right">
-    <button on:click={toggleTheme}>
-      {#if data.theme === 'light'}
-        <FontAwesomeIcon icon={faSun} />
-      {:else}
-        <FontAwesomeIcon icon={faMoon} />
-      {/if}
-    </button>
-    <button
-      on:click={() => {
-        goto('/account/settings');
-      }}><FontAwesomeIcon icon={faGear} /></button
-    >
-    <FloatingUiComponent enableArrow={false} offsetPx={-6} bind:this={userBox.floatComp}>
-      <button slot="ref" type="button" let:floatingRef use:floatingRef on:click={onUserClick}>
-        <FontAwesomeIcon icon={faUser} />
+{#key language}
+  <div class="menu-bar">
+    <div class="menu-section left">
+      <svelte:component this={$dMenu.comp} {...$dMenu.compProps} />
+    </div>
+    <div class="menu-section right">
+      <button on:click={toggleTheme}>
+        {#if data.theme === 'light'}
+          <FontAwesomeIcon icon={faSun} />
+        {:else}
+          <FontAwesomeIcon icon={faMoon} />
+        {/if}
       </button>
-      <UserMenu slot="tooltip" user={data.user} logoutClickHandler={onLogout} bind:this={userBox.userComp} />
-    </FloatingUiComponent>
+      <button
+        on:click={() => {
+          goto('/account/settings');
+        }}><FontAwesomeIcon icon={faGear} /></button
+      >
+      <FloatingUiComponent enableArrow={false} offsetPx={-6} bind:this={userBox.floatComp}>
+        <button slot="ref" type="button" let:floatingRef use:floatingRef on:click={onUserClick}>
+          <FontAwesomeIcon icon={faUser} />
+        </button>
+        <UserMenu slot="tooltip" user={data.user} logoutClickHandler={onLogout} bind:this={userBox.userComp} />
+      </FloatingUiComponent>
+    </div>
   </div>
-</div>
-<slot />
+  <slot />
+{/key}
 
 <style lang="scss">
   @use '$lib/styles/common';

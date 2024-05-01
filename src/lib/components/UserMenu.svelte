@@ -2,6 +2,7 @@
   import type { User } from '$lib/types';
   import { page } from '$app/stores';
   import { createUrl } from '$lib/utils';
+  import * as m from '$lib/paraglide/messages.js';
   type CEv = MouseEvent & { currentTarget: EventTarget & HTMLAnchorElement };
 
   export let user: User | null;
@@ -40,7 +41,7 @@
     <li><a href={hrefWithRedir('/account/login')}>Sign in</a></li>
     <li><a href={hrefWithRedir('/account/register')}>Register</a></li>
   {:else}
-    <li><a href={hrefWithRedir('/account/logout')} on:click={onLogoutClick}>Sign out</a></li>
+    <li><a href={hrefWithRedir('/account/logout')} on:click={onLogoutClick}>{m.signOut()}</a></li>
   {/if}
 </ul>
 

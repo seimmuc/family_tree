@@ -1,0 +1,8 @@
+{
+  "$schema": "https://inlang.com/schema/inlang-message-format",
+  "hello": "Здраствуй мир",
+  "hi": "Привет {name}!",
+  "settingsTitle": "Настройки",
+  "languageTitle": "Язык",
+  "signOut": "Выйти"
+}
