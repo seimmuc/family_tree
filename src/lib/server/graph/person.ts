@@ -6,7 +6,7 @@ import type {
   Relationship,
   UpdatablePerson
 } from '$lib/types';
-import { Integer, ManagedTransaction, Relationship as Neo4jRel } from 'neo4j-driver';
+import type { Integer, ManagedTransaction, Relationship as Neo4jRel } from 'neo4j-driver';
 import { readTransaction, writeTransaction } from './memgraph';
 import type { TransactionConfig } from 'neo4j-driver-core';
 

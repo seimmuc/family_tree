@@ -1,4 +1,4 @@
-import { object, string, ObjectSchema, boolean, array, number as yupnumber, StringSchema } from 'yup';
+import { object, string, type ObjectSchema, boolean, array, number as yupnumber, type StringSchema } from 'yup';
 import type { InferType, AnyObject } from 'yup';
 import { stripNonPrintableAndNormalize } from './utils';
 import type { UUID } from 'crypto';

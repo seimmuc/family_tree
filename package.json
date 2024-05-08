@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "vite dev",
-    "build": "paraglide-js compile --project ./project.inlang --outdir ./src/paraglide && vite build",
+    "build": "paraglide-js compile --project ./project.inlang --outdir ./src/lib/paraglide && vite build",
     "preview": "vite preview",
     "test": "npm run test:integration && npm run test:unit",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
@@ -12,8 +12,7 @@
     "test:integration": "playwright test",
     "test:unit": "vitest",
     "lint": "prettier --check .",
-    "format": "prettier --write .",
-    "postinstall": "paraglide-js compile --project ./project.inlang --outdir ./src/paraglide"
+    "format": "prettier --write ."
   },
   "devDependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.5.1",
@@ -24,6 +23,7 @@
     "@inlang/paraglide-sveltekit": "^0.6.12",
     "@playwright/test": "^1.28.1",
     "@sveltejs/adapter-auto": "^3.0.0",
+    "@sveltejs/adapter-node": "^5.0.1",
     "@sveltejs/kit": "^2.0.0",
     "@sveltejs/vite-plugin-svelte": "^3.0.0",
     "@types/node": "^20.11.19",

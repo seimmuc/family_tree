@@ -171,7 +171,7 @@
       return cancel();
     }
     const updatePerson: UpdatablePerson = { id: person.id, ...chRes.value };
-    if (image.pSrc == '') {
+    if (image.pSrc === '') {
       // image was marked for deletion
       updatePerson.photo = null;
     }

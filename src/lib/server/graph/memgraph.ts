@@ -1,4 +1,4 @@
-import { Driver, ManagedTransaction, Session, auth, driver } from 'neo4j-driver';
+import { type Driver, type ManagedTransaction, type Session, auth, driver } from 'neo4j-driver';
 import { MEMGRAPH_URI, MEMGRAPH_USER, MEMGRAPH_PASSWORD, MEMGRAPH_DB_NAME } from '$env/static/private';
 import type { TransactionConfig } from 'neo4j-driver-core';
 
