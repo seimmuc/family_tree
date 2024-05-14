@@ -1,0 +1,25 @@
+include:
+  - path:
+    - ./compose-webserver.yaml
+    - ./compose-webserver-nginx.yaml
+  - ./compose-pubnet.yaml
+
+services:
+  rproxy:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+      target: nginxproxy
+    volumes:
+      - media-vol:/gentreerp/media
+    networks:
+      - proxy
+      - public
+    depends_on:
+      web:
+        condition: service_started
+        required: true
+        restart: true
+    ports:
+      - "80:80"
+    restart: on-failure:10

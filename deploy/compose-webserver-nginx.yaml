@@ -1,0 +1,22 @@
+services:
+  web:
+    environment:
+      PROTOCOL_HEADER: x-forwarded-proto
+      HOST_HEADER: x-forwarded-host
+      PORT_HEADER: x-forwarded-port
+      ADDRESS_HEADER: x-forwarded-for
+      XFF_DEPTH: 2
+      PORT: 80
+    volumes:
+      - media-vol:/gentree/media
+    networks:
+      - proxy
+
+volumes:
+  media-vol:
+
+networks:
+  proxy:
+    driver: bridge
+    internal: true
+    attachable: false

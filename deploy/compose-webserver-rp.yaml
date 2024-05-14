@@ -1,0 +1,23 @@
+include:
+  - ./compose-pubnet.yaml
+
+services:
+  web:
+    networks:
+      - public
+    ports:
+      - "8088:80"
+    environment:
+      PROTOCOL_HEADER: x-forwarded-proto
+      HOST_HEADER: x-forwarded-host
+      PORT_HEADER: x-forwarded-port
+      ADDRESS_HEADER: x-forwarded-for
+      XFF_DEPTH: 2
+      PORT: 80
+    volumes:
+      - type: bind
+        source: ./production_data/media
+        target: /gentree/media
+        bind:
+          create_host_path: true
+        read_only: false

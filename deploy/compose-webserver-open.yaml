@@ -1,0 +1,12 @@
+include:
+  - ./compose-pubnet.yaml
+
+services:
+  web:
+    networks:
+      - public
+    ports:
+      - "80:80"
+    environment:
+      ORIGIN: http://localhost
+      PORT: 80

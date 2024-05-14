@@ -1,0 +1,5 @@
+networks:
+  public:
+    driver: bridge
+    internal: false
+    attachable: false

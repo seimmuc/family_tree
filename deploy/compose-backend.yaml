@@ -1,0 +1,31 @@
+services:
+  memdb:
+    image: memgraph/memgraph-mage
+    restart: on-failure:5
+    environment:
+      MEMGRAPH_USER: muser
+      MEMGRAPH_PASSWORD: mpass
+      MEMGRAPH: --data-directory=/var/lib/memgraph
+    volumes:
+      - type: volume
+        source: memdb-data
+        target: /var/lib/memgraph
+        read_only: false
+    healthcheck:
+      test: ["CMD-SHELL", "echo 'RETURN 0;' | mgconsole -username muser -password mpass || exit 1"]
+      interval: 1m45s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+      start_interval: 2s
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge
+    internal: true
+    attachable: false
+
+volumes:
+  memdb-data:
