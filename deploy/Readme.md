@@ -1,6 +1,7 @@
 # Running `docker compose up`
 
 Docker compose commands should be ran from the project's root directory. It should look something like this:
+
 ```bash
 docker compose -f ./deploy/compose-run-nginx.yaml --project-name family-tree up -d
 ```

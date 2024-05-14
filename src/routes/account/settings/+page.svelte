@@ -3,7 +3,8 @@
   import { page } from '$app/stores';
   import { TRANS_DELAY, redirUserChange } from '$lib/client/clutils';
   import TimedMessage from '$lib/components/TimedMessage.svelte';
-  import { LANGUAGES, USER_OPTIONS_UPDATE_SCHEMA, type LangCode, type User, type UserOptions, DEFAULT_USER_OPTIONS } from '$lib/types';
+  import { LANGUAGES, USER_OPTIONS_UPDATE_SCHEMA, DEFAULT_USER_OPTIONS } from '$lib/types';
+  import type { LangCode, User, UserOptions } from '$lib/types';
   import { toFullUserOptions } from '$lib/utils.js';
   import { slide } from 'svelte/transition';
   import type { SubmitFunction } from './$types.js';

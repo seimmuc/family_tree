@@ -5,10 +5,11 @@ A geneology tree SvelteKit website.
 1. Make sure you have docker compose, then clone and cd into this repo.
 
 2. Modify `.env` file or create `.env.local` to modify/override server options.
-    ```shell
-    cp .env .env.local
-    nano .env.local
-    ```
+
+   ```shell
+   cp .env .env.local
+   nano .env.local
+   ```
 
 3. Run `docker compose -f ./deploy/compose-run-nginx.yaml --project-name family-tree up -d`.
 

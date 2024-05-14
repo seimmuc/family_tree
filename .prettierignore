@@ -2,3 +2,9 @@
 pnpm-lock.yaml
 package-lock.json
 yarn.lock
+
+# Ignore paraglide generated files
+src/lib/paraglide/*
+
+# Ignore docker compose files
+deploy/**/*.yaml

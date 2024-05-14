@@ -28,7 +28,7 @@
     i18n.config.runtime.setLanguageTag(lang);
     if (browser) {
       document.documentElement.lang = lang;
-      document.documentElement.dir = i18n.config.textDirection[lang] ?? "ltr";
+      document.documentElement.dir = i18n.config.textDirection[lang] ?? 'ltr';
     }
   }
   setContext('setLanguage', setLanguage);
