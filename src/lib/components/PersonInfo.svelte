@@ -6,6 +6,7 @@
   import type { Result } from 'neverthrow';
   import { createEventDispatcher } from 'svelte';
   import { slide, type TransitionConfig } from 'svelte/transition';
+  import * as m from '$lib/paraglide/messages.js';
 
   type DateMode = 'date' | 'str';
 
@@ -15,11 +16,13 @@
   export let nameLink: string | undefined = undefined;
   export let transOptions: TransitionConfig = {};
   export let initDateMode: DateMode = 'date';
+  export let placeholders: { name: string; bio: string } = { name: m.placeholderName(), bio: m.placeholderBio() };
 
   const dispatch = createEventDispatcher();
   let editPerson: PersonEdit;
   let birthDM: DateMode;
   let deathDM: DateMode;
+  const phShown = { name: false, bio: false };
 
   export function reset(newPerson?: PersonData) {
     if (newPerson === undefined) {
@@ -28,10 +31,18 @@
     editPerson = toPersonEdit(newPerson);
     birthDM = toViableDM(initDateMode, editPerson.birthDate);
     deathDM = toViableDM(initDateMode, editPerson.deathDate);
+    setPlaceholderShown('name', editPerson.name.length < 1, editPerson.name);
+    setPlaceholderShown('bio', editPerson.bio.length < 1, editPerson.bio);
   }
 
   export function getChanges(): Result<PersonChanges, YupErr> {
-    return getPersonChanges(person, editPerson);
+    const { name: np, bio: bp } = phShown;
+    setPlaceholderShown('name', false);
+    setPlaceholderShown('bio', false);
+    const result = getPersonChanges(person, editPerson);
+    setPlaceholderShown('name', np);
+    setPlaceholderShown('bio', bp);
+    return result;
   }
 
   export function getPersonEdit(): PersonEdit {
@@ -51,13 +62,40 @@
     deathDM = toViableDM(newDM, editPerson.deathDate);
   }
 
+  function setPlaceholderShown(inpType: 'name' | 'bio', shown: boolean, resetVal = '') {
+    if (!placeholders[inpType] || shown === phShown[inpType]) {
+      return;
+    }
+    phShown[inpType] = shown;
+    if (shown) {
+      editPerson[inpType] = placeholders[inpType];
+    } else {
+      editPerson[inpType] = resetVal;
+    }
+  }
+  function onFocusIn(inpType: 'name' | 'bio') {
+    setPlaceholderShown(inpType, false);
+  }
+  function onFocusOut(inpType: 'name' | 'bio') {
+    setPlaceholderShown(inpType, editPerson[inpType].length < 1);
+  }
+
   reset(person);
 </script>
 
 <div class="name-bar">
   <slot name="name-left"><div /></slot>
   {#if editMode}
-    <h1 class="name" contenteditable="plaintext-only" bind:textContent={editPerson.name} use:nonewlines on:returnkey />
+    <h1
+      class="name"
+      class:placeholder={phShown.name}
+      contenteditable="plaintext-only"
+      bind:textContent={editPerson.name}
+      use:nonewlines
+      on:returnkey
+      on:focus={() => onFocusIn('name')}
+      on:blur={() => onFocusOut('name')}
+    />
   {:else}
     <h1 class="name">
       {#if nameLink}
@@ -91,7 +129,14 @@
 {/if}
 
 {#if editMode}
-  <p class="bio" contenteditable="plaintext-only" bind:textContent={editPerson.bio} />
+  <p
+    class="bio"
+    class:placeholder={phShown.bio}
+    contenteditable="plaintext-only"
+    bind:textContent={editPerson.bio}
+    on:focus={() => onFocusIn('bio')}
+    on:blur={() => onFocusOut('bio')}
+  />
 {:else}
   <p class="bio">{bioDisplay ? bioDisplay : person.bio}</p>
 {/if}
@@ -157,5 +202,8 @@
     text-align: center;
     @include common.contenteditable-border;
     @include colors.col-trans($bg: false, $fg: true, $br: true);
+  }
+  .placeholder {
+    color: var(--col-disabled-fg, colors.$light-text-disabled);
   }
 </style>

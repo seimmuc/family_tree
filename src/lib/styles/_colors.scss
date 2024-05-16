@@ -7,6 +7,7 @@ $warning-fg: rgb(255, 128, 0);
 
 $light-bg: #ebebeb;
 $light-text: #080808;
+$light-text-disabled: color.adjust($light-text, $lightness: 35%);
 $light-primary-bg: color.scale($light-bg, $lightness: -7.5%);
 $light-primary-border: color.scale($light-primary-bg, $lightness: -20%);
 $light-secondary-bg: color.scale($light-bg, $lightness: -20%);
@@ -24,6 +25,7 @@ $light-search-match-fg: hsl(30, 100%, 29%);
 
 $dark-bg: #2c2c2c;
 $dark-text: #f3f3f3;
+$dark-text-disabled: color.adjust($dark-text, $lightness: -35%);
 $dark-primary-bg: color.scale($dark-bg, $lightness: +7.5%);
 $dark-primary-border: color.scale($dark-primary-bg, $lightness: +20%);
 $dark-secondary-bg: color.scale($dark-bg, $lightness: +20%);

@@ -10,6 +10,7 @@
 :root:not([data-theme="dark"]) {
   --col-bg: #{colors.$light-bg};
   --col-fg: #{colors.$light-text};
+  --col-disabled-fg: #{colors.$light-text-disabled};
   --col-primary-bg: #{colors.$light-primary-bg};
   --col-primary-border: #{colors.$light-primary-border};
   --col-secondary-bg: #{colors.$light-secondary-bg};
@@ -31,6 +32,7 @@
 :root[data-theme="dark"] {
   --col-bg: #{colors.$dark-bg};
   --col-fg: #{colors.$dark-text};
+  --col-disabled-fg: #{colors.$dark-text-disabled};
   --col-primary-bg: #{colors.$dark-primary-bg};
   --col-primary-border: #{colors.$dark-primary-border};
   --col-secondary-bg: #{colors.$dark-secondary-bg};
