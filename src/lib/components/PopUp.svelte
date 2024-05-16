@@ -75,13 +75,18 @@
     if (!editMode) {
       return true;
     }
-    const uc = [...Object.keys(piComp.getChanges())];
+    const ch = piComp.getChanges();
+    if (ch.isErr()) {
+      return false;
+    }
+    const uc = [...Object.keys(ch.value)];
     if (uc.length < 1) {
       return true;
     }
     if (unsavedEdits.timer !== undefined) {
       clearTimeout(unsavedEdits.timer);
     }
+    // TODO make this work again
     unsavedEdits.fields = uc;
     unsavedEdits.timer = setTimeout(() => {
       unsavedEdits.fields = [];

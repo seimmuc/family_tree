@@ -106,9 +106,9 @@ export function getPersonChanges(original: PersonData, edits: PersonEdit): Resul
     const vp = PERSON_EDIT_SCHEMA.validateSync(edits);
     const res = {
       name: vp.name !== original.name ? vp.name : undefined,
-      bio: vp.bio !== original.bio ? vp.bio || null : undefined,
-      birthDate: vp.birthDate !== original.birthDate ? vp.birthDate || null : undefined,
-      deathDate: vp.deathDate !== original.deathDate ? vp.deathDate || null : undefined
+      bio: vp.bio !== (original.bio ?? '') ? vp.bio || null : undefined,
+      birthDate: vp.birthDate !== (original.birthDate ?? '') ? vp.birthDate || null : undefined,
+      deathDate: vp.deathDate !== (original.deathDate ?? '') ? vp.deathDate || null : undefined
     };
     return ok(clearUndefinedVals(res));
   } catch (e) {
