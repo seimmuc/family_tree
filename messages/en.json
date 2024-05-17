@@ -6,5 +6,6 @@
   "languageTitle": "Language",
   "signOut": "Sign out",
   "placeholderName": "Name",
-  "placeholderBio": "Bio"
+  "placeholderBio": "Bio",
+  "newPersonHeader": "Add new person"
 }

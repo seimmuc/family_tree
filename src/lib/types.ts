@@ -65,6 +65,31 @@ export const PERSON_SCHEMA: ObjectSchema<UpdatablePerson> = object({
 }).noUnknown();
 export const PERSON_EDIT_SCHEMA = PERSON_SCHEMA.pick(['name', 'bio', 'birthDate', 'deathDate']);
 
+// TODO temporary, re-DRY this later
+export const PERSON_NEW_SCHEMA: ObjectSchema<PersonData> = object({
+  name: string()
+    .min(1)
+    .max(75)
+    .trim()
+    .transform(v => stripNonPrintableAndNormalize(v, false, true))
+    .required(),
+  gender: string()
+    .max(30)
+    .trim()
+    .transform(v => stripNonPrintableAndNormalize(v, false, true))
+    .optional(),
+  birthDate: DATE_SCHEMA.label('birth date').nonNullable(),
+  deathDate: DATE_SCHEMA.label('death date').nonNullable(),
+  bio: string()
+    .max(1000)
+    .trim()
+    .transform(v => stripNonPrintableAndNormalize(v, false, false))
+    .optional(),
+  photo: string()
+    .matches(/^[^/.][^/]{0,127}$/)
+    .optional()
+}).noUnknown();
+
 export const PERSON_KEYS = Object.keys(PERSON_SCHEMA.fields);
 
 export interface Relationship {

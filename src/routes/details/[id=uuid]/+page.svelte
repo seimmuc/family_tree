@@ -43,7 +43,8 @@
   import { enhance } from '$app/forms';
   import type { SubmitFunction } from '@sveltejs/kit';
   import { fade, slide } from 'svelte/transition';
-  import RelSection from './RelSection.svelte';
+  import RelSection from '../RelSection.svelte';
+  import DetailsMainArea from '../DetailsMainArea.svelte';
   import { peopleToIdArray } from '$lib/utils';
   import SearchBox, { type SearchBoxLinkFunc } from '$lib/components/SearchBox.svelte';
   import PersonInfo from '$lib/components/PersonInfo.svelte';
@@ -225,79 +226,77 @@
   });
 </script>
 
-<div class="root">
-  <div class="main-area">
-    <div class="top-controls">
-      <a class="btn tree" href="/tree/{person.id}">view tree</a>
-      {#if data.canEdit || editMode}
-        <button class="btn edit" type="button" on:click={toggleEditMode}>toggle edit mode</button>
+<DetailsMainArea>
+  <div class="top-controls">
+    <a class="btn tree" href="/tree/{person.id}">view tree</a>
+    {#if data.canEdit || editMode}
+      <button class="btn edit" type="button" on:click={toggleEditMode}>toggle edit mode</button>
+    {/if}
+  </div>
+
+  <form method="POST" action="?/update" enctype="multipart/form-data" use:enhance={submitUpdate} bind:this={frm}>
+    <div
+      class="image-box"
+      class:edit={editMode}
+      class:preview={image.pSrc !== undefined}
+      class:dragging={image.dragging}
+      use:filedrop={filedropOptions}
+      on:filedrop={onImageFileDrop}
+      on:filedragenter={onImageDragEnter}
+      on:filedragleave={onImageDragLeave}
+    >
+      {#if photoSrc === undefined}
+        <div class="photo-small missing">No photo</div>
+      {:else}
+        <img class="photo-small" src={photoSrc} alt={person.name} />
       {/if}
-    </div>
-
-    <form method="POST" action="?/update" enctype="multipart/form-data" use:enhance={submitUpdate} bind:this={frm}>
-      <div
-        class="image-box"
-        class:edit={editMode}
-        class:preview={image.pSrc !== undefined}
-        class:dragging={image.dragging}
-        use:filedrop={filedropOptions}
-        on:filedrop={onImageFileDrop}
-        on:filedragenter={onImageDragEnter}
-        on:filedragleave={onImageDragLeave}
-      >
-        {#if photoSrc === undefined}
-          <div class="photo-small missing">No photo</div>
-        {:else}
-          <img class="photo-small" src={photoSrc} alt={person.name} />
-        {/if}
-        {#if editMode}
-          <div class="photo-edit" transition:fade={TRANS_OPT}>
-            <button
-              class="photo-edit-btn upload"
-              type="button"
-              title="Upload image"
-              on:click={() => image.fileInput?.click()}
-            >
-              <FontAwesomeIcon icon={icons.upload} />
+      {#if editMode}
+        <div class="photo-edit" transition:fade={TRANS_OPT}>
+          <button
+            class="photo-edit-btn upload"
+            type="button"
+            title="Upload image"
+            on:click={() => image.fileInput?.click()}
+          >
+            <FontAwesomeIcon icon={icons.upload} />
+          </button>
+          {#if image.pSrc !== undefined}
+            <button class="photo-edit-btn clear" type="button" title="Clear" on:click={clearImage}>
+              <FontAwesomeIcon icon={icons.clear} />
             </button>
-            {#if image.pSrc !== undefined}
-              <button class="photo-edit-btn clear" type="button" title="Clear" on:click={clearImage}>
-                <FontAwesomeIcon icon={icons.clear} />
-              </button>
-            {/if}
-            <button class="photo-edit-btn delete" type="button" title="Delete image" on:click={deleteImage}>
-              <FontAwesomeIcon icon={icons.delete} />
-            </button>
-          </div>
-        {/if}
-        <input type="file" name="photo" style="display: none;" bind:this={image.fileInput} />
-      </div>
-
-      <PersonInfo
-        {editMode}
-        {person}
-        transOptions={TRANS_OPT}
-        on:returnkey={() => frm?.requestSubmit()}
-        bind:this={piComp}
-      />
-
-      <div class="relations">
-        <RelSection {editMode} sectionName="Parents" people={parents} bind:this={rels.parentsComp} />
-        <RelSection {editMode} sectionName="Children" people={children} bind:this={rels.childrenComp} />
-      </div>
-
-      {#if editMode && data.canEdit}
-        <TimedMessage bind:this={formMsg} let:msg>
-          <p class="form-message" transition:slide={{ axis: 'y', ...TRANS_OPT }}>{msg}</p>
-        </TimedMessage>
-        <div class="form-buttons" transition:slide={{ axis: 'y', ...TRANS_OPT }}>
-          <button type="submit">Save</button>
-          <button type="button" on:click={() => setEditMode(false)}>Cancel</button>
+          {/if}
+          <button class="photo-edit-btn delete" type="button" title="Delete image" on:click={deleteImage}>
+            <FontAwesomeIcon icon={icons.delete} />
+          </button>
         </div>
       {/if}
-    </form>
-  </div>
-</div>
+      <input type="file" name="photo" style="display: none;" bind:this={image.fileInput} />
+    </div>
+
+    <PersonInfo
+      {editMode}
+      {person}
+      transOptions={TRANS_OPT}
+      on:returnkey={() => frm?.requestSubmit()}
+      bind:this={piComp}
+    />
+
+    <div class="relations">
+      <RelSection {editMode} sectionName="Parents" people={parents} bind:this={rels.parentsComp} />
+      <RelSection {editMode} sectionName="Children" people={children} bind:this={rels.childrenComp} />
+    </div>
+
+    {#if editMode && data.canEdit}
+      <TimedMessage bind:this={formMsg} let:msg>
+        <p class="form-message" transition:slide={{ axis: 'y', ...TRANS_OPT }}>{msg}</p>
+      </TimedMessage>
+      <div class="form-buttons" transition:slide={{ axis: 'y', ...TRANS_OPT }}>
+        <button type="submit">Save</button>
+        <button type="button" on:click={() => setEditMode(false)}>Cancel</button>
+      </div>
+    {/if}
+  </form>
+</DetailsMainArea>
 
 <a class="back-button" href="/tree/{person.id}">
   <FontAwesomeIcon icon={faArrowLeft} size="3x" />
@@ -310,31 +309,12 @@
   $image-scale: 1;
   $edit-anim-duration: colors.$fade-time;
 
-  .root {
-    display: flex;
-    flex-direction: column;
-    margin: 30px 15px;
-    align-items: center;
+  form {
+    display: contents;
   }
-
-  .main-area {
-    width: 94%;
-    max-width: 900px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background-color: var(--col-primary-bg, colors.$light-primary-bg);
-    border: 3px solid var(--col-primary-border, colors.$light-primary-border);
-    border-radius: 16px;
-    @include colors.col-trans($bg: true, $fg: false, $br: true);
-    padding: 10px 20px;
-    form {
-      display: contents;
-    }
-    .form-message {
-      margin: 1px 0 5px;
-      color: red;
-    }
+  .form-message {
+    margin: 1px 0 5px;
+    color: red;
   }
 
   .top-controls {

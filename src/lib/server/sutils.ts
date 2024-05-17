@@ -1,5 +1,5 @@
-import { PERSON_SCHEMA, RELATIVES_SINGLE_TYPE_CHANGE_SCHEMA } from '$lib/types';
-import type { RelativesChangeRequest, UpdatablePerson, UserPermission } from '$lib/types';
+import { PERSON_NEW_SCHEMA, PERSON_SCHEMA, RELATIVES_SINGLE_TYPE_CHANGE_SCHEMA } from '$lib/types';
+import type { PersonData, RelativesChangeRequest, UpdatablePerson, UserPermission } from '$lib/types';
 import { ValidationError } from 'yup';
 import { type Result, err, ok } from 'neverthrow';
 import { createUrl } from '$lib/utils';
@@ -46,10 +46,33 @@ export function parseUpdatePerson(updateJson?: FormDataEntryValue | null): Resul
       throw new Error();
     }
   } catch {
-    return err({ code: 400, message: 'invalid json' });
+    return err({ code: 422, message: 'invalid json' });
   }
   try {
     return ok(PERSON_SCHEMA.validateSync(dangerousPerson, { abortEarly: true, stripUnknown: true }));
+  } catch (error) {
+    if (error instanceof ValidationError) {
+      return err({ code: 422, message: error.message });
+    }
+    throw error;
+  }
+}
+
+export function parseNewPerson(dataJson?: FormDataEntryValue | null): Result<PersonData, FailError> {
+  if (typeof dataJson !== 'string') {
+    return err({ code: 422, message: 'missing new person data' });
+  }
+  let dangerousPerson: { [k: string]: any };
+  try {
+    dangerousPerson = JSON.parse(dataJson);
+    if (typeof dangerousPerson !== 'object') {
+      throw new Error();
+    }
+  } catch {
+    return err({ code: 422, message: 'invalid json' });
+  }
+  try {
+    return ok(PERSON_NEW_SCHEMA.validateSync(dangerousPerson, { abortEarly: true, stripUnknown: true }));
   } catch (error) {
     if (error instanceof ValidationError) {
       return err({ code: 422, message: error.message });

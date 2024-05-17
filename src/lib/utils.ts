@@ -1,11 +1,16 @@
 import { err, ok, type Result } from 'neverthrow';
 import { DEFAULT_USER_OPTIONS, type Person, type UserOptions } from './types';
 
-export function clearUndefinedVals(object: Record<string, any>): Record<string, any> {
-  return Object.fromEntries(Object.entries(object).filter(([k, v]) => v !== undefined));
+export type ExcludeVals<T, E> = { [K in keyof T]: Exclude<T[K], E> };
+
+export function clearUndefinedVals<T extends Record<string, any>>(object: T): ExcludeVals<T, undefined> {
+  return Object.fromEntries(Object.entries(object).filter(([k, v]) => v !== undefined)) as ExcludeVals<T, undefined>;
 }
-export function clearEmptyVals(object: Record<string, any>): Record<string, any> {
-  return Object.fromEntries(Object.entries(object).filter(([k, v]) => v !== undefined && v !== null));
+export function clearEmptyVals<T extends Record<string, any>>(object: T): ExcludeVals<T, undefined | null> {
+  return Object.fromEntries(Object.entries(object).filter(([k, v]) => v !== undefined && v !== null)) as ExcludeVals<
+    T,
+    undefined | null
+  >;
 }
 
 export function clearKeys(object: Record<string, any>, keys: string[]): Record<string, any> {
