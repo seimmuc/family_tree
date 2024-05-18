@@ -180,3 +180,20 @@ export function getUserOption<K extends keyof UserOptions>(o: UserOptions, key: 
 export function toFullUserOptions(o: UserOptions): Required<UserOptions> {
   return Object.assign({}, DEFAULT_USER_OPTIONS, o);
 }
+
+export function parseConfigList(configValue: string | undefined, splitOnComma = true): string[] {
+  if (configValue === undefined) {
+    return [];
+  }
+  configValue = configValue.trim();
+  if (configValue[0] === '[' && configValue[configValue.length - 1] === ']') {
+    return JSON.parse(configValue);
+  }
+  if (configValue.length < 1) {
+    return [];
+  }
+  if (splitOnComma && configValue.includes(',')) {
+    return configValue.split(',').map(s => s.trim());
+  }
+  return [configValue];
+}

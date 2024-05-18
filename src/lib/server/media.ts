@@ -4,6 +4,9 @@ import fs from 'node:fs';
 import { MEDIA_ROOT } from '$env/static/private';
 import { PUBLIC_MEDIA_IMAGE_MIME_TYPES } from '$env/static/public';
 import { Writable } from 'node:stream';
+import { parseConfigList } from '$lib/utils';
+
+let ACCEPTABLE_FILETYPES: string[] = parseConfigList(PUBLIC_MEDIA_IMAGE_MIME_TYPES);
 
 function toFullPath(relPath: string): string {
   return path.posix.join(MEDIA_ROOT, relPath);
@@ -14,7 +17,7 @@ export async function addOrReplacePhoto(
   file: File,
   oldFileName?: string
 ): Promise<[string, boolean]> {
-  if (!PUBLIC_MEDIA_IMAGE_MIME_TYPES.includes(file.type)) {
+  if (!ACCEPTABLE_FILETYPES.includes(file.type)) {
     throw Error(`photo's MIME type "${file.type}" is not allowed`);
   }
   const fileName = `${personUuid}|${crypto.randomUUID()}`;

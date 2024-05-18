@@ -14,16 +14,7 @@
   } from '@fortawesome/free-solid-svg-icons';
   import { quadOut } from 'svelte/easing';
 
-  let ACCEPTABLE_FILETYPES: string | string[];
-  try {
-    ACCEPTABLE_FILETYPES = JSON.parse(PUBLIC_MEDIA_IMAGE_MIME_TYPES);
-    if (typeof ACCEPTABLE_FILETYPES !== 'string' && !Array.isArray(ACCEPTABLE_FILETYPES)) {
-      throw new Error();
-    }
-  } catch {
-    // PUBLIC_MEDIA_IMAGE_MIME_TYPES either isn't json, or isn't a valid type
-    ACCEPTABLE_FILETYPES = PUBLIC_MEDIA_IMAGE_MIME_TYPES;
-  }
+  let ACCEPTABLE_FILETYPES: string[] = parseConfigList(PUBLIC_MEDIA_IMAGE_MIME_TYPES);
 
   const TRANS_OPT = {
     duration: TRANS_DELAY,
@@ -46,7 +37,7 @@
   import { fade, slide } from 'svelte/transition';
   import RelSection from '../RelSection.svelte';
   import DetailsMainArea from '../DetailsMainArea.svelte';
-  import { peopleToIdArray } from '$lib/utils';
+  import { parseConfigList, peopleToIdArray } from '$lib/utils';
   import SearchBox, { type SearchBoxLinkFunc } from '$lib/components/SearchBox.svelte';
   import PersonInfo from '$lib/components/PersonInfo.svelte';
   import TimedMessage from '$lib/components/TimedMessage.svelte';

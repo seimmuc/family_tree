@@ -2,7 +2,7 @@ import { PERSON_NEW_SCHEMA, PERSON_UPDATE_SCHEMA, type PersonData, type Updatabl
 import { type RelativesChangeRequest, RELATIVES_SINGLE_TYPE_CHANGE_SCHEMA } from '$lib/types/reqdata';
 import { ValidationError } from 'yup';
 import { type Result, err, ok } from 'neverthrow';
-import { createUrl } from '$lib/utils';
+import { createUrl, parseConfigList } from '$lib/utils';
 import type { User, UserPermission } from '$lib/types/user';
 import { USERS_ADMINS } from '$env/static/private';
 import { error, redirect } from '@sveltejs/kit';
@@ -17,22 +17,6 @@ export function parseConfigBool(configValue: string | undefined, def: boolean = 
     return def;
   }
   return configBools[configValue.trim().toLowerCase()] ?? def;
-}
-export function parseConfigList(configValue: string | undefined, splitOnComma = true): string[] {
-  if (configValue === undefined) {
-    return [];
-  }
-  configValue = configValue.trim();
-  if (configValue[0] === '[' && configValue[configValue.length - 1] === ']') {
-    return JSON.parse(configValue);
-  }
-  if (configValue.length < 1) {
-    return [];
-  }
-  if (splitOnComma && configValue.includes(',')) {
-    return configValue.split(',').map(s => s.trim());
-  }
-  return [configValue];
 }
 
 export function parseUpdatePerson(updateJson?: FormDataEntryValue | null): Result<UpdatablePerson, FailError> {
