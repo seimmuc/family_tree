@@ -20,7 +20,6 @@ export const actions: Actions = {
       return fail(npRes.error.code, { message: npRes.error.message });
     }
     const newPersonData = npRes.value;
-    console.log(newPersonData);
 
     const person = await WriteActions.perform(act => {
       return act.addPerson(newPersonData);
