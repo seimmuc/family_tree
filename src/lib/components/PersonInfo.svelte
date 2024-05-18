@@ -137,8 +137,10 @@
     on:focus={() => onFocusIn('bio')}
     on:blur={() => onFocusOut('bio')}
   />
+{:else if bioDisplay || person.bio}
+  <p class="bio">{(bioDisplay ? bioDisplay : person.bio) ?? ''}</p>
 {:else}
-  <p class="bio">{bioDisplay ? bioDisplay : person.bio}</p>
+  <p class="bio empty">No bio</p>
 {/if}
 
 <style lang="scss">
@@ -200,8 +202,12 @@
     overflow-wrap: anywhere;
     white-space: pre-line;
     text-align: center;
+    min-height: 1em;
     @include common.contenteditable-border;
     @include colors.col-trans($bg: false, $fg: true, $br: true);
+    &.empty {
+      color: var(--col-disabled-fg, colors.$light-text-disabled);
+    }
   }
   .placeholder {
     color: var(--col-disabled-fg, colors.$light-text-disabled);
