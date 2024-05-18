@@ -6,7 +6,7 @@ import {
   userHasPermission,
   userLoginRedirOrErrorIfNotAuthorized
 } from '$lib/server/sutils.js';
-import type { RelativesChangeRequest } from '$lib/types.js';
+import type { RelativesChangeRequest } from '$lib/types/reqdata.js';
 import { error, type Actions, fail } from '@sveltejs/kit';
 
 export async function load({ params, locals, url }) {

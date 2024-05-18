@@ -9,7 +9,7 @@
   import { enhance } from '$app/forms';
   import type { SubmitFunction } from './$types.js';
   import { clearEmptyVals, type ExcludeVals } from '$lib/utils';
-  import type { PersonData } from '$lib/types';
+  import type { PersonData } from '$lib/types/person';
   import SearchBox, { type SearchBoxLinkFunc } from '$lib/components/SearchBox.svelte';
 
   export let data;

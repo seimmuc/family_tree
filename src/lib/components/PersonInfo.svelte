@@ -1,7 +1,7 @@
 <script lang="ts">
   import { nonewlines, toPersonEdit, formatDate, getPersonChanges } from '$lib/client/clutils';
   import type { PersonEdit, PersonChanges, YupErr } from '$lib/client/clutils';
-  import { DATE_MAX_LEN, type PersonData } from '$lib/types';
+  import { DATE_MAX_LEN, type PersonData } from '$lib/types/person';
   import { isDateString } from '$lib/utils';
   import type { Result } from 'neverthrow';
   import { createEventDispatcher } from 'svelte';

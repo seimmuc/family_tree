@@ -1,6 +1,6 @@
 <script lang="ts">
   import SearchBox, { type SearchCache, type SelectionEventDetail } from '$lib/components/SearchBox.svelte';
-  import type { Person } from '$lib/types';
+  import type { Person } from '$lib/types/person';
   import { faCircleXmark } from '@fortawesome/free-regular-svg-icons';
   import { faPlus } from '@fortawesome/free-solid-svg-icons';
   import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';

@@ -1,8 +1,8 @@
 <script lang="ts">
   import FloatingUiComponent, { type FloatingUICompControl } from '$lib/components/FloatingUIComponent.svelte';
   import TimedMessage from '$lib/components/TimedMessage.svelte';
-  import { USER_PERMISSIONS } from '$lib/types.js';
-  import type { User, UserID, UserPermChanges, UserPermChangesReq, UserPermission } from '$lib/types.js';
+  import { USER_PERMISSIONS } from '$lib/types/user.js';
+  import type { User, UserID, UserPermChanges, UserPermChangesReq, UserPermission } from '$lib/types/user.js';
   import { titleCaseWord, validateUsername } from '$lib/utils';
   import {
     faCircleCheck,

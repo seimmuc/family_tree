@@ -53,7 +53,8 @@
   import { createEventDispatcher, onMount, tick } from 'svelte';
   import { fade, slide } from 'svelte/transition';
   import FloatingUiComponent from './FloatingUIComponent.svelte';
-  import type { Person, SearchQueryCl } from '$lib/types';
+  import type { Person } from '$lib/types/person';
+  import type { SearchQueryCl } from '$lib/types/reqdata';
   import { err, ok, type Result } from 'neverthrow';
   import { photoUrl } from '$lib/client/clutils';
   import { arrayFilterInPlace } from '$lib/utils';

@@ -1,5 +1,5 @@
 import { addConfigAdmin } from '$lib/server/sutils.js';
-import { getTheme } from '$lib/types.js';
+import { getTheme } from '$lib/types/other.js';
 
 export function load({ cookies, locals, depends }) {
   const theme = getTheme(cookies.get('theme'));

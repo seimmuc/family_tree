@@ -1,9 +1,9 @@
-import { PERSON_NEW_SCHEMA, PERSON_SCHEMA, RELATIVES_SINGLE_TYPE_CHANGE_SCHEMA } from '$lib/types';
-import type { PersonData, RelativesChangeRequest, UpdatablePerson, UserPermission } from '$lib/types';
+import { PERSON_NEW_SCHEMA, PERSON_UPDATE_SCHEMA, type PersonData, type UpdatablePerson } from '$lib/types/person';
+import { type RelativesChangeRequest, RELATIVES_SINGLE_TYPE_CHANGE_SCHEMA } from '$lib/types/reqdata';
 import { ValidationError } from 'yup';
 import { type Result, err, ok } from 'neverthrow';
 import { createUrl } from '$lib/utils';
-import type { User } from '$lib/types';
+import type { User, UserPermission } from '$lib/types/user';
 import { USERS_ADMINS } from '$env/static/private';
 import { error, redirect } from '@sveltejs/kit';
 
@@ -49,7 +49,7 @@ export function parseUpdatePerson(updateJson?: FormDataEntryValue | null): Resul
     return err({ code: 422, message: 'invalid json' });
   }
   try {
-    return ok(PERSON_SCHEMA.validateSync(dangerousPerson, { abortEarly: true, stripUnknown: true }));
+    return ok(PERSON_UPDATE_SCHEMA.validateSync(dangerousPerson, { abortEarly: true, stripUnknown: true }));
   } catch (error) {
     if (error instanceof ValidationError) {
       return err({ code: 422, message: error.message });

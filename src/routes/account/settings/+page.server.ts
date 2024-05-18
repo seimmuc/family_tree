@@ -3,7 +3,7 @@ import { fail } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import type { Actions } from './$types';
 import { ValidationError } from 'yup';
-import { USER_OPTIONS_UPDATE_SCHEMA, USER_SCHEMA, type User, type UserOptions } from '$lib/types';
+import { USER_OPTIONS_UPDATE_SCHEMA, USER_SCHEMA, type User, type UserOptions } from '$lib/types/user';
 import { UserWriteActions } from '$lib/server/graph/user';
 
 export const load = (async ({ locals, url }) => {

@@ -6,7 +6,8 @@
   import FloatingUiComponent from '$lib/components/FloatingUIComponent.svelte';
   import UserMenu from '$lib/components/UserMenu.svelte';
   import '$lib/styles/global.scss';
-  import { DEFAULT_USER_OPTIONS, type LangCode, type Theme } from '$lib/types.js';
+  import { DEFAULT_USER_OPTIONS, type LangCode } from '$lib/types/user.js';
+  import type { Theme } from '$lib/types/other.js';
   import { faGear, faUser, faSun, faMoon } from '@fortawesome/free-solid-svg-icons';
   import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
   import { onMount, setContext } from 'svelte';

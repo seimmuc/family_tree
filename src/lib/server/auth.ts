@@ -1,7 +1,7 @@
 import { Lucia, TimeSpan } from 'lucia';
 import { LuciaCypherAdapter } from './graph/lucia-adapter';
 import { dev } from '$app/environment';
-import type { User, UserDB, UserID } from '$lib/types';
+import type { User, UserDB, UserID } from '$lib/types/user';
 
 const adapter = new LuciaCypherAdapter();
 

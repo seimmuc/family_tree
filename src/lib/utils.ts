@@ -1,5 +1,6 @@
 import { err, ok, type Result } from 'neverthrow';
-import { DEFAULT_USER_OPTIONS, type Person, type UserOptions } from './types';
+import { DEFAULT_USER_OPTIONS, type UserOptions } from './types/user';
+import type { Person } from './types/person';
 
 export type ExcludeVals<T, E> = { [K in keyof T]: Exclude<T[K], E> };
 

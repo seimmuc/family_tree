@@ -1,6 +1,6 @@
 import { ReadActions } from '$lib/server/graph/person.js';
 import { userHasPermission } from '$lib/server/sutils.js';
-import { SEARCH_QUERY_SCHEMA, type SearchQuery } from '$lib/types.js';
+import { SEARCH_QUERY_SCHEMA, type SearchQuery } from '$lib/types/reqdata.js';
 import { json } from '@sveltejs/kit';
 
 export async function POST({ request, locals }) {

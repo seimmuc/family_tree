@@ -8,7 +8,7 @@
   import PopUp from '$lib/components/PopUp.svelte';
   import SearchBox, { type SearchBoxLinkFunc } from '$lib/components/SearchBox.svelte';
   import type { Point } from '$lib/components/types.js';
-  import { type Person } from '$lib/types.js';
+  import { type Person } from '$lib/types/person.js';
   import { type ClientRectObject } from '@floating-ui/core';
   import { onMount } from 'svelte';
   import { tweened } from 'svelte/motion';

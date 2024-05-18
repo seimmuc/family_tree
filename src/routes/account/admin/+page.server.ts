@@ -1,7 +1,7 @@
 import type { PageServerLoad } from './$types';
 import { addConfigAdmin, userLoginRedirOrErrorIfNotAuthorized } from '$lib/server/sutils';
 import { UserReadActions } from '$lib/server/graph/user';
-import { USER_SCHEMA, type User } from '$lib/types';
+import { USER_SCHEMA, type User } from '$lib/types/user';
 
 const FETCHED_USER_LIMIT = 25;
 

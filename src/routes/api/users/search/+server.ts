@@ -1,6 +1,6 @@
 import { UserReadActions } from '$lib/server/graph/user';
 import { addConfigAdmin, userHasPermission } from '$lib/server/sutils.js';
-import { USER_SCHEMA } from '$lib/types.js';
+import { USER_SCHEMA } from '$lib/types/user.js';
 import { validateUsername } from '$lib/utils.js';
 import { json } from '@sveltejs/kit';
 

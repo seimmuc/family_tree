@@ -39,7 +39,8 @@
   import { filedrop, type FileDropOptions } from 'filedrop-svelte';
   import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
   import { photoUrl, redirUserChange, TRANS_DELAY } from '$lib/client/clutils.js';
-  import type { Person, RelativesChangeRequest, UpdatablePerson } from '$lib/types.js';
+  import type { Person, UpdatablePerson } from '$lib/types/person';
+  import type { RelativesChangeRequest } from '$lib/types/reqdata';
   import { enhance } from '$app/forms';
   import type { SubmitFunction } from '@sveltejs/kit';
   import { fade, slide } from 'svelte/transition';

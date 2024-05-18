@@ -1,6 +1,7 @@
 import { browser } from '$app/environment';
 import { goto } from '$app/navigation';
-import { PERSON_EDIT_SCHEMA, type PersonData, type User, type UserPermission } from '$lib/types';
+import { PERSON_UPDATE_SCHEMA, type PersonData } from '$lib/types/person';
+import type { User, UserPermission } from '$lib/types/user';
 import { clearUndefinedVals, createUrl, isDateString } from '$lib/utils';
 import { err, ok, type Result } from 'neverthrow';
 import type { Action } from 'svelte/action';
@@ -84,6 +85,7 @@ export const nonewlines: Action<HTMLElement, undefined, { 'on:returnkey': (e: Cu
 
 // Person-related tools
 export type PersonEdit = { name: string; birthDate: string; deathDate: string; bio: string };
+const PERSON_EDIT_SCHEMA = PERSON_UPDATE_SCHEMA.pick(['name', 'birthDate', 'deathDate', 'bio']);
 export type PersonChanges = {
   name?: string;
   bio?: string | null;

@@ -1,6 +1,6 @@
 import { UserWriteActions } from '$lib/server/graph/user.js';
 import { userHasPermission } from '$lib/server/sutils.js';
-import { USER_ID_SCHEMA, type UserID } from '$lib/types.js';
+import { USER_ID_SCHEMA, type UserID } from '$lib/types/user.js';
 import { json } from '@sveltejs/kit';
 import { ValidationError } from 'yup';
 

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { photoUrl } from '$lib/client/clutils';
-  import type { PersonData } from '$lib/types';
+  import type { PersonData } from '$lib/types/person';
   import type { Point } from './types';
 
   export let person: PersonData;

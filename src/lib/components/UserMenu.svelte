@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { User } from '$lib/types';
+  import type { User } from '$lib/types/user';
   import { page } from '$app/stores';
   import { createUrl } from '$lib/utils';
   import * as m from '$lib/paraglide/messages.js';

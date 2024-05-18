@@ -6,7 +6,7 @@
   import { slide } from 'svelte/transition';
   import type { SubmitFunction } from './$types.js';
   import { TRANS_DELAY } from '$lib/client/clutils.js';
-  import { LANGUAGES } from '$lib/types.js';
+  import { LANGUAGES } from '$lib/types/user.js';
 
   export let data;
 

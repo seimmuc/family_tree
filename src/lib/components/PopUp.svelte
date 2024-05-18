@@ -2,7 +2,7 @@
   import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
   import { faXmark } from '@fortawesome/free-solid-svg-icons';
   import { faPenToSquare } from '@fortawesome/free-regular-svg-icons';
-  import type { Person, UpdatablePerson } from '$lib/types';
+  import type { Person, UpdatablePerson } from '$lib/types/person';
   import { createEventDispatcher } from 'svelte';
   import { enhance } from '$app/forms';
   import type { SubmitFunction } from '@sveltejs/kit';

@@ -5,7 +5,7 @@ import { Argon2id } from 'oslo/password';
 import { lucia } from '$lib/server/auth';
 import { parseConfigBool } from '$lib/server/sutils';
 import { validateUsernameAndPassword } from '$lib/utils';
-import { LANGUAGES, type UserOptions, type UserPermission } from '$lib/types';
+import { LANGUAGES, type UserOptions, type UserPermission } from '$lib/types/user';
 import { USERS_MAKE_FIRST_ADMIN } from '$env/static/private';
 
 const makeFirstUserAdmin = parseConfigBool(USERS_MAKE_FIRST_ADMIN);

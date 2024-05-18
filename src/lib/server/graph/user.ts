@@ -1,7 +1,7 @@
 import { type ManagedTransaction, Integer } from 'neo4j-driver';
 import { readTransaction, writeTransaction } from './memgraph';
 import type { TransactionConfig } from 'neo4j-driver-core';
-import type { UserDB, UserID, UserOptions, UserPermission } from '$lib/types';
+import type { UserDB, UserID, UserOptions, UserPermission } from '$lib/types/user';
 import { err, ok, type Result } from 'neverthrow';
 
 export class UserReadActions {

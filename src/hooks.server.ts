@@ -2,7 +2,7 @@ import { building } from '$app/environment';
 import { MEDIA_ROOT } from '$env/static/private';
 import { lucia } from '$lib/server/auth';
 import { getDbConnection, useSession } from '$lib/server/graph/memgraph';
-import { isTheme } from '$lib/types';
+import { isTheme } from '$lib/types/other';
 import { mkdir } from 'fs/promises';
 
 if (!building) {
