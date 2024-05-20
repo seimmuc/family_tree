@@ -7,7 +7,7 @@ import {
   userLoginRedirOrErrorIfNotAuthorized
 } from '$lib/server/sutils.js';
 import type { RelativesChangeRequest } from '$lib/types/reqdata.js';
-import { error, type Actions, fail } from '@sveltejs/kit';
+import { error, type Actions, fail, redirect } from '@sveltejs/kit';
 
 export async function load({ params, locals, url }) {
   userLoginRedirOrErrorIfNotAuthorized(locals.user, 'view', url);
@@ -126,5 +126,34 @@ export const actions: Actions = {
         }
       }
     });
+  },
+  delete: async ({ locals, params }) => {
+    if (!userHasPermission(locals.user, 'edit')) {
+      return fail(403, { message: 'unauthorized' });
+    }
+
+    const pid = params.id;
+    if (pid === undefined) {
+      // this should never happen since uuid isn't optional for this route
+      return fail(500, { message: 'something went wrong' });
+    }
+
+    // delete person from db
+    const delPerson = await WriteActions.perform(act => act.deletePerson(pid));
+
+    // check if person existed, if not user is probably on a stale page
+    if (delPerson === undefined) {
+      return fail(500, { message: 'this person does not exist' });
+    }
+
+    // delete the person's photo if they had one
+    if (delPerson.photo) {
+      if (!(await tryDeletePhoto(delPerson.photo))) {
+        console.error(`Failed to delete photo while deleting person. Photo: "${delPerson.photo}", pid: ${pid}`);
+      }
+    }
+
+    // redirect user to the home page
+    return redirect(302, `/`);
   }
 };

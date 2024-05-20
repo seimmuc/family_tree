@@ -10,7 +10,9 @@
     faTrashCanArrowUp,
     faFileArrowUp,
     faAngleUp,
-    faEraser
+    faEraser,
+    faTrashCan,
+    faSpinner
   } from '@fortawesome/free-solid-svg-icons';
   import { quadOut } from 'svelte/easing';
 
@@ -42,6 +44,7 @@
   import PersonInfo from '$lib/components/PersonInfo.svelte';
   import TimedMessage from '$lib/components/TimedMessage.svelte';
   import { page } from '$app/stores';
+  import FloatingUiComponent, { type FloatingUICompControl } from '$lib/components/FloatingUIComponent.svelte';
 
   // params
   export let data;
@@ -66,6 +69,13 @@
     childrenComp: undefined as any as RelSection
   };
   let piComp: PersonInfo;
+  const del = {
+    button: undefined as HTMLButtonElement | undefined,
+    tooltipRoot: undefined as HTMLDivElement | undefined,
+    tooltipControl: undefined as FloatingUICompControl | undefined,
+    errMsg: undefined as TimedMessage | undefined,
+    processing: false
+  };
 
   // reactive vars
   $: filedropOptions = {
@@ -205,6 +215,26 @@
     };
   };
 
+  const submitDelete: SubmitFunction = () => {
+    del.processing = true;
+    return async ({ result, update }) => {
+      del.processing = false;
+      if (result.type === 'failure' && result.data?.message) {
+        del.errMsg?.setMessage(result.data.message);
+      }
+      update();
+    };
+  };
+
+  function onWindowClick(e: MouseEvent & { currentTarget: EventTarget & Window }) {
+    if (
+      del.tooltipControl?.isVisible() &&
+      !(e.target instanceof Node && (del.tooltipRoot?.contains(e.target) || del.button?.contains(e.target)))
+    ) {
+      del.tooltipControl?.hide();
+    }
+  }
+
   // login on user change
   function authChange(user: typeof data.user) {
     redirUserChange(user, 'view', $page.url);
@@ -218,76 +248,115 @@
   });
 </script>
 
+<svelte:window on:click={onWindowClick} />
+
 <DetailsMainArea>
   <div class="top-controls">
-    <a class="btn tree" href="/tree/{person.id}">view tree</a>
-    {#if data.canEdit || editMode}
-      <button class="btn edit" type="button" on:click={toggleEditMode}>toggle edit mode</button>
-    {/if}
+    <div class="tc-section left">
+      <a class="btn tree" href="/tree/{person.id}">view tree</a>
+      {#if data.canEdit || editMode}
+        <button class="btn edit" type="button" on:click={toggleEditMode}>toggle edit mode</button>
+      {/if}
+    </div>
+    <div class="tc-section right">
+      <FloatingUiComponent placementDir="bottom-end" bind:control={del.tooltipControl}>
+        <button
+          type="button"
+          class="btn"
+          slot="ref"
+          let:floatingRef
+          use:floatingRef
+          let:control
+          on:click={control.toggle}
+          bind:this={del.button}
+        >
+          Delete <FontAwesomeIcon icon={faTrashCan} />
+        </button>
+        <div slot="tooltip" class="delete-tooltip" bind:this={del.tooltipRoot}>
+          <span class="confirm-text">Are you sure you want to delete <span class="name">{person.name}</span>?</span>
+          <form method="POST" action="?/delete" enctype="multipart/form-data" use:enhance={submitDelete}>
+            <button type="submit" class="btn">Confirm</button>
+            {#if del.processing}
+              <FontAwesomeIcon icon={faSpinner} spinPulse />
+            {/if}
+            <TimedMessage bind:this={del.errMsg} let:msg>
+              <span class="error-text" transition:slide={{ axis: 'y', ...TRANS_OPT }}>{msg}</span>
+            </TimedMessage>
+          </form>
+        </div>
+      </FloatingUiComponent>
+    </div>
   </div>
 
-  <form method="POST" action="?/update" enctype="multipart/form-data" use:enhance={submitUpdate} bind:this={frm}>
-    <div
-      class="image-box"
-      class:edit={editMode}
-      class:preview={image.pSrc !== undefined}
-      class:dragging={image.dragging}
-      use:filedrop={filedropOptions}
-      on:filedrop={onImageFileDrop}
-      on:filedragenter={onImageDragEnter}
-      on:filedragleave={onImageDragLeave}
-    >
-      {#if photoSrc === undefined}
-        <div class="photo-small missing">No photo</div>
-      {:else}
-        <img class="photo-small" src={photoSrc} alt={person.name} />
-      {/if}
-      {#if editMode}
-        <div class="photo-edit" transition:fade={TRANS_OPT}>
-          <button
-            class="photo-edit-btn upload"
-            type="button"
-            title="Upload image"
-            on:click={() => image.fileInput?.click()}
-          >
-            <FontAwesomeIcon icon={icons.upload} />
+  <div
+    class="image-box"
+    class:edit={editMode}
+    class:preview={image.pSrc !== undefined}
+    class:dragging={image.dragging}
+    use:filedrop={filedropOptions}
+    on:filedrop={onImageFileDrop}
+    on:filedragenter={onImageDragEnter}
+    on:filedragleave={onImageDragLeave}
+  >
+    {#if photoSrc === undefined}
+      <div class="photo-small missing">No photo</div>
+    {:else}
+      <img class="photo-small" src={photoSrc} alt={person.name} />
+    {/if}
+    {#if editMode}
+      <div class="photo-edit" transition:fade={TRANS_OPT}>
+        <button
+          class="photo-edit-btn upload"
+          type="button"
+          title="Upload image"
+          on:click={() => image.fileInput?.click()}
+        >
+          <FontAwesomeIcon icon={icons.upload} />
+        </button>
+        {#if image.pSrc !== undefined}
+          <button class="photo-edit-btn clear" type="button" title="Clear" on:click={clearImage}>
+            <FontAwesomeIcon icon={icons.clear} />
           </button>
-          {#if image.pSrc !== undefined}
-            <button class="photo-edit-btn clear" type="button" title="Clear" on:click={clearImage}>
-              <FontAwesomeIcon icon={icons.clear} />
-            </button>
-          {/if}
-          <button class="photo-edit-btn delete" type="button" title="Delete image" on:click={deleteImage}>
-            <FontAwesomeIcon icon={icons.delete} />
-          </button>
-        </div>
-      {/if}
-      <input type="file" name="photo" style="display: none;" bind:this={image.fileInput} />
-    </div>
-
-    <PersonInfo
-      {editMode}
-      {person}
-      transOptions={TRANS_OPT}
-      on:returnkey={() => frm?.requestSubmit()}
-      bind:this={piComp}
-    />
-
-    <div class="relations">
-      <RelSection {editMode} sectionName="Parents" people={parents} bind:this={rels.parentsComp} />
-      <RelSection {editMode} sectionName="Children" people={children} bind:this={rels.childrenComp} />
-    </div>
-
-    {#if editMode && data.canEdit}
-      <TimedMessage bind:this={formMsg} let:msg>
-        <p class="form-message" transition:slide={{ axis: 'y', ...TRANS_OPT }}>{msg}</p>
-      </TimedMessage>
-      <div class="form-buttons" transition:slide={{ axis: 'y', ...TRANS_OPT }}>
-        <button type="submit">Save</button>
-        <button type="button" on:click={() => setEditMode(false)}>Cancel</button>
+        {/if}
+        <button class="photo-edit-btn delete" type="button" title="Delete image" on:click={deleteImage}>
+          <FontAwesomeIcon icon={icons.delete} />
+        </button>
       </div>
     {/if}
-  </form>
+    <input type="file" form="update-form" name="photo" style="display: none;" bind:this={image.fileInput} />
+  </div>
+
+  <PersonInfo
+    {editMode}
+    {person}
+    transOptions={TRANS_OPT}
+    on:returnkey={() => frm?.requestSubmit()}
+    bind:this={piComp}
+  />
+
+  <div class="relations">
+    <RelSection {editMode} sectionName="Parents" people={parents} bind:this={rels.parentsComp} />
+    <RelSection {editMode} sectionName="Children" people={children} bind:this={rels.childrenComp} />
+  </div>
+
+  {#if editMode && data.canEdit}
+    <TimedMessage bind:this={formMsg} let:msg>
+      <p class="form-message" transition:slide={{ axis: 'y', ...TRANS_OPT }}>{msg}</p>
+    </TimedMessage>
+    <div class="form-buttons" transition:slide={{ axis: 'y', ...TRANS_OPT }}>
+      <form
+        id="update-form"
+        method="POST"
+        action="?/update"
+        enctype="multipart/form-data"
+        use:enhance={submitUpdate}
+        bind:this={frm}
+      >
+        <button type="submit">Save</button>
+      </form>
+      <button type="button" on:click={() => setEditMode(false)}>Cancel</button>
+    </div>
+  {/if}
 </DetailsMainArea>
 
 <a class="back-button" href="/tree/{person.id}">
@@ -311,6 +380,12 @@
 
   .top-controls {
     align-self: flex-start;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    align-items: center;
 
     button {
       @include common.styleless-button;
@@ -321,6 +396,28 @@
       border: 2px solid gray;
       border-radius: 5px;
       padding: 2px;
+    }
+
+    .delete-tooltip {
+      background-color: var(--col-secondary-bg, colors.$light-secondary-bg);
+      border: 2px solid var(--col-secondary-border, colors.$light-secondary-border);
+      border-radius: 6px;
+      @include colors.col-trans($bg: true, $fg: true, $br: true);
+      padding: 0.25em 0.4em;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-size: 1.25rem;
+      font-weight: normal;
+      .confirm-text {
+        display: block;
+        .name {
+          font-weight: bold;
+        }
+      }
+      button {
+        margin: 0.4em 0 0.2em;
+      }
     }
   }
 
