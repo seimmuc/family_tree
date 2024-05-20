@@ -1,5 +1,5 @@
-import type { UUID } from "crypto";
-import { ObjectSchema, StringSchema, number as yupnumber, object, string, type AnyObject, array } from "yup";
+import type { UUID } from 'crypto';
+import { ObjectSchema, StringSchema, number as yupnumber, object, string, type AnyObject, array } from 'yup';
 
 export const USER_PERMISSIONS = ['view', 'edit', 'admin'] as const;
 export type UserPermission = (typeof USER_PERMISSIONS)[number];

@@ -7,12 +7,11 @@ type OptionalKeysNullable<T extends Record<any, any>> = {
 
 export const DATE_MAX_LEN = 30;
 
-
 // Person types - Typescipt
 
 /** Person object stored in db and returned by the server */
 export interface Person {
-  id: string;   // UUIDv4
+  id: string; // UUIDv4
   name: string;
   gender?: string;
   birthDate?: string; // YYYY-MM-DD
@@ -24,12 +23,11 @@ export interface Person {
 /** Equivalent to Person, but used to create a new person or other cases when the person isn't in DB yet */
 export type PersonData = Omit<Person, 'id'>;
 
-/** 
+/**
  * Person update object, id must remain unchanged, all other fields should be undefined to leave them unchanged, null
  * to remove them (become undefined) or be set to the new valid value. Name cannot be null since it cannot be removed.
  */
 export type UpdatablePerson = Partial<OptionalKeysNullable<PersonData>> & Pick<Person, 'id'>;
-
 
 // Person types - yup schemas
 
@@ -38,12 +36,27 @@ export const PERSON_ID_ARRAY = array(pidBase).required();
 const DATE_SCHEMA = string().trim().max(DATE_MAX_LEN);
 
 const pId = pidBase.label('person id');
-const pName = string().min(1).max(75).trim().transform(v => v ? stripNonPrintableAndNormalize(v, false, true) : v).required();
-const pGender = string().max(30).trim().transform(v => v ? stripNonPrintableAndNormalize(v, false, true) : v).optional();
+const pName = string()
+  .min(1)
+  .max(75)
+  .trim()
+  .transform(v => (v ? stripNonPrintableAndNormalize(v, false, true) : v))
+  .required();
+const pGender = string()
+  .max(30)
+  .trim()
+  .transform(v => (v ? stripNonPrintableAndNormalize(v, false, true) : v))
+  .optional();
 const pBirthDate = DATE_SCHEMA.label('birth date').optional();
 const pDeathDate = DATE_SCHEMA.label('death date').optional();
-const pBio = string().max(1000).trim().transform(v => v ? stripNonPrintableAndNormalize(v, false, false) : v).optional();
-const pPhoto = string().matches(/^[^/.][^/]{0,127}$/).optional();
+const pBio = string()
+  .max(1000)
+  .trim()
+  .transform(v => (v ? stripNonPrintableAndNormalize(v, false, false) : v))
+  .optional();
+const pPhoto = string()
+  .matches(/^[^/.][^/]{0,127}$/)
+  .optional();
 
 /** `Person` type validator */
 export const PERSON_SCHEMA: ObjectSchema<Person> = object({
@@ -60,17 +73,18 @@ export const PERSON_SCHEMA: ObjectSchema<Person> = object({
 export const PERSON_NEW_SCHEMA: ObjectSchema<PersonData> = PERSON_SCHEMA.omit(['id']);
 
 /** `UpdatablePerson` type validator */
-export const PERSON_UPDATE_SCHEMA: ObjectSchema<UpdatablePerson> = PERSON_SCHEMA.pick(['id']).shape({
-  name: pName.nonNullable().optional(),
-  gender: pGender.nullable(),
-  birthDate: pBirthDate.nullable(),
-  deathDate: pDeathDate.nullable(),
-  bio: pBio.nullable(),
-  photo: pPhoto.nullable()
-}).noUnknown();
+export const PERSON_UPDATE_SCHEMA: ObjectSchema<UpdatablePerson> = PERSON_SCHEMA.pick(['id'])
+  .shape({
+    name: pName.nonNullable().optional(),
+    gender: pGender.nullable(),
+    birthDate: pBirthDate.nullable(),
+    deathDate: pDeathDate.nullable(),
+    bio: pBio.nullable(),
+    photo: pPhoto.nullable()
+  })
+  .noUnknown();
 
 export const PERSON_KEYS = Object.keys(PERSON_SCHEMA.fields);
-
 
 // Relationships
 

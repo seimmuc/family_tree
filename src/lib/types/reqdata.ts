@@ -10,7 +10,6 @@ export const SEARCH_QUERY_SCHEMA = object({
 export type SearchQuery = InferType<typeof SEARCH_QUERY_SCHEMA>;
 export type SearchQueryCl = Partial<SearchQuery> & Required<Pick<SearchQuery, 'nameQuery'>>;
 
-
 // POST /details/[uuid]?/update
 export const RELATIVES_SINGLE_TYPE_CHANGE_SCHEMA = object({
   added: PERSON_ID_ARRAY,
