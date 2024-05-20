@@ -43,7 +43,7 @@ function coerceIntoId(personOrId: string | Person): string {
  */
 export function filtersWhereAnd<OV extends string>(filters: Filter[], objVar: OV): WhereConditions<1, [OV]> {
   const fq: [string, [string, any][]][] = filters.map((f, i) => [
-    `p[$prop${i}] ${f.operator} $val${i}`,
+    `${objVar}[$prop${i}] ${f.operator} $val${i}`,
     [
       [`prop${i}`, f.prop],
       [`val${i}`, f.val]
@@ -70,6 +70,10 @@ export class ReadActions {
   }
   async findAllPeople(): Promise<Person[]> {
     const r = await this.transaction.run('MATCH (p:Person) RETURN p');
+    return r.records.map(r => r.get('p').properties);
+  }
+  async findManyPeople(limit: number = 50): Promise<Person[]> {
+    const r = await this.transaction.run('MATCH (p:Person) RETURN p LIMIT $limit ORDER BY p.name', { limit });
     return r.records.map(r => r.get('p').properties);
   }
   async findPersonById(id: string): Promise<Person | undefined> {
@@ -213,6 +217,13 @@ export class WriteActions extends ReadActions {
     return writeTransaction(async tx => {
       return cb(new WriteActions(tx));
     }, config);
+  }
+  async deletePerson(personId: string): Promise<Person | undefined> {
+    const r = await this.transaction.run(
+      'MATCH (p:Person) WHERE p.id = $id WITH p, properties(p) AS rt DETACH DELETE p RETURN rt',
+      { id: personId }
+    );
+    return r.records[0]?.get('rt');
   }
   /**
    * Deletes all people that match provided WHERE condition
