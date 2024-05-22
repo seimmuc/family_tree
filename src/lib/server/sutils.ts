@@ -67,12 +67,12 @@ export function parseNewPerson(dataJson?: FormDataEntryValue | null): Result<Per
 
 export function parseUpdateRelatives(
   updateJson: FormDataEntryValue | null,
-  personId: string
-): Result<RelativesChangeRequest, FailError> {
+  personId?: string
+): Result<RelativesChangeRequest<string>, FailError> {
   if (typeof updateJson !== 'string') {
     return err({ code: 422, message: 'missing relatives update data' });
   }
-  let dangerReq: RelativesChangeRequest;
+  let dangerReq: RelativesChangeRequest<string>;
   try {
     dangerReq = JSON.parse(updateJson);
     if (typeof dangerReq !== 'object') {
@@ -89,7 +89,7 @@ export function parseUpdateRelatives(
       ])
     );
     for (const ch of Object.values(res)) {
-      if (ch.added.includes(personId) || ch.removed.includes(personId)) {
+      if (personId !== undefined && (ch.added.includes(personId) || ch.removed.includes(personId))) {
         return err({ code: 422, message: 'circular relations are not allowed' });
       }
       for (const rid of ch.removed) {

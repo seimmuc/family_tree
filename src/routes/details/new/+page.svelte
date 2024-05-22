@@ -11,14 +11,21 @@
   import { clearEmptyVals, type ExcludeVals } from '$lib/utils';
   import type { PersonData } from '$lib/types/person';
   import SearchBox, { type SearchBoxLinkFunc } from '$lib/components/SearchBox.svelte';
+  import RelSection from '../RelSection.svelte';
+  import { createRelChangeRequest } from '../utils';
 
   export let data;
 
   let piComp: PersonInfo;
   let frm: HTMLFormElement;
   let formMsg: TimedMessage;
+  const rels = {
+    parentsComp: undefined as any as RelSection,
+    childrenComp: undefined as any as RelSection
+  };
 
-  const submitUpdate: SubmitFunction = ({ formData, cancel }) => {
+  const submit: SubmitFunction = ({ formData, cancel }) => {
+    // person data
     const pdRes = piComp.getChanges();
     if (pdRes.isErr()) {
       formMsg.setMessage(pdRes.error);
@@ -27,6 +34,14 @@
     type PDType = ExcludeVals<PersonChanges, null | undefined> & Required<Pick<PersonChanges, 'name'>>;
     const personData: PersonData = clearEmptyVals(pdRes.value) as PDType;
     formData.append('person-new', JSON.stringify(personData));
+
+    // relatives
+    const relsUpd = createRelChangeRequest([
+      ['parents', rels.parentsComp],
+      ['children', rels.childrenComp]
+    ]);
+    formData.append('relatives-new', JSON.stringify(relsUpd));
+
     return async ({ result, update }) => {
       formMsg.hide();
       if (result.type === 'failure' && result.data?.message) {
@@ -44,16 +59,20 @@
 
 <DetailsMainArea>
   <h1>{m.newPersonHeader()}</h1>
-  <form method="POST" enctype="multipart/form-data" use:enhance={submitUpdate} bind:this={frm}>
-    <PersonInfo editMode={true} person={{ name: '' }} on:returnkey={() => frm?.requestSubmit()} bind:this={piComp} />
-    <TimedMessage bind:this={formMsg} let:msg>
-      <p class="form-message" transition:slide={{ axis: 'y', duration: TRANS_DELAY, easing: quadOut }}>{msg}</p>
-    </TimedMessage>
-    <div class="form-buttons">
+  <PersonInfo editMode={true} person={{ name: '' }} on:returnkey={() => frm?.requestSubmit()} bind:this={piComp} />
+  <TimedMessage bind:this={formMsg} let:msg>
+    <p class="form-message" transition:slide={{ axis: 'y', duration: TRANS_DELAY, easing: quadOut }}>{msg}</p>
+  </TimedMessage>
+  <div class="relations">
+    <RelSection editMode={true} sectionName="Parents" people={[]} bind:this={rels.parentsComp} />
+    <RelSection editMode={true} sectionName="Children" people={[]} bind:this={rels.childrenComp} />
+  </div>
+  <div class="form-buttons">
+    <form method="POST" enctype="multipart/form-data" use:enhance={submit} bind:this={frm}>
       <button type="submit">Add</button>
-      <button type="button" disabled on:click={() => formMsg.setMessage('not implemented yet')}>Cancel</button>
-    </div>
-  </form>
+    </form>
+    <button type="button" disabled on:click={() => formMsg.setMessage('not implemented yet')}>Cancel</button>
+  </div>
 </DetailsMainArea>
 
 <style lang="scss">
@@ -66,5 +85,15 @@
   .form-message {
     margin: 1px 0 5px;
     color: red;
+  }
+  .relations {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: space-evenly;
+    align-items: flex-start;
+    gap: 20px;
+    width: 100%;
+    margin-top: 15px;
   }
 </style>

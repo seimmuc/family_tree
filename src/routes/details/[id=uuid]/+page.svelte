@@ -39,7 +39,8 @@
   import { fade, slide } from 'svelte/transition';
   import RelSection from '../RelSection.svelte';
   import DetailsMainArea from '../DetailsMainArea.svelte';
-  import { parseConfigList, peopleToIdArray } from '$lib/utils';
+  import { createRelChangeRequest } from '../utils';
+  import { parseConfigList } from '$lib/utils';
   import SearchBox, { type SearchBoxLinkFunc } from '$lib/components/SearchBox.svelte';
   import PersonInfo from '$lib/components/PersonInfo.svelte';
   import TimedMessage from '$lib/components/TimedMessage.svelte';
@@ -156,12 +157,6 @@
   }
 
   // form submission functions
-  function addRelChanges(chReq: RelativesChangeRequest, relType: string, section: RelSection): void {
-    const diffs = section.differences();
-    if (diffs.added.length > 0 || diffs.removed.length > 0) {
-      chReq[relType] = { added: peopleToIdArray(diffs.added), removed: peopleToIdArray(diffs.removed) };
-    }
-  }
   const submitUpdate: SubmitFunction = ({ formData, cancel }) => {
     if (!data.canEdit) {
       cancel();
@@ -181,9 +176,10 @@
     formData.append('person-update', JSON.stringify(updatePerson));
 
     // relatives-update
-    const relsUpd: RelativesChangeRequest = {};
-    addRelChanges(relsUpd, 'parents', rels.parentsComp);
-    addRelChanges(relsUpd, 'children', rels.childrenComp);
+    const relsUpd = createRelChangeRequest([
+      ['parents', rels.parentsComp],
+      ['children', rels.childrenComp]
+    ]);
     const sendRelsUpd = Object.keys(relsUpd).length > 0;
     if (sendRelsUpd) {
       formData.append('relatives-update', JSON.stringify(relsUpd));
@@ -214,7 +210,6 @@
       update();
     };
   };
-
   const submitDelete: SubmitFunction = () => {
     del.processing = true;
     return async ({ result, update }) => {

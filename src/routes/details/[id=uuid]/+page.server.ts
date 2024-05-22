@@ -62,7 +62,7 @@ export const actions: Actions = {
     }
     const { id: pid } = personUpdate;
     const photo = data.get('photo');
-    let relativesUpdate: RelativesChangeRequest | undefined = undefined;
+    let relativesUpdate: RelativesChangeRequest<'parents' | 'children'> | undefined = undefined;
     if (data.has('relatives-update')) {
       const relRes = parseUpdateRelatives(data.get('relatives-update'), pid);
       if (relRes.isErr()) {

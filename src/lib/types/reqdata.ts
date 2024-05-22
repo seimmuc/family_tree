@@ -17,4 +17,4 @@ export const RELATIVES_SINGLE_TYPE_CHANGE_SCHEMA = object({
 }).noUnknown();
 
 export type RelativesSingleTypeChange = InferType<typeof RELATIVES_SINGLE_TYPE_CHANGE_SCHEMA>;
-export type RelativesChangeRequest = { [relType: string]: RelativesSingleTypeChange };
+export type RelativesChangeRequest<RT extends string> = Partial<Record<RT, RelativesSingleTypeChange>>;
