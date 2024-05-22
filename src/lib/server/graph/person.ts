@@ -303,4 +303,10 @@ export class WriteActions extends ReadActions {
       tid: toPerson
     });
   }
+  async addParentRelation(child: string | Person, parent: string | Person): Promise<Neo4jRel | undefined> {
+    return this.addPersonRelation(child, parent, 'PARENT');
+  }
+  async delParentRelation(child: string | Person, parent: string | Person): Promise<void> {
+    return this.delPersonRelation(child, parent, 'PARENT');
+  }
 }

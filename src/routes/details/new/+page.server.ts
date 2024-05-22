@@ -41,18 +41,18 @@ export const actions: Actions = {
       const { parents, children } = relUpd;
       if (parents !== undefined) {
         for (const prId of parents.added) {
-          await act.addPersonRelation(newPerson.id, prId, 'PARENT');
+          await act.addParentRelation(newPerson.id, prId);
         }
         for (const prId of parents.removed) {
-          await act.delPersonRelation(newPerson.id, prId, 'PARENT');
+          await act.delParentRelation(newPerson.id, prId);
         }
       }
       if (children !== undefined) {
         for (const chId of children.added) {
-          await act.addPersonRelation(chId, newPerson.id, 'PARENT');
+          await act.addParentRelation(chId, newPerson.id);
         }
         for (const chId of children.removed) {
-          await act.delPersonRelation(chId, newPerson.id, 'PARENT');
+          await act.delParentRelation(chId, newPerson.id);
         }
       }
 

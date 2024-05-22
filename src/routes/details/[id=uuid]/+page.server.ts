@@ -110,18 +110,18 @@ export const actions: Actions = {
         const { parents, children } = relativesUpdate;
         if (parents !== undefined) {
           for (const prId of parents.added) {
-            await act.addPersonRelation(pid, prId, 'PARENT');
+            await act.addParentRelation(pid, prId);
           }
           for (const prId of parents.removed) {
-            await act.delPersonRelation(pid, prId, 'PARENT');
+            await act.delParentRelation(pid, prId);
           }
         }
         if (children !== undefined) {
           for (const chId of children.added) {
-            await act.addPersonRelation(chId, pid, 'PARENT');
+            await act.addParentRelation(chId, pid);
           }
           for (const chId of children.removed) {
-            await act.delPersonRelation(chId, pid, 'PARENT');
+            await act.delParentRelation(chId, pid);
           }
         }
       }
