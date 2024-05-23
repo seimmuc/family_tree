@@ -289,14 +289,14 @@ export class WriteActions extends ReadActions {
     if (r.records.length > 1) {
       throw Error('db returned multiple new relation records, probably because multiple people have the same id');
     }
-    return r.records[0]?.get('r') as Neo4jRel;
+    return r.records[0]?.get('r') as Neo4jRel | undefined;
   }
   /**
    * Deletes a relationship between 2 people
    * @param fromPerson the relationship start person id
    * @param toPerson the relationship end person id
    * @param relationType relationship type
-   * 
+   *
    * Security warning: relationType is injected into the query without any sanitization. Do not allow any user input to leak into it.
    */
   async delPersonRelation(
@@ -317,5 +317,26 @@ export class WriteActions extends ReadActions {
   }
   async delParentRelation(child: PersonOrId, parent: PersonOrId): Promise<void> {
     return this.delPersonRelation(child, parent, 'PARENT');
+  }
+  async addPartnerRelation(partner1: PersonOrId, partner2: PersonOrId): Promise<Neo4jRel | undefined> {
+    // MATCH (p1:Person {id: $pi1}), (p2:Person {id: $pi2})
+    // WHERE NOT exists((p1)-[:PARTNER]-(p2))
+    // CREATE (p1)-[r:PARTNER]->(p2)
+    // RETURN r
+    const r = await this.transaction.run(
+      'MATCH (p1:Person {id: $pi1}), (p2:Person {id: $pi2}) WHERE NOT exists((p1)-[:PARTNER]-(p2)) CREATE (p1)-[r:PARTNER]->(p2) RETURN r',
+      { pi1: coerceIntoId(partner1), pi2: coerceIntoId(partner2) }
+    );
+    if (r.records.length > 1) {
+      throw Error('db returned multiple new relation records, probably because multiple people have the same id');
+    }
+    return r.records[0]?.get('r') as Neo4jRel | undefined;
+  }
+  async delPartnerRelation(partner1: PersonOrId, partner2: PersonOrId): Promise<number> {
+    const r = await this.transaction.run(
+      'MATCH (:Person {id: $pi1})-[r:PARTNER]-(:Person {id: $pi2}) DELETE r RETURN count(r) as rc',
+      { pi1: coerceIntoId(partner1), pi2: coerceIntoId(partner2) }
+    );
+    return (r.records[0].get('rc') as Integer).toInt();
   }
 }

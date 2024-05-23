@@ -33,7 +33,6 @@
   import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
   import { photoUrl, redirUserChange, TRANS_DELAY } from '$lib/client/clutils.js';
   import type { Person, UpdatablePerson } from '$lib/types/person';
-  import type { RelativesChangeRequest } from '$lib/types/reqdata';
   import { enhance } from '$app/forms';
   import type { SubmitFunction } from '@sveltejs/kit';
   import { fade, slide } from 'svelte/transition';
@@ -50,12 +49,13 @@
   // params
   export let data;
 
-  $: updateData(data.person, data.children, data.parents, data.relatives);
+  $: updateData(data.person, data.children, data.parents, data.partners, data.relatives);
 
   // vars
   let person: Person;
   let parents: Person[];
   let children: Person[];
+  let partners: Person[];
   let editMode: boolean = false;
   const image = {
     fileInput: undefined as HTMLInputElement | undefined,
@@ -67,7 +67,8 @@
   let frm: HTMLFormElement | undefined;
   const rels = {
     parentsComp: undefined as any as RelSection,
-    childrenComp: undefined as any as RelSection
+    childrenComp: undefined as any as RelSection,
+    partnersComp: undefined as any as RelSection
   };
   let piComp: PersonInfo;
   const del = {
@@ -89,13 +90,14 @@
   } as FileDropOptions;
   $: photoSrc = getPhotoSrc(image.src, image.pSrc);
 
-  function updateData(p: Person, childrenIds: string[], parentIds: string[], otherPeople: Person[]) {
+  function updateData(p: Person, childIds: string[], parentIds: string[], partnerIds: string[], relatives: Person[]) {
     person = p;
     image.src = photoUrl(p);
     image.pSrc = undefined;
     piComp?.reset(person);
-    parents = otherPeople.filter(p => parentIds.includes(p.id));
-    children = otherPeople.filter(p => childrenIds.includes(p.id));
+    parents = relatives.filter(p => parentIds.includes(p.id));
+    children = relatives.filter(p => childIds.includes(p.id));
+    partners = relatives.filter(p => partnerIds.includes(p.id));
   }
   function getPhotoSrc(originalSrc?: string, previewSrc?: string | null): string | undefined {
     if (previewSrc) {
@@ -178,7 +180,8 @@
     // relatives-update
     const relsUpd = createRelChangeRequest([
       ['parents', rels.parentsComp],
-      ['children', rels.childrenComp]
+      ['children', rels.childrenComp],
+      ['partners', rels.partnersComp]
     ]);
     const sendRelsUpd = Object.keys(relsUpd).length > 0;
     if (sendRelsUpd) {
@@ -332,6 +335,7 @@
   <div class="relations">
     <RelSection {editMode} sectionName="Parents" people={parents} bind:this={rels.parentsComp} />
     <RelSection {editMode} sectionName="Children" people={children} bind:this={rels.childrenComp} />
+    <RelSection {editMode} sectionName="Partners" people={partners} bind:this={rels.partnersComp} />
   </div>
 
   {#if editMode && data.canEdit}

@@ -21,7 +21,8 @@
   let formMsg: TimedMessage;
   const rels = {
     parentsComp: undefined as any as RelSection,
-    childrenComp: undefined as any as RelSection
+    childrenComp: undefined as any as RelSection,
+    partnersComp: undefined as any as RelSection
   };
 
   const submit: SubmitFunction = ({ formData, cancel }) => {
@@ -38,7 +39,8 @@
     // relatives
     const relsUpd = createRelChangeRequest([
       ['parents', rels.parentsComp],
-      ['children', rels.childrenComp]
+      ['children', rels.childrenComp],
+      ['partners', rels.partnersComp]
     ]);
     formData.append('relatives-new', JSON.stringify(relsUpd));
 
@@ -66,6 +68,7 @@
   <div class="relations">
     <RelSection editMode={true} sectionName="Parents" people={[]} bind:this={rels.parentsComp} />
     <RelSection editMode={true} sectionName="Children" people={[]} bind:this={rels.childrenComp} />
+    <RelSection editMode={true} sectionName="Partners" people={[]} bind:this={rels.partnersComp} />
   </div>
   <div class="form-buttons">
     <form method="POST" enctype="multipart/form-data" use:enhance={submit} bind:this={frm}>

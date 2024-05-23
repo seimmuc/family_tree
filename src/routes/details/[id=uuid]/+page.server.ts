@@ -25,6 +25,7 @@ export async function load({ params, locals, url }) {
   // Find children and parents
   const children: string[] = [];
   const parents: string[] = [];
+  const partners: string[] = [];
   for (const rel of relations) {
     if (rel.relType === 'parent') {
       if (rel.participants.parent[0] === pid) {
@@ -32,15 +33,23 @@ export async function load({ params, locals, url }) {
       } else if (rel.participants.child[0] === pid) {
         parents.push(rel.participants.parent[0]);
       }
+    } else if (rel.relType === 'partner') {
+      if (rel.participants.partner.includes(pid)) {
+        for (const partnerId of rel.participants.partner) {
+          if (partnerId !== pid) {
+            partners.push(partnerId);
+          }
+        }
+      }
     }
   }
 
   // Only send relatives who are useful to the page
   // TODO strip person objects of useless data
-  const rids = children.concat(parents);
+  const rids = children.concat(parents, partners);
   const relatives = allPeople.filter(p => rids.includes(p.id));
 
-  return { person, children, parents, relatives, canEdit };
+  return { person, children, parents, partners, relatives, canEdit };
 }
 
 export const actions: Actions = {
@@ -62,7 +71,7 @@ export const actions: Actions = {
     }
     const { id: pid } = personUpdate;
     const photo = data.get('photo');
-    let relativesUpdate: RelativesChangeRequest<'parents' | 'children'> | undefined = undefined;
+    let relativesUpdate: RelativesChangeRequest<'parents' | 'children' | 'partners'> | undefined = undefined;
     if (data.has('relatives-update')) {
       const relRes = parseUpdateRelatives(data.get('relatives-update'), pid);
       if (relRes.isErr()) {
@@ -107,7 +116,7 @@ export const actions: Actions = {
 
       // relations
       if (relativesUpdate !== undefined) {
-        const { parents, children } = relativesUpdate;
+        const { parents, children, partners } = relativesUpdate;
         if (parents !== undefined) {
           for (const prId of parents.added) {
             await act.addParentRelation(pid, prId);
@@ -122,6 +131,14 @@ export const actions: Actions = {
           }
           for (const chId of children.removed) {
             await act.delParentRelation(chId, pid);
+          }
+        }
+        if (partners !== undefined) {
+          for (const partnerId of partners.added) {
+            await act.addPartnerRelation(pid, partnerId);
+          }
+          for (const partnerId of partners.removed) {
+            await act.delPartnerRelation(pid, partnerId);
           }
         }
       }
