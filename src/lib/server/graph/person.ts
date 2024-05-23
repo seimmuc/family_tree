@@ -23,9 +23,10 @@ type WhereConditions<L extends number, OV extends string[] & { length: L }> = {
   params: { [k: string]: any };
 };
 
+type PersonOrId = Person | Person['id'];
 type PersonRelationType = 'PARENT' | 'SIBLING' | 'PARTNER';
 
-function coerceIntoId(personOrId: string | Person): string {
+function coerceIntoId(personOrId: PersonOrId): Person['id'] {
   if (typeof personOrId === 'object') {
     personOrId = personOrId.id;
   }
@@ -275,8 +276,8 @@ export class WriteActions extends ReadActions {
    * Security warning: relationType is injected into the query without any sanitization. Do not allow any user input to leak into it.
    */
   async addPersonRelation(
-    fromPerson: string | Person,
-    toPerson: string | Person,
+    fromPerson: PersonOrId,
+    toPerson: PersonOrId,
     relationType: PersonRelationType
   ): Promise<Neo4jRel | undefined> {
     fromPerson = coerceIntoId(fromPerson);
@@ -290,9 +291,17 @@ export class WriteActions extends ReadActions {
     }
     return r.records[0]?.get('r') as Neo4jRel;
   }
+  /**
+   * Deletes a relationship between 2 people
+   * @param fromPerson the relationship start person id
+   * @param toPerson the relationship end person id
+   * @param relationType relationship type
+   * 
+   * Security warning: relationType is injected into the query without any sanitization. Do not allow any user input to leak into it.
+   */
   async delPersonRelation(
-    fromPerson: string | Person,
-    toPerson: string | Person,
+    fromPerson: PersonOrId,
+    toPerson: PersonOrId,
     relationType: PersonRelationType | undefined
   ): Promise<void> {
     fromPerson = coerceIntoId(fromPerson);
@@ -303,10 +312,10 @@ export class WriteActions extends ReadActions {
       tid: toPerson
     });
   }
-  async addParentRelation(child: string | Person, parent: string | Person): Promise<Neo4jRel | undefined> {
+  async addParentRelation(child: PersonOrId, parent: PersonOrId): Promise<Neo4jRel | undefined> {
     return this.addPersonRelation(child, parent, 'PARENT');
   }
-  async delParentRelation(child: string | Person, parent: string | Person): Promise<void> {
+  async delParentRelation(child: PersonOrId, parent: PersonOrId): Promise<void> {
     return this.delPersonRelation(child, parent, 'PARENT');
   }
 }
