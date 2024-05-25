@@ -374,8 +374,8 @@
   }
   .separator {
     height: 3px;
-    width: calc(100% + 2 * var(--account-hpad, 0px));
-    margin-left: calc(0px - var(--account-hpad, 0px));
+    width: calc(100% + 2 * var(--rootdiv-hpad, 0px));
+    margin-left: calc(0px - var(--rootdiv-hpad, 0px));
     background-color: var(--col-primary-border, colors.$light-primary-border);
   }
   .user-view {
