@@ -45,6 +45,7 @@
   import TimedMessage from '$lib/components/TimedMessage.svelte';
   import { page } from '$app/stores';
   import FloatingUiComponent, { type FloatingUICompControl } from '$lib/components/FloatingUIComponent.svelte';
+  import * as m from '$lib/paraglide/messages.js';
 
   // params
   export let data;
@@ -251,9 +252,9 @@
 <DetailsMainArea>
   <div class="top-controls">
     <div class="tc-section left">
-      <a class="btn tree" href="/tree/{person.id}">view tree</a>
+      <a class="btn tree" href="/tree/{person.id}">{m.detailsViewTree()}</a>
       {#if data.canEdit || editMode}
-        <button class="btn edit" type="button" on:click={toggleEditMode}>toggle edit mode</button>
+        <button class="btn edit" type="button" on:click={toggleEditMode}>{m.detailsEditMode()}</button>
       {/if}
     </div>
     <div class="tc-section right">
@@ -268,12 +269,12 @@
           on:click={control.toggle}
           bind:this={del.button}
         >
-          Delete <FontAwesomeIcon icon={faTrashCan} />
+          {m.detailsDelete()} <FontAwesomeIcon icon={faTrashCan} />
         </button>
         <div slot="tooltip" class="delete-tooltip" bind:this={del.tooltipRoot}>
-          <span class="confirm-text">Are you sure you want to delete <span class="name">{person.name}</span>?</span>
+          <span class="confirm-text">{@html m.deleteConfirm({ name: `<span class="name">${person.name}</span>` })}</span>
           <form method="POST" action="?/delete" enctype="multipart/form-data" use:enhance={submitDelete}>
-            <button type="submit" class="btn">Confirm</button>
+            <button type="submit" class="btn">{m.deleteConfirmButton()}</button>
             {#if del.processing}
               <FontAwesomeIcon icon={faSpinner} spinPulse />
             {/if}
@@ -410,7 +411,7 @@
       font-weight: normal;
       .confirm-text {
         display: block;
-        .name {
+        :global(.name) {
           font-weight: bold;
         }
       }

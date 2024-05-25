@@ -4,5 +4,10 @@
   "hi": "Привет {name}!",
   "settingsTitle": "Настройки",
   "languageTitle": "Язык",
-  "signOut": "Выйти"
+  "signOut": "Выйти",
+  "detailsViewTree": "Открыть древо",
+  "detailsEditMode": "Режим редактирования",
+  "detailsDelete": "Удалить",
+  "deleteConfirm": "Удалить {name}?",
+  "deleteConfirmButton": "Подтвердить"
 }

@@ -7,5 +7,10 @@
   "signOut": "Sign out",
   "placeholderName": "Name",
   "placeholderBio": "Bio",
-  "newPersonHeader": "Add new person"
+  "newPersonHeader": "Add new person",
+  "detailsViewTree": "View tree",
+  "detailsEditMode": "Toggle edit mode",
+  "detailsDelete": "Delete",
+  "deleteConfirm": "Are you sure you want to delete {name}?",
+  "deleteConfirmButton": "Confirm"
 }
