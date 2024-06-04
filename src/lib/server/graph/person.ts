@@ -6,7 +6,8 @@ import type {
   Relationship,
   UpdatablePerson
 } from '$lib/types/person';
-import type { Integer, ManagedTransaction, Relationship as Neo4jRel } from 'neo4j-driver';
+import type { ManagedTransaction, Relationship as Neo4jRel } from 'neo4j-driver';
+import { Integer } from 'neo4j-driver';
 import { readTransaction, writeTransaction } from './memgraph';
 import type { TransactionConfig } from 'neo4j-driver-core';
 
@@ -73,8 +74,11 @@ export class ReadActions {
     const r = await this.transaction.run('MATCH (p:Person) RETURN p');
     return r.records.map(r => r.get('p').properties);
   }
-  async findManyPeople(limit: number = 50): Promise<Person[]> {
-    const r = await this.transaction.run('MATCH (p:Person) RETURN p LIMIT $limit ORDER BY p.name', { limit });
+  async getPageOfPeople(limit: number = 50, skip: number = 0): Promise<Person[]> {
+    const r = await this.transaction.run(
+      'MATCH (p:Person) RETURN p ORDER BY p.name SKIP $skip LIMIT $limit',
+      { limit: Integer.fromInt(limit), skip: Integer.fromInt(skip) }
+    );
     return r.records.map(r => r.get('p').properties);
   }
   async findPersonById(id: string): Promise<Person | undefined> {

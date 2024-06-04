@@ -1,4 +1,4 @@
-import { object, string, boolean, type InferType } from 'yup';
+import { object, string, boolean, type InferType, number } from 'yup';
 import { PERSON_ID_ARRAY } from './person';
 
 // POST /api/search
@@ -9,6 +9,15 @@ export const SEARCH_QUERY_SCHEMA = object({
 
 export type SearchQuery = InferType<typeof SEARCH_QUERY_SCHEMA>;
 export type SearchQueryCl = Partial<SearchQuery> & Required<Pick<SearchQuery, 'nameQuery'>>;
+
+// GET /api/list
+export const LIST_PEOPLE_QUERY_SCHEMA = object({
+  skip: number().min(0).optional().default(0),
+  limit: number().min(1).max(100).optional().default(50)
+});
+
+export type ListPeopleQuery = InferType<typeof LIST_PEOPLE_QUERY_SCHEMA>;
+export type ListPeopleQueryCl = Partial<ListPeopleQuery>;
 
 // POST /details/[uuid]?/update
 export const RELATIVES_SINGLE_TYPE_CHANGE_SCHEMA = object({

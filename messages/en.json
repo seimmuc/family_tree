@@ -7,6 +7,8 @@
   "signOut": "Sign out",
   "placeholderName": "Name",
   "placeholderBio": "Bio",
+  "cPagedListItemsStatus": "{first}-{last} out of {total}",
+  "cPagedListLoading": "Loading",
   "newPersonHeader": "Add new person",
   "detailsViewTree": "View tree",
   "detailsEditMode": "Toggle edit mode",

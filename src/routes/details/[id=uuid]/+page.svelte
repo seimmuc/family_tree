@@ -37,7 +37,7 @@
   import type { SubmitFunction } from '@sveltejs/kit';
   import { fade, slide } from 'svelte/transition';
   import RelSection from '../RelSection.svelte';
-  import DetailsMainArea from '../DetailsMainArea.svelte';
+  import RootDivCentered from '$lib/components/RootDivCentered.svelte';
   import { createRelChangeRequest } from '../utils';
   import { parseConfigList } from '$lib/utils';
   import SearchBox, { type SearchBoxLinkFunc } from '$lib/components/SearchBox.svelte';
@@ -249,7 +249,7 @@
 
 <svelte:window on:click={onWindowClick} />
 
-<DetailsMainArea>
+<RootDivCentered>
   <div class="top-controls">
     <div class="tc-section left">
       <a class="btn tree" href="/tree/{person.id}">{m.detailsViewTree()}</a>
@@ -357,7 +357,7 @@
       <button type="button" on:click={() => setEditMode(false)}>Cancel</button>
     </div>
   {/if}
-</DetailsMainArea>
+</RootDivCentered>
 
 <a class="back-button" href="/tree/{person.id}">
   <FontAwesomeIcon icon={faArrowLeft} size="3x" />

@@ -1,7 +1,7 @@
 <script lang="ts">
   import PersonInfo from '$lib/components/PersonInfo.svelte';
   import TimedMessage from '$lib/components/TimedMessage.svelte';
-  import DetailsMainArea from '../DetailsMainArea.svelte';
+  import RootDivCentered from '$lib/components/RootDivCentered.svelte';
   import * as m from '$lib/paraglide/messages.js';
   import { slide } from 'svelte/transition';
   import { TRANS_DELAY, type PersonChanges } from '$lib/client/clutils';
@@ -59,7 +59,7 @@
   });
 </script>
 
-<DetailsMainArea>
+<RootDivCentered>
   <h1>{m.newPersonHeader()}</h1>
   <PersonInfo editMode={true} person={{ name: '' }} on:returnkey={() => frm?.requestSubmit()} bind:this={piComp} />
   <TimedMessage bind:this={formMsg} let:msg>
@@ -76,7 +76,7 @@
     </form>
     <button type="button" disabled on:click={() => formMsg.setMessage('not implemented yet')}>Cancel</button>
   </div>
-</DetailsMainArea>
+</RootDivCentered>
 
 <style lang="scss">
   h1 {
