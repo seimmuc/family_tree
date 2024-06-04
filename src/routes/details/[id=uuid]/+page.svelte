@@ -40,12 +40,13 @@
   import RootDivCentered from '$lib/components/RootDivCentered.svelte';
   import { createRelChangeRequest } from '../utils';
   import { parseConfigList } from '$lib/utils';
-  import SearchBox, { type SearchBoxLinkFunc } from '$lib/components/SearchBox.svelte';
+  import { type SearchBoxLinkFunc } from '$lib/components/SearchBox.svelte';
   import PersonInfo from '$lib/components/PersonInfo.svelte';
   import TimedMessage from '$lib/components/TimedMessage.svelte';
   import { page } from '$app/stores';
   import FloatingUiComponent, { type FloatingUICompControl } from '$lib/components/FloatingUIComponent.svelte';
   import * as m from '$lib/paraglide/messages.js';
+  import Navbar from '$lib/components/Navbar.svelte';
 
   // params
   export let data;
@@ -242,8 +243,8 @@
 
   setEditMode(false);
   data.dynamicMenu.set({
-    comp: SearchBox,
-    compProps: { linkFunc: (p => `/details/${p.id}`) satisfies SearchBoxLinkFunc }
+    comp: Navbar,
+    compProps: { enableSearchBox: true, searchBoxLinkFunc: (p => `/details/${p.id}`) satisfies SearchBoxLinkFunc }
   });
 </script>
 

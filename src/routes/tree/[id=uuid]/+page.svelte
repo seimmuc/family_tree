@@ -6,7 +6,8 @@
   import FloatingUiComponent, { type FloatingUICompControl } from '$lib/components/FloatingUIComponent.svelte';
   import PersonNode from '$lib/components/PersonNode.svelte';
   import PopUp from '$lib/components/PopUp.svelte';
-  import SearchBox, { type SearchBoxLinkFunc } from '$lib/components/SearchBox.svelte';
+  import { type SearchBoxLinkFunc } from '$lib/components/SearchBox.svelte';
+  import Navbar from '$lib/components/Navbar.svelte';
   import type { Point } from '$lib/components/types.js';
   import { type Person } from '$lib/types/person.js';
   import { type ClientRectObject } from '@floating-ui/core';
@@ -226,8 +227,8 @@
   $: authChange(data.user);
 
   data.dynamicMenu.set({
-    comp: SearchBox,
-    compProps: { linkFunc: (p => `/tree/${p.id}`) satisfies SearchBoxLinkFunc }
+    comp: Navbar,
+    compProps: { enableSearchBox: true, searchBoxLinkFunc: (p => `/tree/${p.id}`) satisfies SearchBoxLinkFunc }
   });
 </script>
 
