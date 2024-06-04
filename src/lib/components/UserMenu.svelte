@@ -3,6 +3,7 @@
   import { page } from '$app/stores';
   import { createUrl } from '$lib/utils';
   import * as m from '$lib/paraglide/messages.js';
+  import { userHasPermission } from '$lib/client/clutils';
   type CEv = MouseEvent & { currentTarget: EventTarget & HTMLAnchorElement };
 
   export let user: User | null;
@@ -36,6 +37,10 @@
       Signed in as <span class="username">{user.username}</span>
     {/if}
   </li>
+
+  {#if userHasPermission(user, 'admin')}
+    <li><a href="/account/admin">Administration</a></li>
+  {/if}
 
   {#if user === null}
     <li><a href={hrefWithRedir('/account/login')}>Sign in</a></li>

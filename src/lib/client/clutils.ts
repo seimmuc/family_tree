@@ -125,7 +125,7 @@ export function photoUrl(person: PersonData): string | undefined {
   return person.photo ? `/media/${person.photo}` : undefined;
 }
 
-function userHasPermission(user: Pick<User, 'permissions'> | null, permission: UserPermission): boolean {
+export function userHasPermission(user: Pick<User, 'permissions'> | null, permission: UserPermission): boolean {
   if (user === null) {
     return false;
   }
