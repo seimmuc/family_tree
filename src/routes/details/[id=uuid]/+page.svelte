@@ -270,10 +270,13 @@
           on:click={control.toggle}
           bind:this={del.button}
         >
-          {m.detailsDelete()} <FontAwesomeIcon icon={faTrashCan} />
+          {m.detailsDelete()}
+          <FontAwesomeIcon icon={faTrashCan} />
         </button>
         <div slot="tooltip" class="delete-tooltip" bind:this={del.tooltipRoot}>
-          <span class="confirm-text">{@html m.deleteConfirm({ name: `<span class="name">${escapeHtml(person.name)}</span>` })}</span>
+          <span class="confirm-text">
+            {@html m.deleteConfirm({ name: `<span class="name">${escapeHtml(person.name)}</span>` })}
+          </span>
           <form method="POST" action="?/delete" enctype="multipart/form-data" use:enhance={submitDelete}>
             <button type="submit" class="btn">{m.deleteConfirmButton()}</button>
             {#if del.processing}

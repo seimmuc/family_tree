@@ -16,7 +16,7 @@
   let peopleCount = data.peopleCount ?? people.length;
   let pageSize = data.pageSize ?? 50;
 
-  async function fetchPage(startIndex: number, maxItemCount: number): Promise<{ items: Person[], totalItems: number }> {
+  async function fetchPage(startIndex: number, maxItemCount: number): Promise<{ items: Person[]; totalItems: number }> {
     if (startIndex < 0) {
       throw new Error(`startIndex is too low (${startIndex})`);
     } else if (maxItemCount < 1 || maxItemCount > 100) {
@@ -26,7 +26,7 @@
     const qryObj = Object.fromEntries(Object.entries(qryData).map(([k, v]) => [k, v.toString()]));
     const request = fetch(createUrl('/api/list', $page.url, qryObj), { method: 'GET' });
     const response = await request;
-    let responseData: { people: Person[], totalCount: number } = await response.json();
+    let responseData: { people: Person[]; totalCount: number } = await response.json();
     return { items: responseData.people, totalItems: responseData.totalCount };
   }
 

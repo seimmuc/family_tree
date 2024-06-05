@@ -4,10 +4,10 @@
   import * as m from '$lib/paraglide/messages.js';
 
   export let initialPageNum: number = 1;
-  export let pagesData: Record<number, T[] > = {};
+  export let pagesData: Record<number, T[]> = {};
   export let pageSize: number;
   export let totalItems: number;
-  export let fetchItemsFunc: (startIndex: number, maxItemCount: number) => Promise<{ items: T[], totalItems: number }>;
+  export let fetchItemsFunc: (startIndex: number, maxItemCount: number) => Promise<{ items: T[]; totalItems: number }>;
 
   let curPageNum: number = initialPageNum;
   const page = {
@@ -42,22 +42,25 @@
 
     if (cachedPage === undefined) {
       page.state = 'loading';
-      fetchPromise = fetchItemsFunc((pageNum - 1) * pageSize, pageSize).then(res => {
-        pagesData[pageNum] = res.items;
-        updateTotalCount(res.totalItems);
-        updatePageView(res.items, pageNum);
-        fetchPromise = undefined;
-        return res;
-      }, res => {
-        fetchPromise = undefined;
-        return res;
-      });
+      fetchPromise = fetchItemsFunc((pageNum - 1) * pageSize, pageSize).then(
+        res => {
+          pagesData[pageNum] = res.items;
+          updateTotalCount(res.totalItems);
+          updatePageView(res.items, pageNum);
+          fetchPromise = undefined;
+          return res;
+        },
+        res => {
+          fetchPromise = undefined;
+          return res;
+        }
+      );
     } else {
       updatePageView(cachedPage, pageNum);
     }
   }
-  export const buttonAction: Action<HTMLButtonElement, { curPage: number, btnPage: number }> = (btn, param) => {
-    function updateCurrent({ curPage, btnPage }: { curPage: number, btnPage: number }) {
+  export const buttonAction: Action<HTMLButtonElement, { curPage: number; btnPage: number }> = (btn, param) => {
+    function updateCurrent({ curPage, btnPage }: { curPage: number; btnPage: number }) {
       if (curPage === btnPage) {
         btn.classList.add('current');
         btn.disabled = true;
@@ -160,7 +163,8 @@
           border-radius: 4px;
           cursor: pointer;
           font: inherit;
-          &:is(.current) {    // for some strange reason "&.current {}" rule doesn't compile
+          // for some strange reason "&.current {}" rule doesn't compile
+          &:is(.current) {
             background-color: color-mix(in srgb, var(--col-fg, colors.$light-text) 20%, transparent);
             cursor: default;
           }

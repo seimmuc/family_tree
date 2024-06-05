@@ -75,10 +75,10 @@ export class ReadActions {
     return r.records.map(r => r.get('p').properties);
   }
   async getPageOfPeople(limit: number = 50, skip: number = 0): Promise<Person[]> {
-    const r = await this.transaction.run(
-      'MATCH (p:Person) RETURN p ORDER BY p.name SKIP $skip LIMIT $limit',
-      { limit: Integer.fromInt(limit), skip: Integer.fromInt(skip) }
-    );
+    const r = await this.transaction.run('MATCH (p:Person) RETURN p ORDER BY p.name SKIP $skip LIMIT $limit', {
+      limit: Integer.fromInt(limit),
+      skip: Integer.fromInt(skip)
+    });
     return r.records.map(r => r.get('p').properties);
   }
   async findPersonById(id: string): Promise<Person | undefined> {

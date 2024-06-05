@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { FontAwesomeIcon } from "@fortawesome/svelte-fontawesome";
-import SearchBox, { type SearchBoxLinkFunc } from "./SearchBox.svelte";
-  import { faPlus } from "@fortawesome/free-solid-svg-icons";
+  import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
+  import SearchBox, { type SearchBoxLinkFunc } from './SearchBox.svelte';
+  import { faPlus } from '@fortawesome/free-solid-svg-icons';
 
   export let enableSearchBox = false;
   export let searchBoxLinkFunc: SearchBoxLinkFunc = undefined;

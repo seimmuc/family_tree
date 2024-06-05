@@ -1,5 +1,5 @@
 <script lang="ts">
-  import RootDiv from "$lib/components/RootDiv.svelte";
+  import RootDiv from '$lib/components/RootDiv.svelte';
 </script>
 
 <RootDiv>

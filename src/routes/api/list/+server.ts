@@ -15,5 +15,5 @@ export async function GET({ locals, url }) {
     const count = await act.countAllPeople();
     return { people, count };
   });
-  return json({ people, totalCount: count } satisfies { people: Person[], totalCount: number });
+  return json({ people, totalCount: count } satisfies { people: Person[]; totalCount: number });
 }
