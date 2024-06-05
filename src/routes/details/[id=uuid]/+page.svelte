@@ -400,6 +400,8 @@
     }
 
     .delete-tooltip {
+      position: relative;
+      z-index: 1;
       background-color: var(--col-secondary-bg, colors.$light-secondary-bg);
       border: 2px solid var(--col-secondary-border, colors.$light-secondary-border);
       border-radius: 6px;
