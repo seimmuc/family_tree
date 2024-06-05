@@ -3,6 +3,7 @@ import { goto } from '$app/navigation';
 import { PERSON_UPDATE_SCHEMA, type PersonData } from '$lib/types/person';
 import type { User, UserPermission } from '$lib/types/user';
 import { clearUndefinedVals, createUrl, isDateString } from '$lib/utils';
+import * as he from 'he';
 import { err, ok, type Result } from 'neverthrow';
 import type { Action } from 'svelte/action';
 import { ValidationError } from 'yup';
@@ -82,6 +83,10 @@ export const nonewlines: Action<HTMLElement, undefined, { 'on:returnkey': (e: Cu
     }
   };
 };
+
+export function escapeHtml(htmlString: string): string {
+  return he.escape(htmlString);
+}
 
 // Person-related tools
 export type PersonEdit = { name: string; birthDate: string; deathDate: string; bio: string };

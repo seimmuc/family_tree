@@ -31,7 +31,7 @@
 <script lang="ts">
   import { filedrop, type FileDropOptions } from 'filedrop-svelte';
   import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
-  import { photoUrl, redirUserChange, TRANS_DELAY } from '$lib/client/clutils.js';
+  import { escapeHtml, photoUrl, redirUserChange, TRANS_DELAY } from '$lib/client/clutils.js';
   import type { Person, UpdatablePerson } from '$lib/types/person';
   import { enhance } from '$app/forms';
   import type { SubmitFunction } from '@sveltejs/kit';
@@ -273,7 +273,7 @@
           {m.detailsDelete()} <FontAwesomeIcon icon={faTrashCan} />
         </button>
         <div slot="tooltip" class="delete-tooltip" bind:this={del.tooltipRoot}>
-          <span class="confirm-text">{@html m.deleteConfirm({ name: `<span class="name">${person.name}</span>` })}</span>
+          <span class="confirm-text">{@html m.deleteConfirm({ name: `<span class="name">${escapeHtml(person.name)}</span>` })}</span>
           <form method="POST" action="?/delete" enctype="multipart/form-data" use:enhance={submitDelete}>
             <button type="submit" class="btn">{m.deleteConfirmButton()}</button>
             {#if del.processing}
