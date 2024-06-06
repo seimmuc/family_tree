@@ -14,8 +14,9 @@
   import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
   import { fade, slide, type SlideParams } from 'svelte/transition';
   import { page } from '$app/stores';
-  import { TRANS_DELAY, redirUserChange, timestampToFormattedTime } from '$lib/client/clutils.js';
+  import { TRANS_DELAY, escapeHtml, redirUserChange, timestampToFormattedTime } from '$lib/client/clutils.js';
   import { invalidate } from '$app/navigation';
+  import * as m from '$lib/paraglide/messages.js';
 
   const TRANS_OPTS: SlideParams = { axis: 'x', duration: TRANS_DELAY };
 
@@ -214,14 +215,27 @@
       del.processing = false;
     });
   }
+
+  function permDisplayName(perm: UserPermission): string {
+    switch (perm) {
+      case 'view':
+        return m.adminPermView()
+      case 'edit':
+        return m.adminPermEdit()
+      case 'admin':
+        return m.adminPermAdmin()
+      default:
+        return titleCaseWord(perm);
+    }
+  }
 </script>
 
 <svelte:window on:click={onWindowClick} />
 
-<h1 class="head">Administration</h1>
+<h1 class="head">{m.adminTitle()}</h1>
 <div class="user-select">
   <label
-    >User<input
+    >{m.adminUserLbl()}<input
       type="search"
       list="usernames-list"
       maxlength="32"
@@ -253,7 +267,7 @@
   {#if data.maxFetched}
     <span class="incomplete-list-warn">
       <FontAwesomeIcon icon={faCircleExclamation} size="sm" />
-      <span class="detail">User suggestions list is incomplete</span>
+      <span class="detail">{m.adminUserListIncomplete()}</span>
     </span>
   {/if}
 </div>
@@ -275,8 +289,8 @@
           <FontAwesomeIcon icon={faTrashCan} />
         </button>
         <div slot="tooltip" class="delete-tooltip" bind:this={del.tooltipRoot}>
-          <span class="confirm-text">Delete <span class="uname">{selectedUser.username}</span>?</span>
-          <button type="button" on:click={actionDelete}>Confirm</button>
+          <span class="confirm-text">{@html m.adminDeleteConfirm({ user: `<span class="uname">${escapeHtml(selectedUser.username)}</span>` })}</span>
+          <button type="button" on:click={actionDelete}>{m.adminDeleteConfirmButton()}</button>
           {#if del.processing}
             <FontAwesomeIcon icon={faSpinner} spinPulse />
           {/if}
@@ -286,14 +300,14 @@
         </div>
       </FloatingUiComponent>
     </h2>
-    <p class="user-ctime">Created: {timestampToFormattedTime(selectedUser.creationTime)}</p>
-    <h4 class="user-header">Permissions</h4>
+    <p class="user-ctime">{m.adminCreatedTime({ time: timestampToFormattedTime(selectedUser.creationTime) })}</p>
+    <h4 class="user-header">{m.adminPermissionsTitle()}</h4>
     <ul class="user-permissons">
       {#each USER_PERMISSIONS as perm}
         <li>
           <label>
             <input type="checkbox" bind:checked={pOptions[perm]} on:change={permUpd} />
-            {titleCaseWord(perm)}
+            {permDisplayName(perm)}
           </label>
         </li>
       {/each}
@@ -301,13 +315,13 @@
     {#if unsavedChanges}
       <div class="change-panel" transition:slide={{ ...TRANS_OPTS, axis: 'y' }}>
         <button type="button" on:click={actionSave} disabled={removeOwnAdmin.attempting && !removeOwnAdmin.allow}>
-          Save
+          {m.adminSubmit()}
         </button>
-        <button type="button" on:click={actionReset}>Reset</button>
+        <button type="button" on:click={actionReset}>{m.adminCancel()}</button>
         {#if removeOwnAdmin.attempting}
           <label transition:fade={{ duration: TRANS_OPTS.duration }}>
             <input type="checkbox" bind:checked={removeOwnAdmin.allow} />
-            Yes, I want to remove my own admin permission
+            {m.adminDeleteOwnAdmin()}
           </label>
         {/if}
         {#if show.saving}
@@ -403,7 +417,7 @@
         font-weight: normal;
         .confirm-text {
           display: block;
-          .uname {
+          :global(.uname) {
             font-weight: bold;
             font-family: monospace;
           }

@@ -60,21 +60,21 @@
 </script>
 
 <RootDivCentered>
-  <h1>{m.newPersonHeader()}</h1>
+  <h1>{m.newPersonTitle()}</h1>
   <PersonInfo editMode={true} person={{ name: '' }} on:returnkey={() => frm?.requestSubmit()} bind:this={piComp} />
   <TimedMessage bind:this={formMsg} let:msg>
     <p class="form-message" transition:slide={{ axis: 'y', duration: TRANS_DELAY, easing: quadOut }}>{msg}</p>
   </TimedMessage>
   <div class="relations">
-    <RelSection editMode={true} sectionName="Parents" people={[]} bind:this={rels.parentsComp} />
-    <RelSection editMode={true} sectionName="Children" people={[]} bind:this={rels.childrenComp} />
-    <RelSection editMode={true} sectionName="Partners" people={[]} bind:this={rels.partnersComp} />
+    <RelSection editMode={true} sectionName={m.sharedRelSectionParents()} people={[]} bind:this={rels.parentsComp} />
+    <RelSection editMode={true} sectionName={m.sharedRelSectionChildren()} people={[]} bind:this={rels.childrenComp} />
+    <RelSection editMode={true} sectionName={m.sharedRelSectionPartners()} people={[]} bind:this={rels.partnersComp} />
   </div>
   <div class="form-buttons">
     <form method="POST" enctype="multipart/form-data" use:enhance={submit} bind:this={frm}>
-      <button type="submit">Add</button>
+      <button type="submit">{m.newPersonSubmit()}</button>
     </form>
-    <button type="button" disabled on:click={() => formMsg.setMessage('not implemented yet')}>Cancel</button>
+    <button type="button" disabled on:click={() => formMsg.setMessage('not implemented yet')}>{m.newPersonCancel()}</button>
   </div>
 </RootDivCentered>
 

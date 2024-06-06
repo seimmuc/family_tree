@@ -60,6 +60,7 @@
   import { arrayFilterInPlace } from '$lib/utils';
   import { PUBLIC_SEARCH_CACHE_TTL } from '$env/static/public';
   import { navigating } from '$app/stores';
+  import * as m from '$lib/paraglide/messages.js';
 
   export let canHide = true;
   export let startHidden = true;
@@ -275,8 +276,8 @@
       transition:slide={{ axis: 'x' }}
       type="search"
       class="search-box"
-      placeholder="Search by name"
-      aria-label="Search people by name"
+      placeholder={m.cSearchBoxPlaceholder()}
+      aria-label={m.cSearchBoxAriaLabel()}
       spellcheck="false"
       style={inputBoxStyle}
       bind:this={inpElem}

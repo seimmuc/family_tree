@@ -6,6 +6,7 @@
   import { slide } from 'svelte/transition';
   import type { SubmitFunction } from './$types.js';
   import { TRANS_DELAY } from '$lib/client/clutils.js';
+  import * as m from '$lib/paraglide/messages.js';
 
   export let data;
 
@@ -26,27 +27,27 @@
   };
 </script>
 
-<h1 class="head">Log in</h1>
+<h1 class="head">{m.loginTitle()}</h1>
 <div class="main">
   <form method="POST" use:enhance={submit}>
     {#if data.redirectTo}
       <input type="hidden" name="redir" value={data.redirectTo} />
     {/if}
     <label>
-      <span class="lbl">Username</span>
+      <span class="lbl">{m.loginUsername()}</span>
       <input name="username" type="text" autocomplete="username" required />
     </label>
     <label>
-      <span class="lbl">Password</span>
+      <span class="lbl">{m.loginPassword()}</span>
       <input name="password" type="password" autocomplete="current-password" required />
     </label>
     <TimedMessage bind:this={errComp} let:msg>
       <span class="error" transition:slide={{ duration: TRANS_DELAY, axis: 'y' }}>{msg}</span>
     </TimedMessage>
-    <button class="btn" type="submit">Login</button>
+    <button class="btn" type="submit">{m.loginSubmitButton()}</button>
     <span class="info">
-      Don't have an account?
-      <a href={createUrl('/account/register', $page.url, $page.url.searchParams).toString()}>Sign Up</a>
+      {m.loginSignUpQuestion()}
+      <a href={createUrl('/account/register', $page.url, $page.url.searchParams).toString()}>{m.loginSignUpLinkText()}</a>
     </span>
   </form>
 </div>

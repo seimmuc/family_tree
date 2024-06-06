@@ -275,10 +275,10 @@
         </button>
         <div slot="tooltip" class="delete-tooltip" bind:this={del.tooltipRoot}>
           <span class="confirm-text">
-            {@html m.deleteConfirm({ name: `<span class="name">${escapeHtml(person.name)}</span>` })}
+            {@html m.detailsDeleteConfirm({ name: `<span class="name">${escapeHtml(person.name)}</span>` })}
           </span>
           <form method="POST" action="?/delete" enctype="multipart/form-data" use:enhance={submitDelete}>
-            <button type="submit" class="btn">{m.deleteConfirmButton()}</button>
+            <button type="submit" class="btn">{m.detailsDeleteConfirmButton()}</button>
             {#if del.processing}
               <FontAwesomeIcon icon={faSpinner} spinPulse />
             {/if}
@@ -302,7 +302,7 @@
     on:filedragleave={onImageDragLeave}
   >
     {#if photoSrc === undefined}
-      <div class="photo-small missing">No photo</div>
+      <div class="photo-small missing">{m.detailsPhotoMissing()}</div>
     {:else}
       <img class="photo-small" src={photoSrc} alt={person.name} />
     {/if}
@@ -311,17 +311,17 @@
         <button
           class="photo-edit-btn upload"
           type="button"
-          title="Upload image"
+          title={m.detailsPhotoUpload()}
           on:click={() => image.fileInput?.click()}
         >
           <FontAwesomeIcon icon={icons.upload} />
         </button>
         {#if image.pSrc !== undefined}
-          <button class="photo-edit-btn clear" type="button" title="Clear" on:click={clearImage}>
+          <button class="photo-edit-btn clear" type="button" title={m.detailsPhotoClear()} on:click={clearImage}>
             <FontAwesomeIcon icon={icons.clear} />
           </button>
         {/if}
-        <button class="photo-edit-btn delete" type="button" title="Delete image" on:click={deleteImage}>
+        <button class="photo-edit-btn delete" type="button" title={m.detailsPhotoDelete()} on:click={deleteImage}>
           <FontAwesomeIcon icon={icons.delete} />
         </button>
       </div>
@@ -338,9 +338,9 @@
   />
 
   <div class="relations">
-    <RelSection {editMode} sectionName="Parents" people={parents} bind:this={rels.parentsComp} />
-    <RelSection {editMode} sectionName="Children" people={children} bind:this={rels.childrenComp} />
-    <RelSection {editMode} sectionName="Partners" people={partners} bind:this={rels.partnersComp} />
+    <RelSection {editMode} sectionName={m.sharedRelSectionParents()} people={parents} bind:this={rels.parentsComp} />
+    <RelSection {editMode} sectionName={m.sharedRelSectionChildren()} people={children} bind:this={rels.childrenComp} />
+    <RelSection {editMode} sectionName={m.sharedRelSectionPartners()} people={partners} bind:this={rels.partnersComp} />
   </div>
 
   {#if editMode && data.canEdit}
@@ -356,9 +356,9 @@
         use:enhance={submitUpdate}
         bind:this={frm}
       >
-        <button type="submit">Save</button>
+        <button type="submit">{m.sharedButtonSave()}</button>
       </form>
-      <button type="button" on:click={() => setEditMode(false)}>Cancel</button>
+      <button type="button" on:click={() => setEditMode(false)}>{m.sharedButtonCancel()}</button>
     </div>
   {/if}
 </RootDivCentered>

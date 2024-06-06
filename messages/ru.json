@@ -1,13 +1,11 @@
 {
   "$schema": "https://inlang.com/schema/inlang-message-format",
-  "hello": "Здраствуй мир",
-  "hi": "Привет {name}!",
+  "menubarUserSignOut": "Выйти",
   "settingsTitle": "Настройки",
-  "languageTitle": "Язык",
-  "signOut": "Выйти",
+  "settingsLanguage": "Язык",
   "detailsViewTree": "Открыть древо",
   "detailsEditMode": "Режим редактирования",
   "detailsDelete": "Удалить",
-  "deleteConfirm": "Удалить {name}?",
-  "deleteConfirmButton": "Подтвердить"
+  "detailsDeleteConfirm": "Удалить {name}?",
+  "detailsDeleteConfirmButton": "Подтвердить"
 }

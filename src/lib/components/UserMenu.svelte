@@ -3,7 +3,7 @@
   import { page } from '$app/stores';
   import { createUrl } from '$lib/utils';
   import * as m from '$lib/paraglide/messages.js';
-  import { userHasPermission } from '$lib/client/clutils';
+  import { escapeHtml, userHasPermission } from '$lib/client/clutils';
   type CEv = MouseEvent & { currentTarget: EventTarget & HTMLAnchorElement };
 
   export let user: User | null;
@@ -33,21 +33,21 @@
 <ul style={rootStyle} bind:this={root}>
   <li class="info">
     {#if user === null}
-      Not signed in
+      {m.menubarUserNotSignedIn()}
     {:else}
-      Signed in as <span class="username">{user.username}</span>
+      {@html m.menubarUserSignedAs({ name: `<span class="username">${escapeHtml(user.username)}</span>`})}
     {/if}
   </li>
 
   {#if userHasPermission(user, 'admin')}
-    <li><a href="/account/admin">Administration</a></li>
+    <li><a href="/account/admin">{m.menubarUserAdmin()}</a></li>
   {/if}
 
   {#if user === null}
-    <li><a href={hrefWithRedir('/account/login')}>Sign in</a></li>
-    <li><a href={hrefWithRedir('/account/register')}>Register</a></li>
+    <li><a href={hrefWithRedir('/account/login')}>{m.menubarUserSignIn()}</a></li>
+    <li><a href={hrefWithRedir('/account/register')}>{m.menubarUserRegister()}</a></li>
   {:else}
-    <li><a href={hrefWithRedir('/account/logout')} on:click={onLogoutClick}>{m.signOut()}</a></li>
+    <li><a href={hrefWithRedir('/account/logout')} on:click={onLogoutClick}>{m.menubarUserSignOut()}</a></li>
   {/if}
 </ul>
 
@@ -68,7 +68,7 @@
         border-bottom-width: 2px;
       }
       &.info {
-        .username {
+        :global(span.username) {
           font-size: 1.2em;
           font-weight: bold;
         }

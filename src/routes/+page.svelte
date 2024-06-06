@@ -42,23 +42,22 @@
   {#if !data.authorized}
     {#if data.signedIn}
       <p>
-        You're not authorized to view this page, please contact an administrator or <a href="/account/logout">log out</a>.
+        {@html m.listNoPerm({ logoutlink: `<a href="/account/logout">${m.listNoPermLogout()}</a>` })}
       </p>
     {:else}
       <p>
-        You must be <a href="/account/login">signed in</a> to view this page. If you don't have an account you can
-        register <a href="/account/register">here</a>.
+        {@html m.listNoUser({ loginlink: `<a href="/account/login">${m.listNoUserLogin()}</a>`, reglink: `<a href="/account/register">${m.listNoUserReg()}</a>` })}
       </p>
     {/if}
   {:else}
-    <h1>All people</h1>
+    <h1>{m.listTitle()}</h1>
     <PagedList pagesData={{ 1: people }} totalItems={peopleCount} {pageSize} fetchItemsFunc={fetchPage}>
       <li slot="item" class="pl-person {index % 2 === 0 ? 'even' : 'odd'}" let:item let:index>
         <a href="/tree/{item.id}">{personDisplayName(item)}</a>
       </li>
       <svelte:fragment slot="empty">
-        <li class="pl-empty"><span>No people</span></li>
-        <li class="pl-empty"><a href="/details/new">Create new person</a></li>
+        <li class="pl-empty"><span>{m.listNoPeople()}</span></li>
+        <li class="pl-empty"><a href="/details/new">{m.listCreateNew()}</a></li>
       </svelte:fragment>
       <li slot="loading" class="pl-loading"><FontAwesomeIcon icon={faSpinner} pulse={true} /></li>
     </PagedList>

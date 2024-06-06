@@ -7,6 +7,7 @@ import * as he from 'he';
 import { err, ok, type Result } from 'neverthrow';
 import type { Action } from 'svelte/action';
 import { ValidationError } from 'yup';
+import * as m from '$lib/paraglide/messages.js';
 
 const DEFAULT_DATE_FORMAT_OPRIONS: Intl.DateTimeFormatOptions = {
   year: 'numeric',
@@ -41,7 +42,14 @@ export function formatDate(
   dateFormatOptions: Intl.DateTimeFormatOptions | undefined = DEFAULT_DATE_FORMAT_OPRIONS
 ): string {
   if (!dateString) {
-    return `unknown ${dateType ? dateType + ' ' : ''}date`;
+    switch (dateType) {
+      case 'birth':
+        return m.sharedUnknownDateBirth();
+      case 'death':
+        return m.sharedUnknownDateDeath();
+      default:
+        return m.sharedUnknownDate();
+    }
   }
   if (!isDateString(dateString)) {
     return dateString;

@@ -2,13 +2,14 @@
   import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
   import SearchBox, { type SearchBoxLinkFunc } from './SearchBox.svelte';
   import { faPlus } from '@fortawesome/free-solid-svg-icons';
+  import * as m from '$lib/paraglide/messages.js';
 
   export let enableSearchBox = false;
   export let searchBoxLinkFunc: SearchBoxLinkFunc = undefined;
 </script>
 
 <div class="root">
-  <a class="new-person" href="/details/new"><FontAwesomeIcon icon={faPlus} /></a>
+  <a class="new-person" href="/details/new" title={m.menubarNavAddPerson()}><FontAwesomeIcon icon={faPlus} /></a>
   {#if enableSearchBox}
     <SearchBox linkFunc={searchBoxLinkFunc} />
   {/if}

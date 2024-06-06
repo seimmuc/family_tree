@@ -16,7 +16,7 @@
   export let nameLink: string | undefined = undefined;
   export let transOptions: TransitionConfig = {};
   export let initDateMode: DateMode = 'date';
-  export let placeholders: { name: string; bio: string } = { name: m.placeholderName(), bio: m.placeholderBio() };
+  export let placeholders: { name: string; bio: string } = { name: m.cPersonInfoName(), bio: m.cPersonInfoBio() };
 
   const dispatch = createEventDispatcher();
   let editPerson: PersonEdit;

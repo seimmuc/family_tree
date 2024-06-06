@@ -6,7 +6,8 @@
   import { slide } from 'svelte/transition';
   import type { SubmitFunction } from './$types.js';
   import { TRANS_DELAY } from '$lib/client/clutils.js';
-  import { LANGUAGES } from '$lib/types/user.js';
+  import { DEFAULT_USER_OPTIONS, LANGUAGES } from '$lib/types/user.js';
+  import * as m from '$lib/paraglide/messages.js';
 
   export let data;
 
@@ -27,35 +28,35 @@
   };
 </script>
 
-<h1 class="head">Register</h1>
+<h1 class="head">{m.registerTitle()}</h1>
 <div class="main">
   <form method="POST" use:enhance={submit}>
     {#if data.redirectTo}
       <input type="hidden" name="redir" value={data.redirectTo} />
     {/if}
     <label>
-      <span class="lbl">Username</span>
+      <span class="lbl">{m.registerUsername()}</span>
       <input name="username" type="text" autocomplete="username" required />
     </label>
     <label>
-      <span class="lbl">Password</span>
+      <span class="lbl">{m.registerPassword()}</span>
       <input name="password" type="password" autocomplete="current-password" required />
     </label>
     <label>
-      <span class="lbl">Language</span>
+      <span class="lbl">{m.registerLanguage()}</span>
       <select name="language">
         {#each LANGUAGES as l}
-          <option value={l.code} selected={l.code === 'en'}>{l.name}</option>
+          <option value={l.code} selected={l.code === DEFAULT_USER_OPTIONS.language}>{l.name}</option>
         {/each}
       </select>
     </label>
     <TimedMessage bind:this={errComp} let:msg>
       <span class="error" transition:slide={{ duration: TRANS_DELAY, axis: 'y' }}>{msg}</span>
     </TimedMessage>
-    <button class="btn" type="submit">Register</button>
+    <button class="btn" type="submit">{m.registerSubmitButton()}</button>
     <span class="info">
-      Already have an account?
-      <a href={createUrl('/account/login', $page.url, $page.url.searchParams).toString()}>Sign In</a>
+      {m.registerSignInQuestion()}
+      <a href={createUrl('/account/login', $page.url, $page.url.searchParams).toString()}>{m.registerSignInLinkText()}</a>
     </span>
   </form>
 </div>

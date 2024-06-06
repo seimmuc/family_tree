@@ -87,7 +87,7 @@
 <form method="POST" use:enhance={submitUpdate}>
   <div class="settings">
     <label>
-      <span class="lbl">{m.languageTitle()}</span>
+      <span class="lbl">{m.settingsLanguage()}</span>
       <select bind:value={editOptions.language} on:change={onSettingChange}>
         {#each LANGUAGES as l}
           <option value={l.code} selected={l.code === options.language}>{l.name}</option>
@@ -100,8 +100,8 @@
       <TimedMessage bind:this={errMsg} let:msg>
         <p class="err-msg" transition:slide={{ duration: TRANS_DELAY, axis: 'y' }}>{msg}</p>
       </TimedMessage>
-      <button type="submit">Save</button>
-      <button type="button" on:click={actionCancel}>Cancel</button>
+      <button type="submit">{m.settingsSubmit()}</button>
+      <button type="button" on:click={actionCancel}>{m.settingsCancel()}</button>
     </div>
   {/if}
 </form>

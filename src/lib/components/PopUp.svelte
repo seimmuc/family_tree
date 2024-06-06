@@ -11,6 +11,7 @@
   import PersonInfo from './PersonInfo.svelte';
   import { quadOut } from 'svelte/easing';
   import TimedMessage from './TimedMessage.svelte';
+  import * as m from '$lib/paraglide/messages.js';
 
   const TRANS_OPT = { duration: TRANS_DELAY, easing: quadOut };
 
@@ -141,7 +142,7 @@
         type="button"
         class="button-show-more"
         transition:slide={{ ...TRANS_OPT, axis: 'y' }}
-        on:click={() => (showFullBio = !showFullBio)}>{showFullBio ? 'Show less' : 'Show more'}</button
+        on:click={() => (showFullBio = !showFullBio)}>{showFullBio ? m.cPopUpShowLess() : m.cPopUpShowMore()}</button
       >
     {/if}
     {#if editMode && canEdit}
