@@ -123,7 +123,7 @@
         <button slot="ref" type="button" let:floatingRef use:floatingRef on:click={onUserClick}>
           <FontAwesomeIcon icon={faUser} />
         </button>
-        <UserMenu slot="tooltip" user={data.user} logoutClickHandler={onLogout} bind:this={userBox.userComp} />
+        <UserMenu slot="tooltip" user={data.user} logoutClickHandler={onLogout} rootStyle="position: relative; z-index: 1;" bind:this={userBox.userComp} />
       </FloatingUiComponent>
     </div>
   </div>

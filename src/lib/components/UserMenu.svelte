@@ -8,6 +8,7 @@
 
   export let user: User | null;
   export let logoutClickHandler: ((event: CEv) => void) | undefined = undefined;
+  export let rootStyle: string | undefined = undefined;
 
   let root: HTMLUListElement;
 
@@ -29,7 +30,7 @@
   }
 </script>
 
-<ul bind:this={root}>
+<ul style={rootStyle} bind:this={root}>
   <li class="info">
     {#if user === null}
       Not signed in
