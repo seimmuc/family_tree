@@ -6,6 +6,7 @@ import { createUrl, parseConfigList } from '$lib/utils';
 import type { User, UserPermission } from '$lib/types/user';
 import { USERS_ADMINS } from '$env/static/private';
 import { error, redirect } from '@sveltejs/kit';
+import * as m from '$lib/paraglide/messages.js';
 
 export type FailError = { code: number; message: string };
 
@@ -134,7 +135,14 @@ export function userLoginRedirOrErrorIfNotAuthorized(
     if (user === null) {
       redirect(302, createUrl('/account/login', curUrl, { redirectTo: curUrl.pathname }));
     }
-    error(403, { message: errorMsg ?? 'Unauthorized' });
+    error(403, { message: errorMsg ?? m.errAuthUnauthorized(...locPr(user)) });
     throw new Error('this should never happen');
   }
+}
+
+export function locPr<T extends Record<string, any> | undefined>(userOrLocals: App.Locals | App.Locals['user'], params?: T): [T | undefined, { languageTag?: "en" | "ru" | undefined }] {
+  if (userOrLocals !== null && Object.hasOwn(userOrLocals, 'user')) {
+    userOrLocals = (userOrLocals as App.Locals).user;
+  }
+  return [params, { languageTag: (userOrLocals as App.Locals['user'])?.options.language ?? undefined }];
 }

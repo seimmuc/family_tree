@@ -1,6 +1,7 @@
 import { err, ok, type Result } from 'neverthrow';
-import { DEFAULT_USER_OPTIONS, type UserOptions } from './types/user';
+import { DEFAULT_USER_OPTIONS, type LangCode, type UserOptions } from './types/user';
 import type { Person } from './types/person';
+import * as m from '$lib/paraglide/messages.js';
 
 export type ExcludeVals<T, E> = { [K in keyof T]: Exclude<T[K], E> };
 
@@ -74,36 +75,36 @@ export function stripNonPrintableAndNormalize(
   return text.trim();
 }
 
-export function validateUsername(username: string): Result<void, string> {
+export function validateUsername(username: string, errLangCode?: LangCode): Result<void, string> {
   // https://unicode.org/reports/tr18/#General_Category_Property
   // may consider using \p{Alphabetic} instead of \p{Letter} in the future
   // \p{Mark} (combining marks) and most \p{Punctuation} is currently explicitly prohibited in usernames
   if (!(typeof username === 'string')) {
-    return err('invalid username');
+    return err(m.errUnameInvalid(undefined, { languageTag: errLangCode }));
   }
   if (username.length > 32) {
-    return err('username is too long');
+    return err(m.errUnameLong(undefined, { languageTag: errLangCode }));
   }
   if (!/^[\p{Letter}\p{Number}_.\(\)\[\]\-]+$/v.test(username)) {
-    return err('username contains prohibited characters');
+    return err(m.errUnameBadChars(undefined, { languageTag: errLangCode }));
   }
   if (username.length < 2) {
-    return err('username is too short');
+    return err(m.errUnameShort(undefined, { languageTag: errLangCode }));
   }
   return ok(undefined);
 }
-export function validatePassword(password: string): Result<void, string> {
+export function validatePassword(password: string, errLangCode?: LangCode): Result<void, string> {
   if (!(typeof password === 'string')) {
-    return err('invalid password');
+    return err(m.errPassInvalid(undefined, { languageTag: errLangCode }));
   }
   if (password.length > 64) {
-    return err('password is too long');
+    return err(m.errPassLong(undefined, { languageTag: errLangCode }));
   }
   if (!/^[^\p{Control}\p{Private_Use}\p{Unassigned}]+$/v.test(password)) {
-    return err('password contains prohibited characters');
+    return err(m.errPassBadChars(undefined, { languageTag: errLangCode }));
   }
   if (password.length < 8) {
-    return err('password is too short');
+    return err(m.errPassShort(undefined, { languageTag: errLangCode }));
   }
   return ok(undefined);
 }
@@ -111,15 +112,16 @@ export function validatePassword(password: string): Result<void, string> {
 export function validateUsernameAndPassword(
   formData: FormData,
   uKey = 'username',
-  pKey = 'password'
+  pKey = 'password',
+  errLangCode?: LangCode
 ): Result<[string, string], string> {
   const username = formData.get(uKey) as string;
-  const usernameValidResult = validateUsername(username);
+  const usernameValidResult = validateUsername(username, errLangCode);
   if (usernameValidResult.isErr()) {
     return err(usernameValidResult.error);
   }
   const password = formData.get(pKey) as string;
-  const passwordValidResult = validatePassword(password);
+  const passwordValidResult = validatePassword(password, errLangCode);
   if (passwordValidResult.isErr()) {
     return err(passwordValidResult.error);
   }

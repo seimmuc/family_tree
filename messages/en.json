@@ -72,5 +72,21 @@
   "listNoUserReg": "here",
   "listTitle": "All people",
   "listNoPeople": "No people",
-  "listCreateNew": "Create new person"
+  "listCreateNew": "Create new person",
+  "errAuthUnauthorized": "Unauthorized",
+  "errAuthMustBeAdmin": "Must be signed in as an administrator",
+  "errBadUnameOrPass": "Incorrect username or password",
+  "errUnameInvalid": "invalid username",
+  "errUnameLong": "username is too long",
+  "errUnameShort": "username is too short",
+  "errUnameBadChars": "username contains prohibited characters",
+  "errPassInvalid": "invalid password",
+  "errPassLong": "password is too long",
+  "errPassShort": "password is too short",
+  "errPassBadChars": "password contains prohibited characters",
+  "seServerError": "server error",
+  "seUnauthorized": "unauthorized",
+  "seInvalidValue": "invalid value",
+  "seInvalidRequest": "invalid request",
+  "seApiUserNotFound": "user not found"
 }

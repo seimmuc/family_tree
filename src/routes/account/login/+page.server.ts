@@ -4,6 +4,8 @@ import type { Actions } from './$types';
 import { UserReadActions } from '$lib/server/graph/user';
 import { Argon2id } from 'oslo/password';
 import { lucia } from '$lib/server/auth';
+import * as m from '$lib/paraglide/messages.js';
+import { locPr } from '$lib/server/sutils';
 
 export const load = async ({ locals, url }) => {
   const redirectTo = url.searchParams.get('redirectTo');
@@ -31,13 +33,13 @@ export const actions: Actions = {
         return act.getUserByUsername(username);
       });
       if (user === undefined) {
-        return fail(400, { message: 'Incorrect username or password' });
+        return fail(400, { message: m.errBadUnameOrPass(...locPr(locals)) });
       }
 
       // check password
       const passIsValid = await new Argon2id().verify(user.passwordHash, password);
       if (!passIsValid) {
-        return fail(400, { message: 'Incorrect username or password' });
+        return fail(400, { message: m.errBadUnameOrPass(...locPr(locals)) });
       }
 
       // create and set session

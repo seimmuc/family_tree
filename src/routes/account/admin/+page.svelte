@@ -171,7 +171,7 @@
         }
       } else {
         const { error }: { error: string } = await response.json();
-        saveErrMsgSet?.(error ?? 'server error');
+        saveErrMsgSet?.(error ?? m.seServerError());
       }
       show.saving = false;
     });
