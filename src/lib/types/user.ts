@@ -1,3 +1,4 @@
+import { PUBLIC_DEFAULT_LANGUAGE } from '$env/static/public';
 import type { UUID } from 'crypto';
 import { ObjectSchema, StringSchema, number as yupnumber, object, string, type AnyObject, array } from 'yup';
 
@@ -9,18 +10,23 @@ export const LANGUAGES = [
   { code: 'ru', name: 'Русский' }
 ] as const;
 export type LangCode = (typeof LANGUAGES)[number]['code'];
+const languageCodeArr: LangCode[] = LANGUAGES.map(l => l.code);
 
 export type UserID = UUID;
 export type UserOptions = { language?: LangCode };
 
 export const USER_OPTIONS_SCHEMA = object({
   language: string()
-    .oneOf(LANGUAGES.map(l => l.code))
+    .oneOf(languageCodeArr)
     .optional()
 }).noUnknown();
 export const USER_OPTIONS_UPDATE_SCHEMA = USER_OPTIONS_SCHEMA.partial();
 
-export const DEFAULT_USER_OPTIONS: Required<UserOptions> = { language: 'en' };
+let defaultLanguage: LangCode = (PUBLIC_DEFAULT_LANGUAGE ?? 'en').trim() as LangCode;
+if (!languageCodeArr.includes(defaultLanguage)) {
+  defaultLanguage = 'en';
+}
+export const DEFAULT_USER_OPTIONS: Required<UserOptions> = { language: defaultLanguage };
 
 /** UserMinimal is the minimal representation of a user and should be safe to send to other users and unauthenticated clients when appropriate */
 export type UserMinimal = { id: UserID; username: string };

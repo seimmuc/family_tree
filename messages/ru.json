@@ -3,9 +3,11 @@
   "menubarUserSignOut": "Выйти",
   "settingsTitle": "Настройки",
   "settingsLanguage": "Язык",
+  "loginTitle": "Войти",
   "detailsViewTree": "Открыть древо",
   "detailsEditMode": "Режим редактирования",
   "detailsDelete": "Удалить",
   "detailsDeleteConfirm": "Удалить {name}?",
-  "detailsDeleteConfirmButton": "Подтвердить"
+  "detailsDeleteConfirmButton": "Подтвердить",
+  "listTitle": "Все люди"
 }

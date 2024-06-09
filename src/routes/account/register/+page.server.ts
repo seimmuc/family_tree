@@ -5,7 +5,7 @@ import { Argon2id } from 'oslo/password';
 import { lucia } from '$lib/server/auth';
 import { parseConfigBool } from '$lib/server/sutils';
 import { validateUsernameAndPassword } from '$lib/utils';
-import { LANGUAGES, type UserOptions, type UserPermission } from '$lib/types/user';
+import { DEFAULT_USER_OPTIONS, LANGUAGES, type UserOptions, type UserPermission } from '$lib/types/user';
 import { USERS_MAKE_FIRST_ADMIN } from '$env/static/private';
 
 const makeFirstUserAdmin = parseConfigBool(USERS_MAKE_FIRST_ADMIN);
@@ -30,7 +30,7 @@ export const actions: Actions = {
         return fail(422, { message: upvr.error });
       }
       const [username, password] = upvr.value;
-      const lc = formData.get('language') ?? 'en';
+      const lc = formData.get('language') ?? DEFAULT_USER_OPTIONS.language;
       const language = LANGUAGES.find(l => l.code === lc);
       if (language === undefined) {
         return fail(422, { message: 'unknown language' });
