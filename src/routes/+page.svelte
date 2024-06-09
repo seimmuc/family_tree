@@ -1,6 +1,8 @@
 <script lang="ts">
+  import { invalidate } from '$app/navigation';
   import { page } from '$app/stores';
-  import { formatDate } from '$lib/client/clutils';
+  import { formatDate, onStoreValChange } from '$lib/client/clutils';
+  import { userStore } from '$lib/client/stores.js';
   import PagedList from '$lib/components/PagedList.svelte';
   import RootDivCentered from '$lib/components/RootDivCentered.svelte';
   import * as m from '$lib/paraglide/messages.js';
@@ -9,6 +11,7 @@
   import { createUrl } from '$lib/utils.js';
   import { faSpinner } from '@fortawesome/free-solid-svg-icons';
   import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
+  import { onMount } from 'svelte';
 
   export let data;
 
@@ -36,6 +39,15 @@
     }
     return p.name;
   }
+  onMount(() => {
+    const userUnsub = onStoreValChange(userStore, () => {
+      invalidate('data:personlist');
+    });
+
+    return () => {
+      userUnsub();
+    }
+  });
 </script>
 
 <RootDivCentered>

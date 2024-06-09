@@ -8,6 +8,7 @@ import { err, ok, type Result } from 'neverthrow';
 import type { Action } from 'svelte/action';
 import { ValidationError } from 'yup';
 import * as m from '$lib/paraglide/messages.js';
+import type { Readable } from 'svelte/store';
 
 const DEFAULT_DATE_FORMAT_OPRIONS: Intl.DateTimeFormatOptions = {
   year: 'numeric',
@@ -94,6 +95,17 @@ export const nonewlines: Action<HTMLElement, undefined, { 'on:returnkey': (e: Cu
 
 export function escapeHtml(htmlString: string): string {
   return he.escape(htmlString);
+}
+
+export function onStoreValChange<T>(store: Readable<T>, callback: (newValue: T) => void): () => void {
+  let initVal = true;
+  return store.subscribe(newVal => {
+    if (initVal) {
+      initVal = false;
+    } else {
+      callback(newVal);
+    }
+  });
 }
 
 // Person-related tools

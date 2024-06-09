@@ -2,7 +2,7 @@
   import { browser } from '$app/environment';
   import { goto, invalidate, invalidateAll } from '$app/navigation';
   import { navigating } from '$app/stores';
-  import { theme } from '$lib/client/stores.js';
+  import { theme, userStore } from '$lib/client/stores.js';
   import FloatingUiComponent from '$lib/components/FloatingUIComponent.svelte';
   import UserMenu from '$lib/components/UserMenu.svelte';
   import '$lib/styles/global.scss';
@@ -56,6 +56,11 @@
   $: if (browser) {
     document.documentElement.dataset.theme = data.theme;
   }
+
+  function onAuthChange(user: typeof data.user) {
+    userStore.set(user);
+  }
+  $: onAuthChange(data.user);
 
   function onUserClick() {
     userBox.floatComp?.control.toggle();

@@ -3,7 +3,7 @@ import { userHasPermission } from '$lib/server/sutils.js';
 
 const LIMIT = 50;
 
-export async function load({ locals }) {
+export async function load({ locals, depends }) {
   const user = locals.user;
   if (!userHasPermission(user, 'view')) {
     if (user === null) {
@@ -12,6 +12,7 @@ export async function load({ locals }) {
       return { signedIn: true, authorized: false };
     }
   }
+  depends('data:personlist');
   const [initPeople, peopleCount] = await ReadActions.perform(async act => {
     const ppl = await act.getPageOfPeople(LIMIT);
     const len = ppl.length < LIMIT ? ppl.length : await act.countAllPeople();
