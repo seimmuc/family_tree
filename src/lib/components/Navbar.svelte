@@ -12,10 +12,10 @@
 
 <div class="root">
   {#if enableHomeButton}
-    <a class="home" href="/" title={m.menubarNavHome()}><FontAwesomeIcon icon={faHouse} /></a>
+    <a class="nav-btn home" href="/" title={m.menubarNavHome()}><FontAwesomeIcon icon={faHouse} /></a>
   {/if}
   {#if enableAddPerson}
-    <a class="new-person" href="/details/new" title={m.menubarNavAddPerson()}><FontAwesomeIcon icon={faPlus} /></a>
+    <a class="nav-btn new-person" href="/details/new" title={m.menubarNavAddPerson()}><FontAwesomeIcon icon={faPlus} /></a>
   {/if}
   {#if enableSearchBox}
     <SearchBox linkFunc={searchBoxLinkFunc} />
@@ -24,6 +24,7 @@
 
 <style lang="scss">
   @use '$lib/styles/common';
+  @use '$lib/styles/colors';
 
   .root {
     display: flex;
@@ -32,10 +33,12 @@
     align-items: center;
     gap: 0.75em;
   }
-  .home,
-  .new-person {
+  .nav-btn {
     @include common.link;
+    color: var(--col-fg, colors.$light-text);
     user-select: none;
     font-size: 1.5em;
+    padding: 3px;
+    margin: 0 3px;
   }
 </style>
