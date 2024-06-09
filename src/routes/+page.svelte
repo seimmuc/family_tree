@@ -41,11 +41,11 @@
 <RootDivCentered>
   {#if !data.authorized}
     {#if data.signedIn}
-      <p>
+      <p class="notice">
         {@html m.listNoPerm({ logoutlink: `<a href="/account/logout">${m.listNoPermLogout()}</a>` })}
       </p>
     {:else}
-      <p>
+      <p class="notice">
         {@html m.listNoUser({ loginlink: `<a href="/account/login">${m.listNoUserLogin()}</a>`, reglink: `<a href="/account/register">${m.listNoUserReg()}</a>` })}
       </p>
     {/if}
@@ -68,6 +68,12 @@
   @use '$lib/styles/colors';
   @use '$lib/styles/common';
 
+  .notice {
+    font-size: 1.2em;
+    :global(a) {
+      @include common.link;
+    }
+  }
   h1 {
     margin: 0.25em 0;
   }
