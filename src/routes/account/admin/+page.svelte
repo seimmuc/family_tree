@@ -280,6 +280,7 @@
         <button
           slot="ref"
           type="button"
+          title={m.adminDeleteBtn()}
           let:floatingRef
           use:floatingRef
           let:control

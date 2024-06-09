@@ -6,6 +6,7 @@
   import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
   import { createEventDispatcher, tick } from 'svelte';
   import { slide } from 'svelte/transition';
+  import * as m from '$lib/paraglide/messages.js';
 
   export let editMode: boolean;
   export let sectionName: string;
@@ -101,7 +102,7 @@
             />
           </div>
         {/if}
-        <button type="button" class="toggle-sb" class:x={addingPerson} on:click={toggleAddingPerson}>
+        <button type="button" class="toggle-sb" class:x={addingPerson} title={addingPerson ? m.cSearchBoxBtnClose() : m.cSearchBoxBtnSearch()} on:click={toggleAddingPerson}>
           <FontAwesomeIcon icon={faPlus} />
         </button>
       </div>

@@ -127,12 +127,13 @@
         slot="name-left"
         class="top-button"
         type="button"
+        title={m.cPopUpBtnEdit()}
         on:click={toggleEditMode}
         disabled={!canEdit && !editMode}
       >
         <FontAwesomeIcon icon={faPenToSquare} />
       </button>
-      <button slot="name-right" class="top-button" type="button" on:click={close}>
+      <button slot="name-right" class="top-button" type="button" title={m.cPopUpBtnClose()} on:click={close}>
         <FontAwesomeIcon icon={faXmark} />
       </button>
     </PersonInfo>

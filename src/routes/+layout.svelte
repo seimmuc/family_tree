@@ -14,6 +14,7 @@
   import { config as faconfig } from '@fortawesome/fontawesome-svg-core';
   import '@fortawesome/fontawesome-svg-core/styles.css'; // TODO test impact of this import on initial/subsequent load times
   import { i18n } from '$lib/i18n';
+  import * as m from '$lib/paraglide/messages.js';
 
   export let data;
 
@@ -112,7 +113,7 @@
       <svelte:component this={$dMenu.comp} {...$dMenu.compProps} />
     </div>
     <div class="menu-section right">
-      <button on:click={toggleTheme}>
+      <button title={data.theme === 'light' ? m.menubarBtnThemeDark() : m.menubarBtnThemeLight()} on:click={toggleTheme}>
         {#if data.theme === 'light'}
           <FontAwesomeIcon icon={faMoon} />
         {:else}
@@ -120,12 +121,13 @@
         {/if}
       </button>
       <button
+        title={m.menubarBtnSettings()}
         on:click={() => {
           goto('/account/settings');
         }}><FontAwesomeIcon icon={faGear} /></button
       >
       <FloatingUiComponent enableArrow={false} offsetPx={-6} bind:this={userBox.floatComp}>
-        <button slot="ref" type="button" let:floatingRef use:floatingRef on:click={onUserClick}>
+        <button slot="ref" type="button" title={m.menubarBtnUser()} let:floatingRef use:floatingRef on:click={onUserClick}>
           <FontAwesomeIcon icon={faUser} />
         </button>
         <UserMenu slot="tooltip" user={data.user} logoutClickHandler={onLogout} rootStyle="position: relative; z-index: 1;" bind:this={userBox.userComp} />

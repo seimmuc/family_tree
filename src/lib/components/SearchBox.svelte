@@ -327,7 +327,7 @@
   {/if}
 
   {#if !boxShown || (enableXButton && (canHide || query.length > 0))}
-    <button transition:fade type="button" class="search-btn" on:click={actionSearchBtn}>
+    <button transition:fade type="button" class="search-btn" title={boxShown ? m.cSearchBoxBtnClose() : m.cSearchBoxBtnSearch()} on:click={actionSearchBtn}>
       {#if boxShown}
         <FontAwesomeIcon icon={faCircleXmark} />
       {:else}

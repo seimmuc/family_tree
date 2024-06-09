@@ -111,15 +111,15 @@
 {#if editMode}
   <div class="date input" transition:slide={{ axis: 'y', ...transOptions }}>
     {#if birthDM === 'date'}
-      <input type="date" bind:value={editPerson.birthDate} />
+      <input type="date" title={m.cPersonInfoBirth()} bind:value={editPerson.birthDate} />
     {:else}
-      <input type="text" maxlength={DATE_MAX_LEN} bind:value={editPerson.birthDate} />
+      <input type="text" title={m.cPersonInfoBirth()} placeholder={m.cPersonInfoBirth()} maxlength={DATE_MAX_LEN} bind:value={editPerson.birthDate} />
     {/if}
-    <button type="button" class="switch-format-btn" on:click={toggleDM}>-</button>
+    <button type="button" class="switch-format-btn" title={m.cPersonInfoToggleDateMode()} on:click={toggleDM}>-</button>
     {#if deathDM === 'date'}
-      <input type="date" bind:value={editPerson.deathDate} />
+      <input type="date" title={m.cPersonInfoDeath()} bind:value={editPerson.deathDate} />
     {:else}
-      <input type="text" maxlength={DATE_MAX_LEN} bind:value={editPerson.deathDate} />
+      <input type="text" title={m.cPersonInfoDeath()} placeholder={m.cPersonInfoDeath()} maxlength={DATE_MAX_LEN} bind:value={editPerson.deathDate} />
     {/if}
   </div>
 {:else}

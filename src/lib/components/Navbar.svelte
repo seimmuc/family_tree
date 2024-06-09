@@ -12,7 +12,7 @@
 
 <div class="root">
   {#if enableHomeButton}
-    <a class="home" href="/" title={m.menubarHome()}><FontAwesomeIcon icon={faHouse} /></a>
+    <a class="home" href="/" title={m.menubarNavHome()}><FontAwesomeIcon icon={faHouse} /></a>
   {/if}
   {#if enableAddPerson}
     <a class="new-person" href="/details/new" title={m.menubarNavAddPerson()}><FontAwesomeIcon icon={faPlus} /></a>
