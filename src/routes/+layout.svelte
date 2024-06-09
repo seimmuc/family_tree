@@ -109,9 +109,9 @@
     <div class="menu-section right">
       <button on:click={toggleTheme}>
         {#if data.theme === 'light'}
-          <FontAwesomeIcon icon={faSun} />
-        {:else}
           <FontAwesomeIcon icon={faMoon} />
+        {:else}
+          <FontAwesomeIcon icon={faSun} />
         {/if}
       </button>
       <button
