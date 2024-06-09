@@ -1,5 +1,6 @@
 {
   "$schema": "https://inlang.com/schema/inlang-message-format",
+  "menubarHome": "Home",
   "menubarUserRegister": "Register",
   "menubarUserSignIn": "Sign in",
   "menubarUserSignOut": "Sign out",

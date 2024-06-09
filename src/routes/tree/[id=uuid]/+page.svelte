@@ -228,7 +228,7 @@
 
   data.dynamicMenu.set({
     comp: Navbar,
-    compProps: { enableSearchBox: true, searchBoxLinkFunc: (p => `/tree/${p.id}`) satisfies SearchBoxLinkFunc }
+    compProps: { enableAddPerson: true, enableSearchBox: true, searchBoxLinkFunc: (p => `/tree/${p.id}`) satisfies SearchBoxLinkFunc }
   });
 </script>
 

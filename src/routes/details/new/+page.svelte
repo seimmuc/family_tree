@@ -10,9 +10,10 @@
   import type { SubmitFunction } from './$types.js';
   import { clearEmptyVals, type ExcludeVals } from '$lib/utils';
   import type { PersonData } from '$lib/types/person';
-  import SearchBox, { type SearchBoxLinkFunc } from '$lib/components/SearchBox.svelte';
+  import type { SearchBoxLinkFunc } from '$lib/components/SearchBox.svelte';
   import RelSection from '../RelSection.svelte';
   import { createRelChangeRequest } from '../utils';
+  import Navbar from '$lib/components/Navbar.svelte';
 
   export let data;
 
@@ -54,8 +55,8 @@
   };
 
   data.dynamicMenu.set({
-    comp: SearchBox,
-    compProps: { linkFunc: (p => `/details/${p.id}`) satisfies SearchBoxLinkFunc }
+    comp: Navbar,
+    compProps: { enableAddPerson: false, enableSearchBox: true, searchBoxLinkFunc: (p => `/details/${p.id}`) satisfies SearchBoxLinkFunc }
   });
 </script>
 

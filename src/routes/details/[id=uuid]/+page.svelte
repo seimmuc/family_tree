@@ -244,7 +244,7 @@
   setEditMode(false);
   data.dynamicMenu.set({
     comp: Navbar,
-    compProps: { enableSearchBox: true, searchBoxLinkFunc: (p => `/details/${p.id}`) satisfies SearchBoxLinkFunc }
+    compProps: { enableAddPerson: true, enableSearchBox: true, searchBoxLinkFunc: (p => `/details/${p.id}`) satisfies SearchBoxLinkFunc }
   });
 </script>
 
