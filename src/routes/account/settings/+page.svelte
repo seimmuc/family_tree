@@ -1,7 +1,7 @@
 <script lang="ts">
   import { enhance } from '$app/forms';
   import { page } from '$app/stores';
-  import { TRANS_DELAY, redirUserChange } from '$lib/client/clutils';
+  import { TRANS_DELAY, redirToLogin } from '$lib/client/clutils';
   import TimedMessage from '$lib/components/TimedMessage.svelte';
   import { LANGUAGES, USER_OPTIONS_UPDATE_SCHEMA, DEFAULT_USER_OPTIONS } from '$lib/types/user.js';
   import type { LangCode, User, UserOptions } from '$lib/types/user.js';
@@ -24,7 +24,7 @@
 
   function reset(u: User | null) {
     if (u === null) {
-      redirUserChange(u, undefined, $page.url);
+      redirToLogin($page.url);
     } else {
       user = u;
       options = toFullUserOptions(user.options);

@@ -1,14 +1,17 @@
 import { browser } from '$app/environment';
 import { goto } from '$app/navigation';
+import { PUBLIC_UNAUTHENTICATED_PERMISSIONS } from '$env/static/public';
 import { PERSON_UPDATE_SCHEMA, type PersonData } from '$lib/types/person';
 import type { User, UserPermission } from '$lib/types/user';
-import { clearUndefinedVals, createUrl, isDateString } from '$lib/utils';
+import { clearUndefinedVals, createUrl, isDateString, parseConfigList } from '$lib/utils';
 import * as he from 'he';
 import { err, ok, type Result } from 'neverthrow';
 import type { Action } from 'svelte/action';
 import { ValidationError } from 'yup';
 import * as m from '$lib/paraglide/messages.js';
 import type { Readable } from 'svelte/store';
+
+const UNAUTH_PERMS = parseConfigList(PUBLIC_UNAUTHENTICATED_PERMISSIONS);
 
 const DEFAULT_DATE_FORMAT_OPRIONS: Intl.DateTimeFormatOptions = {
   year: 'numeric',
@@ -151,6 +154,9 @@ export function photoUrl(person: PersonData): string | undefined {
 }
 
 export function userHasPermission(user: Pick<User, 'permissions'> | null, permission: UserPermission): boolean {
+  if (UNAUTH_PERMS.includes(permission)) {
+    return true;
+  }
   if (user === null) {
     return false;
   }
@@ -159,7 +165,7 @@ export function userHasPermission(user: Pick<User, 'permissions'> | null, permis
 
 export function redirUserChange(
   user: Pick<User, 'permissions'> | null,
-  requiredPermission: UserPermission | undefined,
+  requiredPermission: UserPermission,
   currentUrl: URL,
   loginIfNoUser = true,
   noPermRedirPath = '/'
@@ -167,13 +173,22 @@ export function redirUserChange(
   if (!browser) {
     return;
   }
-  if (user === null || (requiredPermission && !userHasPermission(user, requiredPermission))) {
-    const redirToLogin = user === null && loginIfNoUser;
-    const targetPath = redirToLogin ? '/account/login' : noPermRedirPath || '/';
-    const url = createUrl(targetPath, currentUrl, redirToLogin ? { redirectTo: currentUrl.pathname } : undefined);
-    const gotoPromise = goto(url, { invalidateAll: false });
-    gotoPromise.catch(() => {
-      window.location.assign(url);
-    });
+  if (userHasPermission(user, requiredPermission)) {
+    return;
   }
+  if (user === null && loginIfNoUser) {
+    redirToLogin(currentUrl);
+  }
+  gotoUrl(createUrl(noPermRedirPath || '/', currentUrl, undefined));
+}
+
+export function redirToLogin(currentUrl: URL) {
+  gotoUrl(createUrl('/account/login', currentUrl, { redirectTo: currentUrl.pathname }));
+}
+
+export function gotoUrl(url: URL) {
+  const gotoPromise = goto(url, { invalidateAll: false });
+  gotoPromise.catch(() => {
+    window.location.assign(url);
+  });
 }

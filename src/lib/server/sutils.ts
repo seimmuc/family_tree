@@ -5,12 +5,14 @@ import { type Result, err, ok } from 'neverthrow';
 import { createUrl, parseConfigList } from '$lib/utils';
 import { DEFAULT_USER_OPTIONS, type LangCode, type User, type UserPermission } from '$lib/types/user';
 import { USERS_ADMINS } from '$env/static/private';
+import { PUBLIC_UNAUTHENTICATED_PERMISSIONS } from '$env/static/public';
 import { error, redirect } from '@sveltejs/kit';
 import * as m from '$lib/paraglide/messages.js';
 
 export type FailError = { code: number; message: string };
 
 const ADMINISTRATORS = parseConfigList(USERS_ADMINS);
+const UNAUTH_PERMS = parseConfigList(PUBLIC_UNAUTHENTICATED_PERMISSIONS);
 
 const configBools: Record<string, boolean> = { true: true, false: false, yes: true, no: false, y: true, n: false };
 export function parseConfigBool(configValue: string | undefined, def: boolean = false): boolean {
@@ -116,6 +118,9 @@ export function addConfigAdmin<U extends User>(user: U): U {
 }
 
 export function userHasPermission(user: User | null, permission: UserPermission): boolean {
+  if (UNAUTH_PERMS.includes(permission)) {
+    return true;
+  }
   if (user === null) {
     return false;
   }
