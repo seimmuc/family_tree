@@ -36,7 +36,7 @@
   setContext('setLanguage', setLanguage);
   setLanguage(data.user?.options.language ?? DEFAULT_USER_OPTIONS.language);
 
-  const dMenu = data.dynamicMenu;
+  $: dMenu = data.dynamicMenu;
 
   const userBox = {
     floatComp: undefined as FloatingUiComponent | undefined,
