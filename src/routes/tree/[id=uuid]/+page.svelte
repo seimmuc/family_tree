@@ -1,7 +1,7 @@
 <script lang="ts">
   import { browser } from '$app/environment';
   import { page } from '$app/stores';
-  import { TRANS_DELAY, redirUserChange } from '$lib/client/clutils.js';
+  import { TRANS_DELAY, gotoUrl, redirUserChange } from '$lib/client/clutils.js';
   import { theme } from '$lib/client/stores.js';
   import FloatingUiComponent, { type FloatingUICompControl } from '$lib/components/FloatingUIComponent.svelte';
   import PersonNode from '$lib/components/PersonNode.svelte';
@@ -13,6 +13,9 @@
   import { type ClientRectObject } from '@floating-ui/core';
   import { onMount } from 'svelte';
   import { tweened } from 'svelte/motion';
+  import { createUrl } from '$lib/utils.js';
+
+  const TIME_TO_CENTER = 1000 * 1;
 
   export let data;
 
@@ -73,6 +76,7 @@
     control: undefined as FloatingUICompControl | undefined,
     comp: undefined as PopUp | undefined,
     person: undefined as any as PersonData,
+    timeOpened: undefined as number | undefined,
     virtElem: {
       getBoundingClientRect: (): ClientRectObject => {
         if (popup.person && popup.person.node) {
@@ -84,14 +88,27 @@
   };
   let dontClosePopup = false;
 
-  // Pop-Up open
   function onPersonClick(person: PersonData) {
-    popup.person = person;
     if (popup.control?.isVisible()) {
-      popup.control?.update();
-      popup.comp?.reset(person.person);
+      if (popup.person !== undefined && popup.person.person.id === person.person.id) {
+        // user clicked on same person again
+        if (!focusPeople.some(p => p.person.id === person.person.id) && popup.timeOpened !== undefined && popup.timeOpened + TIME_TO_CENTER < Date.now()) {
+          // it's not one of focus people and the delay has passed, let's center on this person
+          gotoUrl(createUrl(`/tree/${person.person.id}`, $page.url, undefined));
+          return;
+        }
+      } else {
+        // user clicked on different person, move PopUp to them
+        popup.person = person;
+        popup.control?.update();
+        popup.comp?.reset(person.person);
+        popup.timeOpened = Date.now();
+      }
     } else {
+      // open a new PopUp
+      popup.person = person;
       popup.control?.show();
+      popup.timeOpened = Date.now();
     }
     dontClosePopup = true;
   }
