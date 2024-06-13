@@ -69,6 +69,7 @@
   "newPersonTitle": "Add new person",
   "newPersonSubmit": "Add",
   "newPersonCancel": "Cancel",
+  "detailsBackBtn": "Back",
   "detailsViewTree": "View tree",
   "detailsEditMode": "Toggle edit mode",
   "detailsDelete": "Delete",

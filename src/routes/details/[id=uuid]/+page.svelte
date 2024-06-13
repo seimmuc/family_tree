@@ -12,7 +12,10 @@
     faAngleUp,
     faEraser,
     faTrashCan,
-    faSpinner
+    faSpinner,
+    faNetworkWired,
+    faChevronLeft,
+    faPenToSquare
   } from '@fortawesome/free-solid-svg-icons';
   import { quadOut } from 'svelte/easing';
 
@@ -47,6 +50,7 @@
   import FloatingUiComponent, { type FloatingUICompControl } from '$lib/components/FloatingUIComponent.svelte';
   import * as m from '$lib/paraglide/messages.js';
   import Navbar from '$lib/components/Navbar.svelte';
+  import { browser } from '$app/environment';
 
   // params
   export let data;
@@ -109,8 +113,39 @@
     }
     return originalSrc;
   }
+  function getPrevPage(): NavigationHistoryEntry | undefined {
+    if (!browser) {
+      return undefined;
+    } else if (Object.hasOwn(window, 'navigation')) {
+      // home: /^\/$/, tree: /^\/tree\/[A-Za-z0-9-]{36}$/, details: /^\/details\/[A-Za-z0-9-]{36}$/, new: /^\/details\/new$/
+      const acceptablePatterns = [/^\/$/, /^\/tree\/[A-Za-z0-9-]{36}$/, /^\/details\/[A-Za-z0-9-]{36}$/];
+      const entries = window.navigation.entries();
+      for (let i = (window.navigation.currentEntry?.index ?? 0) - 1; i < entries.length; i--) {
+        const e = entries[i];
+        if (e.url !== null) {
+          const urlPath = new URL(e.url).pathname;
+          if (acceptablePatterns.some(r => r.test(urlPath))) {
+            return e;
+          }
+        }
+      }
+      return undefined;
+    }
+  }
+  const prevPage: NavigationHistoryEntry | undefined = getPrevPage();
 
-  // html callbacks
+  // html callbacks 
+  function goBack() {
+    if (Object.hasOwn(window, 'navigation')) {
+      const pp = getPrevPage();
+      if (pp) {
+        console.log(pp.key);
+        window.navigation.traverseTo(pp.key);
+      }
+    } else {
+      history.back();
+    }
+  }
   function setEditMode(newVal: boolean) {
     if (!newVal || data.canEdit) {
       editMode = newVal;
@@ -253,42 +288,57 @@
 <RootDivCentered>
   <div class="top-controls">
     <div class="tc-section left">
-      <a class="btn tree" href="/tree/{person.id}">{m.detailsViewTree()}</a>
-      {#if data.canEdit || editMode}
-        <button class="btn edit" type="button" on:click={toggleEditMode}>{m.detailsEditMode()}</button>
-      {/if}
-    </div>
-    <div class="tc-section right">
-      <FloatingUiComponent placementDir="bottom-end" bind:control={del.tooltipControl}>
-        <button
-          type="button"
-          class="btn"
-          slot="ref"
-          let:floatingRef
-          use:floatingRef
-          let:control
-          on:click={control.toggle}
-          bind:this={del.button}
-        >
-          {m.detailsDelete()}
-          <FontAwesomeIcon icon={faTrashCan} />
+      {#if prevPage !== undefined}
+        <button class="btn back" type="button" transition:slide={{ axis: 'x', ...TRANS_OPT }} on:click={goBack}>
+          <FontAwesomeIcon icon={faChevronLeft} />
+          {m.detailsBackBtn()}
         </button>
-        <div slot="tooltip" class="delete-tooltip" bind:this={del.tooltipRoot}>
-          <span class="confirm-text">
-            {@html m.detailsDeleteConfirm({ name: `<span class="name">${escapeHtml(person.name)}</span>` })}
-          </span>
-          <form method="POST" action="?/delete" enctype="multipart/form-data" use:enhance={submitDelete}>
-            <button type="submit" class="btn">{m.detailsDeleteConfirmButton()}</button>
-            {#if del.processing}
-              <FontAwesomeIcon icon={faSpinner} spinPulse />
-            {/if}
-            <TimedMessage bind:this={del.errMsg} let:msg>
-              <span class="error-text" transition:slide={{ axis: 'y', ...TRANS_OPT }}>{msg}</span>
-            </TimedMessage>
-          </form>
-        </div>
-      </FloatingUiComponent>
+      {/if}
+      <a class="btn tree" href="/tree/{person.id}">
+        <FontAwesomeIcon icon={faNetworkWired} />
+        {m.detailsViewTree()}
+      </a>
     </div>
+    {#if data.canEdit || editMode}
+      <div class="tc-section right">
+        <button class="btn edit" type="button" on:click={toggleEditMode}>
+          {m.detailsEditMode()}
+          <FontAwesomeIcon icon={faPenToSquare} />
+        </button>
+        {#if data.canEdit && editMode}
+          <FloatingUiComponent placementDir="bottom-end" bind:control={del.tooltipControl}>
+            <button
+              type="button"
+              class="btn"
+              slot="ref"
+              let:floatingRef
+              use:floatingRef
+              let:control
+              on:click={control.toggle}
+              bind:this={del.button}
+              transition:slide={{ axis: 'x', ...TRANS_OPT }}
+            >
+              {m.detailsDelete()}
+              <FontAwesomeIcon icon={faTrashCan} />
+            </button>
+            <div slot="tooltip" class="delete-tooltip" bind:this={del.tooltipRoot}>
+              <span class="confirm-text">
+                {@html m.detailsDeleteConfirm({ name: `<span class="name">${escapeHtml(person.name)}</span>` })}
+              </span>
+              <form method="POST" action="?/delete" enctype="multipart/form-data" use:enhance={submitDelete}>
+                <button type="submit" class="btn">{m.detailsDeleteConfirmButton()}</button>
+                {#if del.processing}
+                  <FontAwesomeIcon icon={faSpinner} spinPulse />
+                {/if}
+                <TimedMessage bind:this={del.errMsg} let:msg>
+                  <span class="error-text" transition:slide={{ axis: 'y', ...TRANS_OPT }}>{msg}</span>
+                </TimedMessage>
+              </form>
+            </div>
+          </FloatingUiComponent>
+        {/if}
+      </div>
+    {/if}
   </div>
 
   <div
@@ -363,10 +413,6 @@
   {/if}
 </RootDivCentered>
 
-<a class="back-button" href="/tree/{person.id}">
-  <FontAwesomeIcon icon={faArrowLeft} size="3x" />
-</a>
-
 <style lang="scss">
   @use '$lib/styles/common';
   @use '$lib/styles/colors';
@@ -395,11 +441,17 @@
       @include common.styleless-button;
     }
     .btn {
+      font-size: 1.05em;
       text-decoration: none;
       color: inherit;
-      border: 2px solid gray;
+      border: 2px solid var(--col-secondary-border, colors.$light-secondary-border);
       border-radius: 5px;
-      padding: 2px;
+      padding: 2px 4px;
+      @include colors.col-trans($bg: true, $fg: true, $br: true);
+      text-wrap: nowrap;
+      :global(svg) {
+        font-size: small;
+      }
     }
 
     .delete-tooltip {
