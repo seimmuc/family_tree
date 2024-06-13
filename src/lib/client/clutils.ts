@@ -149,8 +149,8 @@ export function getPersonChanges(original: PersonData, edits: PersonEdit): Resul
   }
 }
 
-export function photoUrl(person: PersonData): string | undefined {
-  return person.photo ? `/media/${person.photo}` : undefined;
+export function portraitUrl(person: PersonData): string | undefined {
+  return person.portrait ? `/media/${person.portrait}` : undefined;
 }
 
 export function userHasPermission(user: Pick<User, 'permissions'> | null, permission: UserPermission): boolean {

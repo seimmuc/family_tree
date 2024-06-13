@@ -56,7 +56,7 @@
   import type { Person } from '$lib/types/person';
   import type { SearchQueryCl } from '$lib/types/reqdata';
   import { err, ok, type Result } from 'neverthrow';
-  import { photoUrl } from '$lib/client/clutils';
+  import { portraitUrl } from '$lib/client/clutils';
   import { arrayFilterInPlace } from '$lib/utils';
   import { PUBLIC_SEARCH_CACHE_TTL } from '$env/static/public';
   import { navigating } from '$app/stores';
@@ -312,8 +312,8 @@
                       <span class:hl>{fragment}</span>
                     {/each}
                   </span>
-                  {#if person.photo}
-                    <img class="photo" src={photoUrl(person)} alt={person.name} />
+                  {#if person.portrait}
+                    <img class="pic" src={portraitUrl(person)} alt={person.name} />
                   {/if}
                 </a>
               </li>
@@ -395,7 +395,7 @@
         &:hover .name > .hl {
           color: color-mix(in srgb, var(--col-search-match-fg, colors.$light-search-match-fg), gray 50%);
         }
-        .photo {
+        .pic {
           max-height: 1.35em;
           max-width: 2.5em;
           margin-right: 0px;

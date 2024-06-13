@@ -75,7 +75,7 @@
   "detailsDelete": "Delete",
   "detailsDeleteConfirm": "Are you sure you want to delete {name}?",
   "detailsDeleteConfirmButton": "Confirm",
-  "detailsPhotoMissing": "No photo",
+  "detailsPortraitMissing": "No photo",
   "detailsPhotoUpload": "Upload image",
   "detailsPhotoClear": "Clear image",
   "detailsPhotoDelete": "Delete image",

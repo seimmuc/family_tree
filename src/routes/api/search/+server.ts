@@ -14,6 +14,6 @@ export async function POST({ request, locals }) {
     }
     return act.findPeopleByNamePartial(qry.nameQuery.trim());
   });
-  // TODO only pass return id, name and photo for each person
+  // TODO only pass return id, name and portrait for each person
   return json({ results: people });
 }

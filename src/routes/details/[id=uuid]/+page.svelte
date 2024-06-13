@@ -34,7 +34,7 @@
 <script lang="ts">
   import { filedrop, type FileDropOptions } from 'filedrop-svelte';
   import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
-  import { escapeHtml, photoUrl, redirUserChange, TRANS_DELAY } from '$lib/client/clutils.js';
+  import { escapeHtml, portraitUrl, redirUserChange, TRANS_DELAY } from '$lib/client/clutils.js';
   import type { Person, UpdatablePerson } from '$lib/types/person';
   import { enhance } from '$app/forms';
   import type { SubmitFunction } from '@sveltejs/kit';
@@ -94,18 +94,18 @@
     windowDrop: false,
     accept: ACCEPTABLE_FILETYPES
   } as FileDropOptions;
-  $: photoSrc = getPhotoSrc(image.src, image.pSrc);
+  $: portraitSrc = getPortraitSrc(image.src, image.pSrc);
 
   function updateData(p: Person, childIds: string[], parentIds: string[], partnerIds: string[], relatives: Person[]) {
     person = p;
-    image.src = photoUrl(p);
+    image.src = portraitUrl(p);
     image.pSrc = undefined;
     piComp?.reset(person);
     parents = relatives.filter(p => parentIds.includes(p.id));
     children = relatives.filter(p => childIds.includes(p.id));
     partners = relatives.filter(p => partnerIds.includes(p.id));
   }
-  function getPhotoSrc(originalSrc?: string, previewSrc?: string | null): string | undefined {
+  function getPortraitSrc(originalSrc?: string, previewSrc?: string | null): string | undefined {
     if (previewSrc) {
       return previewSrc;
     } else if (previewSrc === '') {
@@ -210,7 +210,7 @@
     const updatePerson: UpdatablePerson = { id: person.id, ...chRes.value };
     if (image.pSrc === '') {
       // image was marked for deletion
-      updatePerson.photo = null;
+      updatePerson.portrait = null;
     }
     formData.append('person-update', JSON.stringify(updatePerson));
 
@@ -225,13 +225,13 @@
       formData.append('relatives-update', JSON.stringify(relsUpd));
     }
 
-    // photo form data is added directly by the browser
-    const ph = formData.get('photo');
+    // portrait form data is added directly by the browser
+    const ph = formData.get('portrait');
 
     // check if there are any changes
     if (
       Object.keys(chRes.value).length < 1 &&
-      updatePerson.photo !== null &&
+      updatePerson.portrait !== null &&
       !sendRelsUpd &&
       !(ph instanceof File && ph.size > 0)
     ) {
@@ -351,15 +351,15 @@
     on:filedragenter={onImageDragEnter}
     on:filedragleave={onImageDragLeave}
   >
-    {#if photoSrc === undefined}
-      <div class="photo-small missing">{m.detailsPhotoMissing()}</div>
+    {#if portraitSrc === undefined}
+      <div class="portrait-small missing">{m.detailsPortraitMissing()}</div>
     {:else}
-      <img class="photo-small" src={photoSrc} alt={person.name} />
+      <img class="portrait-small" src={portraitSrc} alt={person.name} />
     {/if}
     {#if editMode}
-      <div class="photo-edit" transition:fade={TRANS_OPT}>
+      <div class="portrait-edit" transition:fade={TRANS_OPT}>
         <button
-          class="photo-edit-btn upload"
+          class="portrait-edit-btn upload"
           type="button"
           title={m.detailsPhotoUpload()}
           on:click={() => image.fileInput?.click()}
@@ -367,16 +367,16 @@
           <FontAwesomeIcon icon={icons.upload} />
         </button>
         {#if image.pSrc !== undefined}
-          <button class="photo-edit-btn clear" type="button" title={m.detailsPhotoClear()} on:click={clearImage}>
+          <button class="portrait-edit-btn clear" type="button" title={m.detailsPhotoClear()} on:click={clearImage}>
             <FontAwesomeIcon icon={icons.clear} />
           </button>
         {/if}
-        <button class="photo-edit-btn delete" type="button" title={m.detailsPhotoDelete()} on:click={deleteImage}>
+        <button class="portrait-edit-btn delete" type="button" title={m.detailsPhotoDelete()} on:click={deleteImage}>
           <FontAwesomeIcon icon={icons.delete} />
         </button>
       </div>
     {/if}
-    <input type="file" form="update-form" name="photo" style="display: none;" bind:this={image.fileInput} />
+    <input type="file" form="update-form" name="portrait" style="display: none;" bind:this={image.fileInput} />
   </div>
 
   <PersonInfo
@@ -490,13 +490,13 @@
     @include colors.col-trans($bg: false, $fg: true, $br: true);
     &.edit {
       border-color: yellowgreen;
-      .photo-small.missing {
+      .portrait-small.missing {
         transform: translateY(-20px);
       }
     }
     &.dragging {
       border-color: lightblue;
-      .photo-small {
+      .portrait-small {
         filter: blur(4px);
       }
     }
@@ -504,14 +504,14 @@
       border-color: yellow;
       border-style: dashed;
     }
-    .photo-small {
+    .portrait-small {
       max-width: 400px * $image-scale;
       max-height: 300px * $image-scale;
       transition:
         filter $edit-anim-duration,
         transform $edit-anim-duration;
     }
-    .photo-edit {
+    .portrait-edit {
       position: absolute;
       bottom: 0;
       left: 0;
@@ -524,7 +524,7 @@
       flex-direction: row;
       justify-content: space-around;
       align-items: center;
-      .photo-edit-btn {
+      .portrait-edit-btn {
         @include common.styleless-button;
         @include common.flex-center;
         background-color: var(--col-details-image-overlay-accent, colors.$light-details-image-overlay-accent);

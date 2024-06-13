@@ -66,11 +66,11 @@ export const actions: Actions = {
       return fail(pupRes.error.code, { message: pupRes.error.message });
     }
     const personUpdate = pupRes.value;
-    if (personUpdate.photo) {
-      return fail(422, { message: 'setting photo field is prohibited' });
+    if (personUpdate.portrait) {
+      return fail(422, { message: 'setting portrait field is prohibited' });
     }
     const { id: pid } = personUpdate;
-    const photo = data.get('photo');
+    const portrait = data.get('portrait');
     let relativesUpdate: RelativesChangeRequest<'parents' | 'children' | 'partners'> | undefined = undefined;
     if (data.has('relatives-update')) {
       const relRes = parseUpdateRelatives(data.get('relatives-update'), pid);
@@ -82,7 +82,7 @@ export const actions: Actions = {
 
     // return error if there are no changes
     const updFields = Object.keys(personUpdate).filter(k => k !== 'id').length > 0;
-    if (!updFields && !(photo instanceof File && photo.size > 0) && relativesUpdate === undefined) {
+    if (!updFields && !(portrait instanceof File && portrait.size > 0) && relativesUpdate === undefined) {
       return fail(422, { message: 'empty update' });
     }
 
@@ -92,25 +92,25 @@ export const actions: Actions = {
       if (oldPerson === undefined) {
         return fail(422, { message: 'person does not exist' });
       }
-      // save/delete photo
-      if (photo instanceof File && photo.size > 0) {
-        // add new photo file and delete the old one
+      // save/delete portrait
+      if (portrait instanceof File && portrait.size > 0) {
+        // add new portrait file and delete the old one
         try {
-          const [photoFileName, _] = await addOrReplacePhoto(pid, photo, oldPerson?.photo);
-          personUpdate.photo = photoFileName;
+          const [portraitFileName, _] = await addOrReplacePhoto(pid, portrait, oldPerson?.portrait);
+          personUpdate.portrait = portraitFileName;
         } catch (e) {
-          return fail(500, { message: 'cannot save photo' });
+          return fail(500, { message: 'cannot save portrait' });
         }
-      } else if (personUpdate.photo === null) {
-        // delete old photo
+      } else if (personUpdate.portrait === null) {
+        // delete old portrait
         const oldPerson = await act.findPersonById(pid);
-        if (oldPerson !== undefined && oldPerson.photo) {
-          await tryDeletePhoto(oldPerson.photo);
+        if (oldPerson !== undefined && oldPerson.portrait) {
+          await tryDeletePhoto(oldPerson.portrait);
         }
       }
 
       // person's fields
-      if (updFields || personUpdate.photo !== undefined) {
+      if (updFields || personUpdate.portrait !== undefined) {
         act.updatePerson(personUpdate);
       }
 
@@ -163,10 +163,10 @@ export const actions: Actions = {
       return fail(500, { message: 'this person does not exist' });
     }
 
-    // delete the person's photo if they had one
-    if (delPerson.photo) {
-      if (!(await tryDeletePhoto(delPerson.photo))) {
-        console.error(`Failed to delete photo while deleting person. Photo: "${delPerson.photo}", pid: ${pid}`);
+    // delete the person's portrait if they had one
+    if (delPerson.portrait) {
+      if (!(await tryDeletePhoto(delPerson.portrait))) {
+        console.error(`Failed to delete portrait while deleting person. Portrait: "${delPerson.portrait}", pid: ${pid}`);
       }
     }
 

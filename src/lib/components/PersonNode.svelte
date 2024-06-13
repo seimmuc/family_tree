@@ -1,12 +1,12 @@
 <script lang="ts">
-  import { photoUrl } from '$lib/client/clutils';
+  import { portraitUrl } from '$lib/client/clutils';
   import type { PersonData } from '$lib/types/person';
   import { clampNum } from '$lib/utils';
   import type { Point } from './types';
 
   export let person: PersonData;
 
-  $: bgImgSt = person.photo ? `url(${photoUrl(person)})` : 'none';
+  $: bgImgSt = person.portrait ? `url(${portraitUrl(person)})` : 'none';
   $: fontSize = `${clampNum(12.75 / longestNamePartLength(person.name), 1.2, 2.2)}em`;
 
   let root: HTMLButtonElement;
@@ -32,7 +32,7 @@
 </script>
 
 <button bind:this={root} class="person" style:background-image={bgImgSt} on:click>
-  <span class="name" class:blurbg={person.photo !== undefined} style:font-size={fontSize}>{person.name}</span>
+  <span class="name" class:blurbg={person.portrait !== undefined} style:font-size={fontSize}>{person.name}</span>
 </button>
 
 <style lang="scss">

@@ -17,7 +17,7 @@ export interface Person {
   birthDate?: string; // YYYY-MM-DD
   deathDate?: string;
   bio?: string;
-  photo?: string;
+  portrait?: string;
 }
 
 /** Equivalent to Person, but used to create a new person or other cases when the person isn't in DB yet */
@@ -54,7 +54,7 @@ const pBio = string()
   .trim()
   .transform(v => (v ? stripNonPrintableAndNormalize(v, false, false) : v))
   .optional();
-const pPhoto = string()
+const pPortrait = string()
   .matches(/^[^/.][^/]{0,127}$/)
   .optional();
 
@@ -66,7 +66,7 @@ export const PERSON_SCHEMA: ObjectSchema<Person> = object({
   birthDate: pBirthDate,
   deathDate: pDeathDate,
   bio: pBio,
-  photo: pPhoto
+  portrait: pPortrait
 }).noUnknown();
 
 /** `PersonData` type validator */
@@ -80,7 +80,7 @@ export const PERSON_UPDATE_SCHEMA: ObjectSchema<UpdatablePerson> = PERSON_SCHEMA
     birthDate: pBirthDate.nullable(),
     deathDate: pDeathDate.nullable(),
     bio: pBio.nullable(),
-    photo: pPhoto.nullable()
+    portrait: pPortrait.nullable()
   })
   .noUnknown();
 
