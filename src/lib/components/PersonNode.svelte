@@ -46,6 +46,7 @@
   .person {
     background-color: white;
     width: 12.5em;
+    height: 12.5em;
     aspect-ratio: 1/1;
     border-radius: 50%;
     @include common.flex-center;
