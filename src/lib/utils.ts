@@ -42,6 +42,10 @@ export function titleCaseWord<S extends string | undefined>(word: S): S {
   return (word.charAt(0).toUpperCase() + word.slice(1)) as S;
 }
 
+export function clampNum(number: number, min: number, max: number): number {
+  return Math.min(Math.max(number, min), max);
+}
+
 /**
  * Removes non-printable characters from string and normalizes newline and space characters (to unix newlines and ascii space)
  *

@@ -1,11 +1,13 @@
 <script lang="ts">
   import { photoUrl } from '$lib/client/clutils';
   import type { PersonData } from '$lib/types/person';
+  import { clampNum } from '$lib/utils';
   import type { Point } from './types';
 
   export let person: PersonData;
 
   $: bgImgSt = person.photo ? `url(${photoUrl(person)})` : 'none';
+  $: fontSize = `${clampNum(12.75 / longestNamePartLength(person.name), 1.2, 2.2)}em`;
 
   let root: HTMLButtonElement;
 
@@ -26,10 +28,11 @@
   export function boundBox(): DOMRect {
     return root.getBoundingClientRect();
   }
+  const longestNamePartLength = (name: string) => name.split(/[\s-]/).reduce((a, p) => Math.max(a, p.length), 0);
 </script>
 
-<button bind:this={root} class="person self" style:background-image={bgImgSt} on:click>
-  <span class="name" class:blurbg={person.photo !== undefined}>{person.name}</span>
+<button bind:this={root} class="person" style:background-image={bgImgSt} on:click>
+  <span class="name" class:blurbg={person.photo !== undefined} style:font-size={fontSize}>{person.name}</span>
 </button>
 
 <style lang="scss">
@@ -42,11 +45,11 @@
 
   .person {
     background-color: white;
-    width: 12em;
+    width: 12.5em;
     aspect-ratio: 1/1;
     border-radius: 50%;
     @include common.flex-center;
-    padding: 20px;
+    padding: 15px;
     border: black solid 2px;
     cursor: pointer;
     background-origin: border-box;
@@ -56,11 +59,12 @@
   }
   .name {
     position: relative;
-    font-size: 1.8em;
+    font-size: 1.7em;
     color: black;
     font-weight: bold;
     // font-weight: 1000;
     -webkit-text-stroke: 0.5px #fff;
+    word-break: break-word;
     &.blurbg {
       text-shadow:
         white 0 0 4px,
