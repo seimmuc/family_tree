@@ -140,7 +140,7 @@
 {:else if bioDisplay || person.bio}
   <p class="bio">{(bioDisplay ? bioDisplay : person.bio) ?? ''}</p>
 {:else}
-  <p class="bio empty">No bio</p>
+  <p class="bio empty">{m.cPersonInfoNoBio()}</p>
 {/if}
 
 <style lang="scss">

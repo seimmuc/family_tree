@@ -24,6 +24,7 @@
   "cPersonInfoBio": "Bio",
   "cPersonInfoBirth": "Birth date",
   "cPersonInfoDeath": "Death date",
+  "cPersonInfoNoBio": "No bio",
   "cPersonInfoToggleDateMode": "Toggle date format",
   "cPagedListItemsStatus": "{first}-{last} out of {total}",
   "cPagedListLoading": "Loading",
