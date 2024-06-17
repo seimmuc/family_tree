@@ -489,20 +489,20 @@
     position: relative;
     @include colors.col-trans($bg: false, $fg: true, $br: true);
     &.edit {
-      border-color: yellowgreen;
+      border-color: var(--col-photo-border-edit, colors.$photo-border-color-edit);
       .portrait-small.missing {
         transform: translateY(-20px);
       }
     }
     &.dragging {
-      border-color: lightblue;
+      border-color: var(--col-photo-border-drag, colors.$photo-border-color-drag);
       .portrait-small {
         filter: blur(4px);
       }
     }
     &.preview {
-      border-color: yellow;
-      border-style: dashed;
+      border-color: var(--col-photo-border-preview, colors.$photo-border-color-preview);
+      border-style: var(--sty-photo-border-preview, colors.$photo-border-style-preview);
     }
     .portrait-small {
       max-width: 400px * $image-scale;

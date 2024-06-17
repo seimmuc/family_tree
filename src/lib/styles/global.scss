@@ -4,6 +4,10 @@
   background-color: black;
   color: white;
   @include colors.col-trans($bg: true, $fg: false, $br: false);
+  --col-photo-border-edit: #{colors.$photo-border-color-edit};
+  --col-photo-border-drag: #{colors.$photo-border-color-drag};
+  --col-photo-border-preview: #{colors.$photo-border-color-preview};
+  --sty-photo-border-preview: #{colors.$photo-border-style-preview};
 }
 
 :root[data-theme="light"],

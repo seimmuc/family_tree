@@ -41,6 +41,11 @@ $dark-details-image-overlay-fg: $dark-text;
 $dark-details-image-overlay-accent: #000a;
 $dark-search-match-fg: hsl(30, 100%, 74%);
 
+$photo-border-color-edit: yellowgreen;
+$photo-border-color-drag: lightblue;
+$photo-border-color-preview: yellow;
+$photo-border-style-preview: dashed;
+
 // $dark-accent-bg: color.scale($dark-bg, $lightness: +12%);
 // $dark-accent-border: color.scale($dark-secondary-bg, $lightness: +30%);
 // $dark-accent-fg: color.scale($dark-bg, $lightness: +12%);
