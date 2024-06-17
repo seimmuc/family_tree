@@ -507,9 +507,7 @@
     .portrait-small {
       max-width: 400px * $image-scale;
       max-height: 300px * $image-scale;
-      transition:
-        filter $edit-anim-duration,
-        transform $edit-anim-duration;
+      transition: filter $edit-anim-duration;
     }
     .portrait-edit {
       position: absolute;

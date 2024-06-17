@@ -20,7 +20,7 @@ There are 3 separate docker compose configurations that you can use when running
 
 ## External reverse proxy
 
-`compose-run-extproxy.yaml`: config will expect to be behind your own reverse proxy.Be cautious when using this since improper configuration can cause security issues.
+`compose-run-extproxy.yaml`: config will expect to be behind your own reverse proxy. Be cautious when using this since improper configuration can cause security issues.
 
 NodeJS web server is configured to be accessible via port 8088 on the host. Make sure that you block external access to this port in your firewall.
 
