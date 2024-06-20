@@ -349,6 +349,7 @@
   .head {
     margin-top: 0;
     @include colors.col-trans($bg: false, $fg: true, $br: false);
+    user-select: none;
   }
   .user-select {
     display: flex;
@@ -358,6 +359,7 @@
       display: contents;
       color: var(--col-fg, colors.$light-text);
       @include colors.col-trans($bg: false, $fg: true, $br: false);
+      user-select: none;
     }
     input {
       margin-left: 1em;
@@ -392,15 +394,18 @@
     width: calc(100% + 2 * var(--rootdiv-hpad, 0px));
     margin-left: calc(0px - var(--rootdiv-hpad, 0px));
     background-color: var(--col-primary-border, colors.$light-primary-border);
+    @include colors.col-trans($bg: true, $fg: false, $br: false);
   }
   .user-view {
     margin: 0;
+    @include colors.col-trans($bg: false, $fg: true, $br: false);
     .user-name {
       margin: 0.5em 0 0;
       > button {
         @include common.styleless-button;
         font-size: 0.65em;
         color: inherit;
+        @include colors.col-trans($bg: false, $fg: true, $br: false);
         &:hover {
           color: red;
         }
@@ -416,6 +421,7 @@
         align-items: center;
         font-size: 1.25rem;
         font-weight: normal;
+        user-select: none;
         .confirm-text {
           display: block;
           :global(.uname) {
@@ -434,6 +440,7 @@
     }
     .user-header {
       margin: 0.8em 0 0.2em;
+      user-select: none;
     }
     .user-permissons {
       list-style: none;
@@ -444,6 +451,25 @@
       margin-top: 0.75em;
       // .uview-btn {}
     }
+    label {
+      @include common.flex($dir: row, $wrap: wrap, $alignit: center);
+      display: inline-flex;
+      gap: 0.3em;
+      user-select: none;
+      input[type="checkbox"] {
+        appearance: none;
+        border: 0.1em solid var(--col-secondary-border, colors.$light-secondary-border);
+        border-radius: 0.2em;
+        background-color: var(--col-secondary-bg, colors.$light-secondary-bg);
+        @include colors.col-trans($bg: true, $fg: false, $br: true);
+        width: 0.9em;
+        height: 0.9em;
+        &:checked {
+          appearance: revert;
+        }
+      }
+    }
+    
   }
   .error-text {
     color: red;

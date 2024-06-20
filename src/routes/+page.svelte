@@ -88,6 +88,7 @@
   }
   h1 {
     margin: 0.25em 0;
+    @include colors.col-trans($bg: false, $fg: true, $br: false);
   }
   li.pl-person {
     width: calc(100% - 10px);
@@ -100,9 +101,11 @@
     }
     &.even {
       background-color: color-mix(in srgb, var(--col-secondary-bg, colors.$light-secondary-bg), white 7%);
+      @include colors.col-trans($bg: true, $fg: false, $br: false);
     }
     &.odd {
       background-color: color-mix(in srgb, var(--col-secondary-bg, colors.$light-secondary-bg), black 7%);
+      @include colors.col-trans($bg: true, $fg: false, $br: false);
     }
   }
   li.pl-person a,

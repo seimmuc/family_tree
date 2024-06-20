@@ -182,6 +182,7 @@
         border: 1px solid var(--col-secondary-border, colors.$light-secondary-border);
         border-radius: 2px;
         color: var(--col-fg, colors.$light-text);
+        @include colors.col-trans($bg: true, $fg: true, $br: true);
         width: 10em;
       }
       .switch-format-btn {

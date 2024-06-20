@@ -73,6 +73,7 @@
           font-weight: bold;
         }
         padding-bottom: 6px;
+        color: var(--col-fg, colors.$light-text);
       }
     }
     a {

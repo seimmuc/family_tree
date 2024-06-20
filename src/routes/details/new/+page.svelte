@@ -80,8 +80,11 @@
 </RootDivCentered>
 
 <style lang="scss">
+  @use '$lib/styles/colors';
+
   h1 {
     margin: 0.5em 0;
+    @include colors.col-trans($bg: false, $fg: true, $br: false);
   }
   form {
     display: contents;

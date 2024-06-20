@@ -405,7 +405,6 @@
   }
   .search-box {
     width: 15em;
-    transition: width 0.4s;
     background-color: var(--col-primary-bg, #88888830);
     border: 2px solid var(--col-primary-border, gray);
     border-radius: 5px;

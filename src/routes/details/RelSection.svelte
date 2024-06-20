@@ -75,7 +75,7 @@
   <ul>
     {#each editMode ? peopleEditList : people as p (p.id)}
       <li>
-        <a href={editMode ? undefined : `/details/${p.id}`} on:click={e => onNameClick(e, p)}>{p.name}</a>
+        <a href={editMode ? '' : `/details/${p.id}`} on:click={e => onNameClick(e, p)}>{p.name}</a>
         {#if editMode}
           <button
             type="button"
@@ -114,6 +114,14 @@
   @use '$lib/styles/common';
   @use '$lib/styles/colors';
 
+  @mixin lnk-btn {
+    color: var(--col-link-normal, colors.$light-link-normal);
+    @include colors.col-trans($bg: false, $fg: true, $br: false);
+    &:hover {
+      color: var(--col-link-hover, colors.$light-link-hover);
+    }
+  }
+
   .rel-section {
     .rel-header {
       margin: 0;
@@ -122,10 +130,10 @@
     }
     ul {
       list-style: none;
+      min-width: 11em;
       padding: 0;
       margin: 0;
       margin-bottom: 15px;
-      @include colors.col-trans($bg: false, $fg: true, $br: false);
       li {
         display: flex;
         flex-direction: row;
@@ -144,6 +152,7 @@
           @include common.styleless-button;
           font-size: 0.9em;
           padding: 0.05em 0.2em;
+          @include lnk-btn;
         }
       }
       .add-person {
@@ -158,6 +167,7 @@
         }
         .toggle-sb {
           @include common.styleless-button;
+          @include lnk-btn;
           padding: 0.1em 6px;
           &:first-child {
             padding-left: 1px;

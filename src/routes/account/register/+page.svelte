@@ -84,7 +84,8 @@
         grid-column: 1;
         @include colors.col-trans($bg: false, $fg: true, $br: false);
       }
-      > input {
+      > input,
+      > select {
         grid-column: 2;
         background-color: var(--col-secondary-bg, colors.$light-secondary-bg);
         border: 1px solid var(--col-secondary-border, colors.$light-secondary-border);

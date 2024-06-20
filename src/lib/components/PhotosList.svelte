@@ -262,6 +262,7 @@
         }
         .icon {
           font-size: 1em;
+          color: var(--col-fg, colors.$light-text);
           @include colors.col-trans(
             $bg: false,
             $fg: true,
@@ -293,5 +294,6 @@
   }
   .no-photos {
     color: var(--col-disabled-fg, colors.$light-text-disabled);
+    @include colors.col-trans($bg: false, $fg: true, $br: false);
   }
 </style>

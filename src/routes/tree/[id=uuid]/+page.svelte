@@ -289,7 +289,7 @@
     --popup-border="2px solid var(--col-secondary-border)"
   >
     <PopUp
-      style={`background-color: var(--popup-bg, gray); border: var(--popup-border, 1px solid black); transition: background-color ${(TRANS_DELAY / 1000).toFixed(3)}s, border-color {(TRANS_DELAY / 1000).toFixed(3)}s;`}
+      style={`background-color: var(--popup-bg, gray); border: var(--popup-border, 1px solid black); transition: background-color ${(TRANS_DELAY / 1000).toFixed(3)}s, border-color ${(TRANS_DELAY / 1000).toFixed(3)}s;`}
       slot="tooltip"
       person={popup.person.person}
       canEdit={data.canEdit}

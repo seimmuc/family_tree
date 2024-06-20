@@ -111,6 +111,7 @@
   @use '$lib/styles/colors';
   .head {
     margin-top: 0;
+    @include colors.col-trans($bg: false, $fg: true, $br: false);
   }
   form {
     margin-bottom: 0.8em;
