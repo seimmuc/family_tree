@@ -465,6 +465,7 @@
     flex-wrap: nowrap;
     justify-content: space-between;
     align-items: center;
+    margin-bottom: 0.5em;
 
     button {
       @include common.styleless-button;
