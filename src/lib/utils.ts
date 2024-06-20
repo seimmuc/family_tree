@@ -203,3 +203,13 @@ export function parseConfigList(configValue: string | undefined, splitOnComma = 
   }
   return [configValue];
 }
+
+export async function sha256DigestArrBuf(arrayBuffer: ArrayBuffer): Promise<string> {
+  const hashBuffer = await crypto.subtle.digest('SHA-256', arrayBuffer);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  return hashHex;
+}
+export async function sha256DigestFile(file: File): Promise<string> {
+  return sha256DigestArrBuf(await file.arrayBuffer());
+}

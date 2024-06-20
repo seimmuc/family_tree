@@ -35,3 +35,11 @@
   align-items: center;
   justify-content: center;
 }
+@mixin flex($dir: row, $wrap: nowrap, $justifycn: normal, $alignit: normal, $alignco: normal) {
+  display: flex;
+  flex-wrap: $wrap;
+  flex-direction: $dir;
+  align-content: $alignco;
+  justify-content: $justifycn;
+  align-items: $alignit;
+}

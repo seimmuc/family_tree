@@ -36,6 +36,7 @@
   import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
   import { escapeHtml, portraitUrl, redirUserChange, TRANS_DELAY } from '$lib/client/clutils.js';
   import type { Person, UpdatablePerson } from '$lib/types/person';
+  import type { PhotoChanges } from '$lib/types/reqdata';
   import { enhance } from '$app/forms';
   import type { SubmitFunction } from '@sveltejs/kit';
   import { fade, slide } from 'svelte/transition';
@@ -45,6 +46,7 @@
   import { parseConfigList } from '$lib/utils';
   import { type SearchBoxLinkFunc } from '$lib/components/SearchBox.svelte';
   import PersonInfo from '$lib/components/PersonInfo.svelte';
+  import PhotosList from '$lib/components/PhotosList.svelte';
   import TimedMessage from '$lib/components/TimedMessage.svelte';
   import { page } from '$app/stores';
   import FloatingUiComponent, { type FloatingUICompControl } from '$lib/components/FloatingUIComponent.svelte';
@@ -77,6 +79,7 @@
     partnersComp: undefined as any as RelSection
   };
   let piComp: PersonInfo;
+  let photoList: PhotosList;
   const del = {
     button: undefined as HTMLButtonElement | undefined,
     tooltipRoot: undefined as HTMLDivElement | undefined,
@@ -225,6 +228,25 @@
       formData.append('relatives-update', JSON.stringify(relsUpd));
     }
 
+    // photos
+    const plChanges = photoList.getChanges();
+    let reqPhotoChanges: PhotoChanges | undefined = undefined;
+    if (plChanges.new.length > 0 || plChanges.delete.length > 0) {
+      reqPhotoChanges = { new: [], delete: [] };
+      for (const newPhotoFile of plChanges.new) {
+        const photoId = `new-photo-${reqPhotoChanges.new.length + 1}`;
+        formData.append(photoId, newPhotoFile);
+        reqPhotoChanges.new.push(photoId);
+      }
+      for (const deletedPhotoId of plChanges.delete) {
+        const perPh = data.photos ?? [];
+        if (perPh.find(p => p.id === deletedPhotoId) !== undefined) {
+          reqPhotoChanges.delete.push(deletedPhotoId);
+        }
+      }
+      formData.append('photo-changes', JSON.stringify(reqPhotoChanges));
+    }
+
     // portrait form data is added directly by the browser
     const ph = formData.get('portrait');
 
@@ -233,6 +255,7 @@
       Object.keys(chRes.value).length < 1 &&
       updatePerson.portrait !== null &&
       !sendRelsUpd &&
+      reqPhotoChanges === undefined &&
       !(ph instanceof File && ph.size > 0)
     ) {
       formMsg?.setMessage('nothing to update');
@@ -386,6 +409,8 @@
     on:returnkey={() => frm?.requestSubmit()}
     bind:this={piComp}
   />
+
+  <PhotosList photos={data.photos} {editMode} mimetypes={ACCEPTABLE_FILETYPES} bind:this={photoList} />
 
   <div class="relations">
     <RelSection {editMode} sectionName={m.sharedRelSectionParents()} people={parents} bind:this={rels.parentsComp} />

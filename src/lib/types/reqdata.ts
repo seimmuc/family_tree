@@ -1,5 +1,5 @@
-import { object, string, boolean, type InferType, number } from 'yup';
-import { PERSON_ID_ARRAY } from './person';
+import { object, string, boolean, type InferType, number, array } from 'yup';
+import { PERSON_ID_ARRAY, PHOTO_ID } from './person';
 
 // POST /api/search
 export const SEARCH_QUERY_SCHEMA = object({
@@ -27,3 +27,10 @@ export const RELATIVES_SINGLE_TYPE_CHANGE_SCHEMA = object({
 
 export type RelativesSingleTypeChange = InferType<typeof RELATIVES_SINGLE_TYPE_CHANGE_SCHEMA>;
 export type RelativesChangeRequest<RT extends string> = Partial<Record<RT, RelativesSingleTypeChange>>;
+
+export const PHOTOS_CHANGES_SCHEMA = object({
+  new: array(string().min(3).max(64).required()).required(),
+  delete: array(PHOTO_ID).required()
+}).noUnknown();
+
+export type PhotoChanges = InferType<typeof PHOTOS_CHANGES_SCHEMA>;

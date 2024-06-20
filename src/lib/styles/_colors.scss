@@ -76,6 +76,6 @@ $photo-border-style-preview: dashed;
   @return $res;
 }
 
-@mixin col-trans($bg: true, $fg: true, $br: true) {
-  transition: #{col-trans-str(col-props($bg, $fg, $br)...)};
+@mixin col-trans($bg: true, $fg: true, $br: true, $extra: []) {
+  transition: #{col-trans-str(list.join(col-props($bg, $fg, $br), $extra)...)};
 }

@@ -1,4 +1,4 @@
-import { object, string, type ObjectSchema, array } from 'yup';
+import { object, string, type ObjectSchema, array, StringSchema, number } from 'yup';
 import { stripNonPrintableAndNormalize } from '$lib/utils';
 
 type OptionalKeysNullable<T extends Record<any, any>> = {
@@ -6,6 +6,12 @@ type OptionalKeysNullable<T extends Record<any, any>> = {
 };
 
 export const DATE_MAX_LEN = 30;
+export const PERSON_MAX_PHOTOS = 25;
+
+const UUID = string().required().lowercase().uuid();
+
+export type PhotoPath = string;
+const PHOTO_PATH_SCHEMA: StringSchema<PhotoPath> = string().matches(/^[^/.][^/]{0,127}$/).required();
 
 // Person types - Typescipt
 
@@ -17,7 +23,7 @@ export interface Person {
   birthDate?: string; // YYYY-MM-DD
   deathDate?: string;
   bio?: string;
-  portrait?: string;
+  portrait?: PhotoPath;
 }
 
 /** Equivalent to Person, but used to create a new person or other cases when the person isn't in DB yet */
@@ -31,11 +37,10 @@ export type UpdatablePerson = Partial<OptionalKeysNullable<PersonData>> & Pick<P
 
 // Person types - yup schemas
 
-const pidBase = string().required().lowercase().uuid();
-export const PERSON_ID_ARRAY = array(pidBase).required();
+export const PERSON_ID_ARRAY = array(UUID).required();
 const DATE_SCHEMA = string().trim().max(DATE_MAX_LEN);
 
-const pId = pidBase.label('person id');
+const pId = UUID.label('person id');
 const pName = string()
   .min(1)
   .max(75)
@@ -54,9 +59,7 @@ const pBio = string()
   .trim()
   .transform(v => (v ? stripNonPrintableAndNormalize(v, false, false) : v))
   .optional();
-const pPortrait = string()
-  .matches(/^[^/.][^/]{0,127}$/)
-  .optional();
+const pPortrait = PHOTO_PATH_SCHEMA.optional();
 
 /** `Person` type validator */
 export const PERSON_SCHEMA: ObjectSchema<Person> = object({
@@ -85,6 +88,25 @@ export const PERSON_UPDATE_SCHEMA: ObjectSchema<UpdatablePerson> = PERSON_SCHEMA
   .noUnknown();
 
 export const PERSON_KEYS = Object.keys(PERSON_SCHEMA.fields);
+
+// Photos
+
+export interface Photo {
+  id: string;
+  hash: string;
+  filename: PhotoPath;
+  created: number;
+};
+
+export type PhotoData = Omit<Photo, 'id' | 'created'>;
+
+export const PHOTO_ID = UUID.label('photo id');
+const PHOTO_SCHEMA: ObjectSchema<Photo> = object({
+  id: PHOTO_ID,
+  hash: string().required(),
+  filename: PHOTO_PATH_SCHEMA,
+  created: number().integer().truncate().required()
+});
 
 // Relationships
 

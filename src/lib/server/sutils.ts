@@ -1,5 +1,6 @@
 import { PERSON_NEW_SCHEMA, PERSON_UPDATE_SCHEMA, type PersonData, type UpdatablePerson } from '$lib/types/person';
-import { type RelativesChangeRequest, RELATIVES_SINGLE_TYPE_CHANGE_SCHEMA } from '$lib/types/reqdata';
+import { PHOTOS_CHANGES_SCHEMA, RELATIVES_SINGLE_TYPE_CHANGE_SCHEMA } from '$lib/types/reqdata';
+import type {RelativesChangeRequest, PhotoChanges } from '$lib/types/reqdata';
 import { ValidationError } from 'yup';
 import { type Result, err, ok } from 'neverthrow';
 import { createUrl, parseConfigList } from '$lib/utils';
@@ -102,6 +103,28 @@ export function parseUpdateRelatives(
       }
     }
     return ok(res);
+  } catch (error) {
+    if (error instanceof ValidationError) {
+      return err({ code: 422, message: error.message });
+    }
+    throw error;
+  }
+}
+export function parseUpdatePhotos(dataJson?: FormDataEntryValue | null): Result<PhotoChanges, FailError>  {
+  if (typeof dataJson !== 'string') {
+    return err({ code: 422, message: 'missing photos update data' });
+  }
+  let dangerReq: PhotoChanges;
+  try {
+    dangerReq = JSON.parse(dataJson);
+    if (typeof dangerReq !== 'object') {
+      throw new Error();
+    }
+  } catch {
+    return err({ code: 422, message: 'invalid json' });
+  }
+  try {
+    return ok(PHOTOS_CHANGES_SCHEMA.validateSync(dangerReq, { abortEarly: true, stripUnknown: true }));
   } catch (error) {
     if (error instanceof ValidationError) {
       return err({ code: 422, message: error.message });

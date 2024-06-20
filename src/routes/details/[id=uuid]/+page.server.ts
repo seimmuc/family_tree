@@ -2,25 +2,37 @@ import { ReadActions, WriteActions } from '$lib/server/graph/person.js';
 import { addOrReplacePhoto, tryDeletePhoto } from '$lib/server/media.js';
 import {
   parseUpdatePerson,
+  parseUpdatePhotos,
   parseUpdateRelatives,
   userHasPermission,
   userLoginRedirOrErrorIfNotAuthorized
 } from '$lib/server/sutils.js';
-import type { RelativesChangeRequest } from '$lib/types/reqdata.js';
+import type { Person, Photo, PhotoData, Relationship } from '$lib/types/person.js';
+import type { PhotoChanges, RelativesChangeRequest } from '$lib/types/reqdata.js';
+import { sha256DigestFile } from '$lib/utils.js';
 import { error, type Actions, fail, redirect } from '@sveltejs/kit';
+import { Result, err, ok } from 'neverthrow';
 
 export async function load({ params, locals, url }) {
   userLoginRedirOrErrorIfNotAuthorized(locals.user, 'view', url);
   const canEdit = userHasPermission(locals.user, 'edit');
   const pid = params.id;
-  const [allPeople, relations] = await ReadActions.perform(async act => {
-    return await act.findFamily([pid], 1);
+  const dbRes: Result<[Person[], Relationship[], Photo[], Person], undefined> = await ReadActions.perform(async act => {
+    const [ppl, rels] = await act.findFamily([pid], 1);
+    const person = ppl.find(p => p.id === pid);
+    if (person === undefined) {
+      return err(undefined);
+    }
+    const pics =  await act.getPersonPhotos(pid);
+    return ok([ppl, rels, pics, person]);
   });
 
-  const person = allPeople.find(p => p.id === pid);
-  if (person === undefined) {
+  // return 404 if id does not match a real person
+  if (dbRes.isErr()) {
     error(404);
   }
+
+  const [allPeople, relations, photos, person] = dbRes.value;
 
   // Find children and parents
   const children: string[] = [];
@@ -49,7 +61,7 @@ export async function load({ params, locals, url }) {
   const rids = children.concat(parents, partners);
   const relatives = allPeople.filter(p => rids.includes(p.id));
 
-  return { person, children, parents, partners, relatives, canEdit };
+  return { person, children, parents, partners, relatives, photos, canEdit };
 }
 
 export const actions: Actions = {
@@ -79,11 +91,38 @@ export const actions: Actions = {
       }
       relativesUpdate = relRes.value;
     }
+    let photosUpdate: PhotoChanges | undefined = undefined;
+    let photoFiles: Record<string, [File, Promise<string>]> = {};
+    const beforeDb: Promise<any>[] = [];
+    if (data.has('photo-changes')) {
+      const phoRes = parseUpdatePhotos(data.get('photo-changes'));
+      if (phoRes.isErr()) {
+        return fail(phoRes.error.code, { message: phoRes.error.message });
+      }
+      photosUpdate = phoRes.value;
+      for (const pn of photosUpdate.new) {
+        if (Object.hasOwn(photoFiles, pn)) {
+          return fail(422, { message: 'duplicate new file' });
+        }
+        const pFile = data.get(pn);
+        if (!(pFile instanceof File)) {
+          return fail(422, { message: 'file not present in form data' });
+        }
+        const hashPromise = sha256DigestFile(pFile)
+        beforeDb.push(hashPromise)
+        photoFiles[pn] = [pFile, hashPromise];
+      };
+    }
 
     // return error if there are no changes
     const updFields = Object.keys(personUpdate).filter(k => k !== 'id').length > 0;
-    if (!updFields && !(portrait instanceof File && portrait.size > 0) && relativesUpdate === undefined) {
+    if (!updFields && !(portrait instanceof File && portrait.size > 0) && relativesUpdate === undefined && photosUpdate === undefined) {
       return fail(422, { message: 'empty update' });
+    }
+
+    if (beforeDb.length > 0) {
+      // finish costly calculations before starting db transaction
+      await Promise.allSettled(beforeDb);
     }
 
     // perform the updates
@@ -103,8 +142,7 @@ export const actions: Actions = {
         }
       } else if (personUpdate.portrait === null) {
         // delete old portrait
-        const oldPerson = await act.findPersonById(pid);
-        if (oldPerson !== undefined && oldPerson.portrait) {
+        if (oldPerson.portrait) {
           await tryDeletePhoto(oldPerson.portrait);
         }
       }
@@ -140,6 +178,28 @@ export const actions: Actions = {
           for (const partnerId of partners.removed) {
             await act.delPartnerRelation(pid, partnerId);
           }
+        }
+      }
+
+      // photos
+      if (photosUpdate !== undefined) {
+        const oldPhotos = await act.getPersonPhotos(pid);
+        const toRemove = photosUpdate.delete.map(pi => oldPhotos.find(p => p.id === pi)).filter(p => p !== undefined) as Photo[];
+        const toAdd: PhotoData[] = [];
+        for (const [_, [pFile, pHashPr]] of Object.entries(photoFiles)) {
+          const [pFileName, _] = await addOrReplacePhoto(pid, pFile);
+          toAdd.push({ hash: await pHashPr, filename: pFileName });
+        }
+        for (const photo of toRemove) {
+          if (!(await tryDeletePhoto(photo.filename))) {
+            console.error(`Failed to delete a photo. Photo: "${photo.filename}", pid: ${pid}`);
+          }
+        }
+        if (toAdd.length > 0) {
+          await act.addPhotos(pid, toAdd);
+        }
+        if (toRemove.length > 0) {
+          await act.deletePhotos(pid, toRemove.map(p => p.id));
         }
       }
     });

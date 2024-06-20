@@ -1,10 +1,13 @@
-import type {
-  ParentRelationship,
-  PartnerRelationship,
-  Person,
-  PersonData,
-  Relationship,
-  UpdatablePerson
+import {
+  PERSON_MAX_PHOTOS,
+  type ParentRelationship,
+  type PartnerRelationship,
+  type Person,
+  type PersonData,
+  type Photo,
+  type PhotoData,
+  type Relationship,
+  type UpdatablePerson
 } from '$lib/types/person';
 import type { ManagedTransaction, Relationship as Neo4jRel } from 'neo4j-driver';
 import { Integer } from 'neo4j-driver';
@@ -215,6 +218,14 @@ export class ReadActions {
 
     return [Object.values(pIdenMap), relations];
   }
+  async getPersonPhotos(person: PersonOrId): Promise<Photo[]> {
+    person = coerceIntoId(person);
+    const r = await this.transaction.run(
+      'MATCH (:Person {id: $id})-[:IN_PHOTO]->(ph:Photo) RETURN ph ORDER BY ph.created LIMIT $limit',
+      { id: person, limit: Integer.fromInt(PERSON_MAX_PHOTOS) }
+    );
+    return r.records.map(r => r.get('ph').properties);
+  }
 }
 
 export class WriteActions extends ReadActions {
@@ -342,5 +353,37 @@ export class WriteActions extends ReadActions {
       { pi1: coerceIntoId(partner1), pi2: coerceIntoId(partner2) }
     );
     return (r.records[0].get('rc') as Integer).toInt();
+  }
+  async addPhotos(person: PersonOrId, photos: PhotoData[]): Promise<Photo[]> {
+    // MATCH (p:Person {id: $id})
+    // UNWIND $photos AS photo
+    // CREATE (p)-[:IN_PHOTO]->(ph:Photo)
+    // SET ph = photo
+    // SET ph.id = randomUUID()
+    // SET ph.created = $now
+    // RETURN ph
+    person = coerceIntoId(person);
+    const r =  await this.transaction.run(
+      'MATCH (p:Person {id: $id}) UNWIND $photos AS photo CREATE (p)-[:IN_PHOTO]->(ph:Photo) SET ph = photo, ph.id = randomUUID(), ph.created = $now RETURN ph',
+      { id: person, photos, now: Date.now() }
+    );
+    return r.records.map(r => r.get('ph').properties);
+  }
+  async deletePhotos(person: PersonOrId, photoIds: Photo['id'][] | undefined): Promise<Photo['id'][]> {
+    // MATCH (p:Person {id: $id})-[r:IN_PHOTO]->(ph:Photo)
+    // WHERE $all OR ph.id IN $phids
+    // DELETE r
+    // WITH ph
+    // OPTIONAL MATCH (ph)<-[r:IN_PHOTO]-(:Person)
+    // WITH ph, count(r) AS rc, ph.id as phid
+    // WHERE rc < 1
+    // DELETE ph
+    // RETURN collect(phid) as deleted
+    person = coerceIntoId(person);
+    const r = await this.transaction.run(
+      'MATCH (p:Person {id: $id})-[r:IN_PHOTO]->(ph:Photo) WHERE $all OR ph.id IN $phids DELETE r WITH ph OPTIONAL MATCH (ph)<-[r:IN_PHOTO]-(:Person) WITH ph, count(r) AS rc, ph.id as phid WHERE rc < 1 DELETE ph RETURN collect(phid) as deleted',
+      { id: person, phids: photoIds ?? [], all: photoIds === undefined }
+    )
+    return r.records[0]?.get('deleted');
   }
 }
