@@ -248,7 +248,11 @@
     }
 
     // portrait form data is added directly by the browser
-    const ph = formData.get('portrait');
+    let ph = formData.get('portrait');
+    if (!(ph instanceof File && ph.size > 0)) {
+      formData.delete('portrait');
+      ph = null;
+    }
 
     // check if there are any changes
     if (
@@ -256,7 +260,7 @@
       updatePerson.portrait !== null &&
       !sendRelsUpd &&
       reqPhotoChanges === undefined &&
-      !(ph instanceof File && ph.size > 0)
+      ph !== null
     ) {
       formMsg?.setMessage('nothing to update');
       cancel(); // empty update

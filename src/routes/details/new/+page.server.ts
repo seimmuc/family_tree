@@ -26,6 +26,9 @@ export const actions: Actions = {
       return fail(npRes.error.code, { message: npRes.error.message });
     }
     const newPersonData = npRes.value;
+    if (newPersonData.portrait !== undefined) {
+      return fail(422, { message: 'cannot set phohibited fields' });
+    }
 
     const relRes = parseUpdateRelatives(data.get('relatives-new'));
     if (relRes.isErr()) {

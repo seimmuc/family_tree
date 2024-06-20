@@ -83,7 +83,7 @@ export function parseUpdateRelatives(
       throw new Error();
     }
   } catch {
-    return err({ code: 400, message: 'invalid json' });
+    return err({ code: 422, message: 'invalid json' });
   }
   try {
     const res = Object.fromEntries(
