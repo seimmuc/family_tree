@@ -109,6 +109,7 @@
 <style lang="scss">
   @use '$lib/styles/common';
   @use '$lib/styles/colors';
+
   .head {
     margin-top: 0;
     @include colors.col-trans($bg: false, $fg: true, $br: false);
@@ -143,6 +144,9 @@
   }
   .actions {
     margin-top: 1em;
+    button {
+      @include common.normal-button;
+    }
     .err-msg {
       color: red;
       margin: 0 0 0.35em;

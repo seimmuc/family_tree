@@ -21,6 +21,9 @@
   --col-secondary-border: #{colors.$light-secondary-border};
   --col-link-normal: #{colors.$light-link-normal};
   --col-link-hover: #{colors.$light-link-hover};
+  --col-button-fg: #{colors.$light-button-fg};
+  --col-button-bg: #{colors.$light-button-bg};
+  --col-button-border: #{colors.$light-button-border};
   --col-warning-fg: #{colors.$light-warning-fg};
   --col-contenteditable-border: #{colors.$light-contenteditable-border};
   --col-topbar-bg: #{colors.$light-topbar-bg};
@@ -43,6 +46,9 @@
   --col-secondary-border: #{colors.$dark-secondary-border};
   --col-link-normal: #{colors.$dark-link-normal};
   --col-link-hover: #{colors.$dark-link-hover};
+  --col-button-fg: #{colors.$dark-button-fg};
+  --col-button-bg: #{colors.$dark-button-bg};
+  --col-button-border: #{colors.$dark-button-border};
   --col-warning-fg: #{colors.$dark-warning-fg};
   --col-contenteditable-border: #{colors.$dark-contenteditable-border};
   --col-topbar-bg: #{colors.$dark-topbar-bg};

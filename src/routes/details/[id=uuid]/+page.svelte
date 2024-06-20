@@ -505,6 +505,7 @@
       }
       button {
         margin: 0.4em 0 0.2em;
+        @include common.normal-button;
       }
     }
   }
@@ -575,5 +576,11 @@
     gap: 20px;
     width: 100%;
     margin-top: 15px;
+  }
+  .form-buttons {
+    button {
+      @include common.normal-button;
+      margin-bottom: 0.25em;
+    }
   }
 </style>

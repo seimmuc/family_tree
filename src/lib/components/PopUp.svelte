@@ -201,6 +201,9 @@
     }
     .form-buttons {
       margin-top: 12px;
+      button {
+        @include common.normal-button;
+      }
     }
   }
 </style>

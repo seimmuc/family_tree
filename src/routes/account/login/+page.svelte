@@ -97,6 +97,7 @@
     }
     .btn {
       width: max-content;
+      @include common.normal-button;
     }
     .info {
       @include colors.col-trans($bg: false, $fg: true, $br: false);

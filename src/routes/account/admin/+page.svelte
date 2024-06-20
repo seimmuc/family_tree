@@ -431,6 +431,7 @@
         }
         button {
           margin: 0.4em 0 0.2em;
+          @include common.normal-button;
         }
       }
     }
@@ -449,7 +450,10 @@
     }
     .change-panel {
       margin-top: 0.75em;
-      // .uview-btn {}
+      margin-bottom: 0.25em;
+      button {
+        @include common.normal-button;
+      }
     }
     label {
       @include common.flex($dir: row, $wrap: wrap, $alignit: center);

@@ -30,6 +30,18 @@
   @include styleless-link;
   @include link-colors;
 }
+@mixin normal-button {
+  color: var(--col-button-fg, colors.$light-button-fg);
+  background-color: var(--col-button-bg, colors.$light-button-bg);
+  border: 1.5px solid var(--col-button-border, colors.$light-button-border);
+  border-radius: 2px;
+  @include colors.col-trans($bg: true, $fg: true, $br: true);
+  padding: 3px 10px;
+  font-size: 1.05em;
+  &[disabled] {
+    color: var(--col-disabled-fg, colors.$light-text-disabled);
+  }
+}
 @mixin flex-center {
   display: flex;
   align-items: center;

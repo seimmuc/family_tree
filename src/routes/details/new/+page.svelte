@@ -81,6 +81,7 @@
 
 <style lang="scss">
   @use '$lib/styles/colors';
+  @use '$lib/styles/common';
 
   h1 {
     margin: 0.5em 0;
@@ -102,5 +103,11 @@
     gap: 20px;
     width: 100%;
     margin-top: 15px;
+  }
+  .form-buttons {
+    button {
+      @include common.normal-button;
+      margin-bottom: 0.25em;
+    }
   }
 </style>
