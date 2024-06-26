@@ -1,7 +1,7 @@
 <script lang="ts">
   import { enhance } from '$app/forms';
   import { page } from '$app/stores';
-  import { TRANS_DELAY, redirToLogin } from '$lib/client/clutils';
+  import { TRANS_DELAY, onStoreValChange, redirToLogin } from '$lib/client/clutils';
   import TimedMessage from '$lib/components/TimedMessage.svelte';
   import { LANGUAGES, USER_OPTIONS_UPDATE_SCHEMA, DEFAULT_USER_OPTIONS } from '$lib/types/user.js';
   import type { LangCode, User, UserOptions } from '$lib/types/user.js';
@@ -11,6 +11,7 @@
   import { ValidationError } from 'yup';
   import * as m from '$lib/paraglide/messages.js';
   import { getContext } from 'svelte';
+  import { userStore } from '$lib/client/stores.js';
 
   export let data;
 
@@ -80,6 +81,7 @@
     reset(user);
   }
 
+  onStoreValChange(userStore, reset);
   reset(data.user);
 </script>
 
