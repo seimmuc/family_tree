@@ -151,8 +151,8 @@
         <p class="form-message" transition:slide={{ axis: 'y', ...TRANS_OPT }}>{msg}</p>
       </TimedMessage>
       <div class="form-buttons" transition:slide={{ ...TRANS_OPT, axis: 'y' }}>
-        <button type="submit" disabled={!canSubmit}>Save</button>
-        <button type="button" on:click={actionCancel}>Cancel</button>
+        <button type="submit" disabled={!canSubmit}>{m.sharedButtonSave()}</button>
+        <button type="button" on:click={actionCancel}>{m.sharedButtonCancel()}</button>
       </div>
     {/if}
   </form>
