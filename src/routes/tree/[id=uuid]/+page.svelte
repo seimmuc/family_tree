@@ -8,18 +8,19 @@
   import PopUp from '$lib/components/PopUp.svelte';
   import { type SearchBoxLinkFunc } from '$lib/components/SearchBox.svelte';
   import Navbar from '$lib/components/Navbar.svelte';
-  import type { Point } from '$lib/components/types.js';
+  import { drawLine, findMidPoint, type Point } from '$lib/drawutils.js';
   import { type Person } from '$lib/types/person.js';
   import { type ClientRectObject } from '@floating-ui/core';
   import { onMount } from 'svelte';
   import { tweened } from 'svelte/motion';
-  import { createUrl } from '$lib/utils.js';
+  import { createUrl, minAndMax } from '$lib/utils.js';
 
   const TIME_TO_CENTER = 1000 * 1;
 
   export let data;
 
   let cnv: HTMLCanvasElement;
+  let childRows = { shared: undefined as HTMLDivElement | undefined, other: undefined as HTMLDivElement | undefined };
   let resize: ResizeObserver;
   let resizeTimer: NodeJS.Timeout | number;
   let themeDarkVal = data.theme === 'dark' ? 1 : 0;
@@ -29,7 +30,17 @@
   type PersonData = { person: Person; node: PersonNode };
   let focusPeople: Array<PersonData & { parents: PersonData[] }>;
   let parents: Array<PersonData & { child: string }>;
-  let children: Array<PersonData>;
+  let children: { s: PersonData[], l: PersonData[], r: PersonData[] };
+
+  function pdArr(idArr: Person['id'][] | undefined, pplMap: Record<string, Person>): PersonData[] {
+    if (idArr === undefined) {
+      return [];
+    }
+    return idArr
+      .map(i => pplMap[i])
+      .filter(p => p !== undefined)
+      .map(person => ({ person, node: undefined as any as PersonNode } satisfies PersonData));
+  }
 
   function peopleUpdate() {
     // Construct collections of people's data to be used throughout the page
@@ -44,19 +55,18 @@
         return { person: pplMap[pId] as Person, node: undefined as any as PersonNode, child: fId };
       })
     );
-    children = data.children
-      .map(cId => pplMap[cId])
-      .filter(c => c !== undefined)
-      .map(element => {
-        return { person: element as Person, node: undefined as any as PersonNode };
-      });
+    children = {
+      s: pdArr(data.children.shared, pplMap),
+      l: pdArr(focusPeople.length < 2 ? undefined : data.children.other[focusPeople[0].person.id], pplMap),
+      r: pdArr(focusPeople.length < 2 ? undefined : data.children.other[focusPeople[1].person.id], pplMap)
+    };
     parents.forEach(p => {
       focusPeople.find(fp => fp.person.id === p.child)?.parents.push(p);
     });
     if (popup.control?.isVisible()) {
       // popup.person.node will be unbound and undefined after upcoming DOM update, we need to relink popup with new PersonData object
       const personId = popup.person.person.id;
-      pdloop: for (let pdArr of [focusPeople, parents, children]) {
+      pdloop: for (let pdArr of [focusPeople, parents, children.s, children.l, children.r]) {
         for (let pd of pdArr) {
           if (pd.person.id === personId) {
             popup.person = pd;
@@ -130,6 +140,52 @@
   let wrapperElem: HTMLDivElement;
   const wrapperDimensions = { x: 0, y: 0, width: 0, height: 0 };
 
+  function drawLinesToChildren(context: CanvasRenderingContext2D, children: PersonData[], startPoint: Point, childConnectLineY: number, vLineHeight: number, negOffset: Point) {
+    if (children.length < 1) {
+      return;
+    }
+    // find all node centers and range of x values
+    const childPoints: Point[] = children.map(c => c.node.center(negOffset));
+    const [minX, maxX] = minAndMax(childPoints.map(p => p.x));
+    const xMid = (minX + maxX) / 2;
+    if (xMid !== startPoint.x) {
+      const sp2: Point = { x: xMid, y: childConnectLineY - vLineHeight };
+      const mid: Point = { x: startPoint.x, y: sp2.y };
+      drawLine(context, startPoint, mid);
+      drawLine(context, mid, sp2);
+      startPoint = sp2;
+    }
+    drawLine(context, startPoint, { x: xMid, y: childConnectLineY });
+    drawLine(context, { x: minX, y: childConnectLineY }, { x: maxX, y: childConnectLineY })
+    for (const cp of childPoints) {
+      drawLine(context, { x: cp.x, y: childConnectLineY }, cp);
+    }
+  }
+  function drawLinesToParents(context: CanvasRenderingContext2D, person: typeof focusPeople[number], negOffset: Point) {
+    if (person.parents.length < 1) {
+      return;
+    }
+    const focusMiddle = person.node.center(negOffset);
+    let parentsMiddle: Point;
+    
+    // draw a line between parents if needed and calculate parents' midpoint
+    if (person.parents.length === 1) {
+      parentsMiddle = person.parents[0].node.center(negOffset);
+    } else {
+      const parent1 = person.parents[0].node.center(negOffset);
+      const parent2 = person.parents[1].node.center(negOffset);
+      parentsMiddle = findMidPoint(parent1, parent2);
+      drawLine(context, parent1, parent2);
+    }
+    
+    // draw a line between person and parents' midpoint
+    const midY = (focusMiddle.y + parentsMiddle.y) / 2;
+    const mp1: Point = { x: focusMiddle.x, y: midY };
+    const mp2: Point = { x: parentsMiddle.x, y: midY };
+    drawLine(context, focusMiddle, mp1);
+    drawLine(context, mp1, mp2);
+    drawLine(context, mp2, parentsMiddle);
+  }
   function redraw() {
     wrapperDimensions.x = wrapperElem.getBoundingClientRect().x;
     wrapperDimensions.y = wrapperElem.getBoundingClientRect().y;
@@ -139,69 +195,53 @@
     context.lineWidth = 10;
     const lineBrightness = 255 * themeDarkVal;
     context.strokeStyle = `rgb(${lineBrightness} ${lineBrightness} ${lineBrightness})`;
-    context.lineCap = 'square';
+    context.lineCap = 'round';
     context.clearRect(0, 0, cnv.width, cnv.height);
     context.beginPath();
 
     // Middle of nodes in the "focus" group
-    let middle: Point;
+    let middle: Point, fpL: Point, fpR: Point;
 
+    // Line between focus people, if needed
     if (focusPeople.length === 1) {
-      middle = focusPeople[0].node.center(wrapperDimensions);
+      fpL = fpR = middle = focusPeople[0].node.center(wrapperDimensions);
     } else if (focusPeople.length > 1) {
-      const center1 = focusPeople[0].node.center(wrapperDimensions);
-      const center2 = focusPeople[1].node.center(wrapperDimensions);
-      middle = { x: (center1.x + center2.x) / 2, y: (center1.y + center2.y) / 2 };
+      fpL = focusPeople[0].node.center(wrapperDimensions);
+      fpR = focusPeople[1].node.center(wrapperDimensions);
+      middle = { x: (fpL.x + fpR.x) / 2, y: (fpL.y + fpR.y) / 2 };
 
       // horizontal focus line
-      context.moveTo(center1.x, center1.y);
-      context.lineTo(center2.x, center2.y);
+      context.moveTo(fpL.x, fpL.y);
+      context.lineTo(fpR.x, fpR.y);
     } else {
       throw Error();
     }
 
-    if (children.length > 0) {
-      const childPoints = children.map(element => element.node.center(wrapperDimensions));
-      const childNodeY = children[0].node.center(wrapperDimensions).y;
-      const c1p2: Point = { x: middle.x, y: (middle.y + childNodeY) / 2 };
-      const c2p1: Point = { x: childPoints[0].x, y: c1p2.y };
-      const c2p2: Point = { x: childPoints[childPoints.length - 1].x, y: c1p2.y };
-
-      // vertical line TO children
-      context.moveTo(middle.x, middle.y);
-      context.lineTo(c1p2.x, c1p2.y);
-
-      // horizontal line BETWEEN children
-      context.moveTo(c2p1.x, c2p1.y);
-      context.lineTo(c2p2.x, c2p2.y);
-
-      // lines TO each child
-      for (const point of childPoints) {
-        context.moveTo(point.x, c1p2.y);
-        context.lineTo(point.x, point.y);
+    if (childRows.other !== undefined && childRows.other !== null) {
+      const chOthMtMatch = /(\d+)px/.exec(window.getComputedStyle(childRows.other).marginTop);
+      const chOthMt = chOthMtMatch === null ? 0.0 : parseFloat(chOthMtMatch[1]);
+      const chOthY = childRows.other.getBoundingClientRect().y - wrapperDimensions.y;
+      const chOthMg = chOthMt / 3;
+      if (children.l.length > 0) {
+        drawLinesToChildren(context, children.l, fpL, chOthY - chOthMg, chOthMg, wrapperDimensions);
+      }
+      if (children.r.length > 0) {
+        drawLinesToChildren(context, children.r, fpR, chOthY - chOthMg, chOthMg, wrapperDimensions);
       }
     }
+    if (children.s.length > 0 && childRows.shared !== undefined) {
+      const chShMtMatch = /(\d+)px/.exec(window.getComputedStyle(childRows.shared).marginTop);
+      const chShMt = chShMtMatch === null ? 0.0 : parseFloat(chShMtMatch[1]);
+      const chShY = childRows.shared.getBoundingClientRect().y - wrapperDimensions.y;
+      drawLinesToChildren(context, children.s, middle, chShY - chShMt / 2, chShMt / 2, wrapperDimensions);
+    }
 
+    // lines to parents
     for (const person of focusPeople) {
-      if (person.parents.length < 1) {
-        continue;
-      }
-      const focusMiddle = person.node.center(wrapperDimensions);
-      if (person.parents.length > 1) {
-        const center1 = person.parents[0].node.center(wrapperDimensions);
-        const center2 = person.parents[1].node.center(wrapperDimensions);
-        const parentsMiddle = { x: (center1.x + center2.x) / 2, y: (center1.y + center2.y) / 2 };
-        context.moveTo(focusMiddle.x, focusMiddle.y);
-        context.lineTo(parentsMiddle.x, parentsMiddle.y);
-        context.moveTo(center1.x, center1.y);
-        context.lineTo(center2.x, center2.y);
-      } else {
-        const center = person.parents[0].node.center(wrapperDimensions);
-        context.moveTo(focusMiddle.x, focusMiddle.y);
-        context.lineTo(center.x, center.y);
-      }
+      drawLinesToParents(context, person, wrapperDimensions);
     }
 
+    // finish drawing all lines
     context.stroke();
   }
 
@@ -260,18 +300,33 @@
   >
     <canvas bind:this={cnv} class="lines-canvas" width={wrapperDimensions.width} height={wrapperDimensions.height}>
     </canvas>
-    <div class="row parents">
+    <div class="row group parents">
       {#each parents as parent}
         <PersonNode bind:this={parent.node} person={parent.person} on:click={() => onPersonClick(parent)} />
       {/each}
     </div>
-    <div class="row focus">
+    <div class="row group focus">
       {#each focusPeople as person}
         <PersonNode bind:this={person.node} person={person.person} on:click={() => onPersonClick(person)} />
       {/each}
     </div>
-    <div class="row children">
-      {#each children as child}
+    {#if children.l.length > 0 || children.r.length > 0}
+      <div class="row children other" bind:this={childRows.other}>
+        <div class="group otc-side left">
+          {#each children.l as child}
+          <PersonNode bind:this={child.node} person={child.person} on:click={() => onPersonClick(child)} />
+          {/each}
+        </div>
+        <div class="spacer" />
+        <div class="group otc-side right">
+          {#each children.r as child}
+          <PersonNode bind:this={child.node} person={child.person} on:click={() => onPersonClick(child)} />
+          {/each}
+        </div>
+      </div>
+    {/if}
+    <div class="row group children shared" bind:this={childRows.shared}>
+      {#each children.s as child}
         <PersonNode bind:this={child.node} person={child.person} on:click={() => onPersonClick(child)} />
       {/each}
     </div>
@@ -302,7 +357,12 @@
 {/if}
 
 <style lang="scss">
+  @use 'sass:math';
+  @use '$lib/styles/common';
   @use '$lib/styles/colors';
+
+  $child-line-spacer: 50px;
+
   .root {
     display: flex;
     flex-direction: column;
@@ -312,15 +372,27 @@
     display: flex;
     flex-direction: column;
     position: relative;
-    margin: 50px 25px;
+    margin: 40px 25px;
   }
 
-  .row {
+  .group {
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: center;
     gap: 60px;
+    &.otc-side {
+      gap: 10px;
+      &.left {
+        justify-content: flex-end;
+      }
+      &.right {
+        justify-content: flex-start;
+      }
+    }
+    &.children.shared {
+      gap: 20px;
+    }
   }
 
   .row.parents {
@@ -328,8 +400,19 @@
   }
 
   .row.children {
-    margin-top: 150px;
-    gap: 20px;
+    &.other {
+      @include common.flex($dir: row, $wrap: nowrap, $justifycn: center, $alignit: center);
+      margin-top: 90px;
+      > .spacer {
+        width: $child-line-spacer;
+      }
+      > .otc-side {
+        width: calc(50% - math.div($child-line-spacer, 2));
+      }
+    }
+    &.shared {
+      margin-top: 60px;
+    }
   }
 
   .lines-canvas {

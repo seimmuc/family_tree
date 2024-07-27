@@ -45,6 +45,22 @@ export function titleCaseWord<S extends string | undefined>(word: S): S {
 export function clampNum(number: number, min: number, max: number): number {
   return Math.min(Math.max(number, min), max);
 }
+export function minAndMax(nums: number[]): [number, number] {
+  if (nums.length < 1) {
+    return [NaN, NaN];
+  }
+  let min = nums[0];
+  let max = nums[0];
+  for (let i = 1; i < nums.length; i++) {
+    if (nums[i] < min) {
+      min = nums[i];
+    }
+    if (nums[i] > max) {
+      max = nums[i];
+    }
+  }
+  return [min, max];
+}
 
 /**
  * Removes non-printable characters from string and normalizes newline and space characters (to unix newlines and ascii space)

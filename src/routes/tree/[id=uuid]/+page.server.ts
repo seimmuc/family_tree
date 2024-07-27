@@ -11,21 +11,26 @@ export async function load({ params, locals, url }) {
       return error(404);
     }
     const partner = await act.findMainPartner(focusPerson.id);
-    const partnerIds = [focusPerson.id, partner?.id].filter(v => v !== undefined) as string[];
+    const partnerIds = [focusPerson.id, partner?.id].filter(v => v !== undefined) as string[] & { length: 1 | 2 };
     return [partnerIds, await act.findFamily(partnerIds, 2)];
   });
 
   // get all child IDs and list of their parents
-  const children: Record<string, string[]> = {};
+  const chMap: Record<string, string[]> = {};
   for (const rel of relations) {
     if (rel.relType === 'parent' && focusPeopleIds.includes(rel.participants.parent[0])) {
-      (children[rel.participants.child[0]] ??= []).push(rel.participants.parent[0]);
+      (chMap[rel.participants.child[0]] ??= []).push(rel.participants.parent[0]);
     }
   }
-  // filter children to only include ones that are children of all people in focusPeopleIds
-  const sharedChildren = Object.entries(children)
-    .filter(([_, pIds]) => focusPeopleIds.every(id => pIds.includes(id)))
-    .map(([cId, _]) => cId);
+  // filter children into groups based on their parents
+  const children = { shared: [] as string[], other: {} as Record<string, string[]> };
+  for (const [childId, parentIds] of Object.entries(chMap)) {
+    if (parentIds.length > 1) {
+      children.shared.push(childId);
+    } else {
+      (children.other[parentIds[0]] ??= []).push(childId);
+    }
+  }
 
   // get all parents of each focus person
   const parents: Record<string, string[]> = {};
@@ -35,7 +40,7 @@ export async function load({ params, locals, url }) {
     }
   }
 
-  return { focusPeopleIds, people, relations, children: sharedChildren, parentsOf: parents, canEdit };
+  return { focusPeopleIds, people, relations, children, parentsOf: parents, canEdit };
 }
 
 export const actions: Actions = {

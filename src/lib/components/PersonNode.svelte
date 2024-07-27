@@ -2,7 +2,7 @@
   import { portraitUrl } from '$lib/client/clutils';
   import type { PersonData } from '$lib/types/person';
   import { clampNum } from '$lib/utils';
-  import type { Point } from './types';
+  import type { Point } from '$lib/drawutils';
 
   export let person: PersonData;
 
