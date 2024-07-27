@@ -38,7 +38,7 @@
   @include colors.col-trans($bg: true, $fg: true, $br: true);
   padding: 3px 10px;
   font-size: 1.05em;
-  &[disabled] {
+  &:is([disabled]) {
     color: var(--col-disabled-fg, colors.$light-text-disabled);
   }
 }
