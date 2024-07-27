@@ -1,4 +1,4 @@
-A geneology tree SvelteKit website.
+A genealogy tree SvelteKit website.
 
 # Basic deployment instructions
 
