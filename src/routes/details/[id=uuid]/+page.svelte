@@ -312,6 +312,10 @@
 
 <svelte:window on:click={onWindowClick} />
 
+<svelte:head>
+  <title>{m.detailsTitle({ name: person.name })}</title>
+</svelte:head>
+
 <RootDivCentered>
   <div class="top-controls">
     <div class="tc-section left">

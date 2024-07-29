@@ -27,6 +27,10 @@
   };
 </script>
 
+<svelte:head>
+  <title>{m.loginTitle()}</title>
+</svelte:head>
+
 <h1 class="head">{m.loginTitle()}</h1>
 <div class="main">
   <form method="POST" use:enhance={submit}>

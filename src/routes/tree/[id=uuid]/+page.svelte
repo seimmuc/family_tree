@@ -11,6 +11,7 @@
   import { drawLine, findMidPoint, type Point } from '$lib/drawutils.js';
   import { type Person } from '$lib/types/person.js';
   import { type ClientRectObject } from '@floating-ui/core';
+  import * as m from '$lib/paraglide/messages.js';
   import { onMount } from 'svelte';
   import { tweened } from 'svelte/motion';
   import { createUrl, minAndMax } from '$lib/utils.js';
@@ -290,6 +291,10 @@
 </script>
 
 <svelte:window on:click={onWindowClick} />
+
+<svelte:head>
+  <title>{m.treeTitle()}</title>
+</svelte:head>
 
 <div class="root">
   <div

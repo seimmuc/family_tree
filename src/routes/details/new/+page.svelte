@@ -60,6 +60,10 @@
   });
 </script>
 
+<svelte:head>
+  <title>{m.newPersonTitle()}</title>
+</svelte:head>
+
 <RootDivCentered>
   <h1>{m.newPersonTitle()}</h1>
   <PersonInfo editMode={true} person={{ name: '' }} on:returnkey={() => frm?.requestSubmit()} bind:this={piComp} />

@@ -88,6 +88,10 @@
   reset(data.user);
 </script>
 
+<svelte:head>
+  <title>{m.settingsTitle()}</title>
+</svelte:head>
+
 <h1 class="head">{m.settingsTitle()}</h1>
 <form method="POST" use:enhance={submitUpdate}>
   <div class="settings">

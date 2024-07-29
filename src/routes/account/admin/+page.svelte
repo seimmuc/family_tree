@@ -232,6 +232,10 @@
 
 <svelte:window on:click={onWindowClick} />
 
+<svelte:head>
+  <title>{m.adminTitle()}</title>
+</svelte:head>
+
 <h1 class="head">{m.adminTitle()}</h1>
 <div class="user-select">
   <label

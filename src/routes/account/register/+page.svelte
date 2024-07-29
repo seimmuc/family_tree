@@ -28,6 +28,10 @@
   };
 </script>
 
+<svelte:head>
+  <title>{m.registerTitle()}</title>
+</svelte:head>
+
 <h1 class="head">{m.registerTitle()}</h1>
 <div class="main">
   <form method="POST" use:enhance={submit}>

@@ -50,6 +50,10 @@
   });
 </script>
 
+<svelte:head>
+  <title>{m.listTitle()}</title>
+</svelte:head>
+
 <RootDivCentered>
   {#if !data.authorized}
     {#if data.signedIn}
