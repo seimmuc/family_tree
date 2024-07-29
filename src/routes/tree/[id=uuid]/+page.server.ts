@@ -25,7 +25,7 @@ export async function load({ params, locals, url }) {
   // filter children into groups based on their parents
   const children = { shared: [] as string[], other: {} as Record<string, string[]> };
   for (const [childId, parentIds] of Object.entries(chMap)) {
-    if (parentIds.length > 1) {
+    if (parentIds.length === focusPeopleIds.length) {
       children.shared.push(childId);
     } else {
       (children.other[parentIds[0]] ??= []).push(childId);
