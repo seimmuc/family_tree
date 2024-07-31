@@ -366,7 +366,9 @@
   @use '$lib/styles/common';
   @use '$lib/styles/colors';
 
-  $child-line-spacer: 50px;
+  $node-gap: 60px;
+  $node-gap-children: 10px;
+  $child-line-spacer: $node-gap;
 
   .root {
     display: flex;
@@ -385,9 +387,9 @@
     flex-direction: row;
     align-items: center;
     justify-content: center;
-    gap: 60px;
+    gap: $node-gap;
     &.otc-side {
-      gap: 10px;
+      gap: $node-gap-children;
       &.left {
         justify-content: flex-end;
       }
@@ -396,7 +398,7 @@
       }
     }
     &.children.shared {
-      gap: 20px;
+      gap: $node-gap-children;
     }
   }
 
