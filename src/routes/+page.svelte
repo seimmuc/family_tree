@@ -5,6 +5,8 @@
   import { userStore } from '$lib/client/stores.js';
   import PagedList from '$lib/components/PagedList.svelte';
   import RootDivCentered from '$lib/components/RootDivCentered.svelte';
+  import Navbar from '$lib/components/Navbar.svelte';
+  import type { SearchBoxLinkFunc } from '$lib/components/SearchBox.svelte';
   import * as m from '$lib/paraglide/messages.js';
   import type { Person } from '$lib/types/person';
   import type { ListPeopleQueryCl } from '$lib/types/reqdata.js';
@@ -47,6 +49,11 @@
     return () => {
       userUnsub();
     }
+  });
+
+  data.dynamicMenu.set({
+    comp: Navbar,
+    compProps: { enableHomeButton: false, enableAddPerson: true, enableSearchBox: true, searchBoxLinkFunc: (p => `/tree/${p.id}`) satisfies SearchBoxLinkFunc }
   });
 </script>
 
