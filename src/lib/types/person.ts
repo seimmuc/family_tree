@@ -13,6 +13,13 @@ const UUID = string().required().lowercase().uuid();
 export type PhotoPath = string;
 const PHOTO_PATH_SCHEMA: StringSchema<PhotoPath> = string().matches(/^[^/.][^/]{0,127}$/).required();
 
+/** Must be of the following types
+ * - explicit date in "YYYY-MM-DD" format
+ * - "unknown" or "" if the date is unknown
+ * - "none" if the date is not applicable
+ */
+export type DateType = string | undefined;
+
 // Person types - Typescipt
 
 /** Person object stored in db and returned by the server */
@@ -20,8 +27,8 @@ export interface Person {
   id: string; // UUIDv4
   name: string;
   gender?: string;
-  birthDate?: string; // YYYY-MM-DD
-  deathDate?: string;
+  birthDate?: DateType;
+  deathDate?: DateType;
   bio?: string;
   portrait?: PhotoPath;
 }

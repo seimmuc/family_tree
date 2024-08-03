@@ -36,9 +36,9 @@
   }
 
   function personDisplayName(p: Person): string {
-    if (p.birthDate !== undefined || p.deathDate !== undefined) {
-      return `${p.name} (${formatDate(p.birthDate)} - ${formatDate(p.deathDate)})`;
-    }
+    // if (p.birthDate !== undefined || p.deathDate !== undefined) {
+    //   return `${p.name} (${formatDate(p.birthDate)} - ${formatDate(p.deathDate)})`;
+    // }
     return p.name;
   }
   onMount(() => {

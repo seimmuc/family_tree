@@ -66,7 +66,7 @@
 
 <RootDivCentered>
   <h1>{m.newPersonTitle()}</h1>
-  <PersonInfo editMode={true} person={{ name: '' }} on:returnkey={() => frm?.requestSubmit()} bind:this={piComp} />
+  <PersonInfo editMode={true} person={{ name: '', deathDate: 'none' }} on:returnkey={() => frm?.requestSubmit()} bind:this={piComp} />
   <TimedMessage bind:this={formMsg} let:msg>
     <p class="form-message" transition:slide={{ axis: 'y', duration: TRANS_DELAY, easing: quadOut }}>{msg}</p>
   </TimedMessage>

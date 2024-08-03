@@ -1,7 +1,7 @@
 import { browser } from '$app/environment';
 import { goto } from '$app/navigation';
 import { PUBLIC_UNAUTHENTICATED_PERMISSIONS } from '$env/static/public';
-import { PERSON_UPDATE_SCHEMA, type PersonData, type PhotoPath } from '$lib/types/person';
+import { PERSON_UPDATE_SCHEMA, type DateType, type PersonData, type PhotoPath } from '$lib/types/person';
 import type { User, UserPermission } from '$lib/types/user';
 import { clearUndefinedVals, createUrl, isDateString, parseConfigList } from '$lib/utils';
 import * as he from 'he';
@@ -41,11 +41,14 @@ export function truncateString(str: string, maxChars: number, maxLines: number):
 }
 
 export function formatDate(
-  dateString?: string,
-  dateType: string | undefined = undefined,
+  dateString?: DateType,
+  dateType: 'birth' | 'death' | undefined = undefined,
   dateFormatOptions: Intl.DateTimeFormatOptions | undefined = DEFAULT_DATE_FORMAT_OPRIONS
 ): string {
-  if (!dateString) {
+  if (dateString === 'none') {
+    return '';
+  }
+  if (dateString === undefined || dateString.length < 1 || dateString === 'unknown') {
     switch (dateType) {
       case 'birth':
         return m.sharedUnknownDateBirth();

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { nonewlines, toPersonEdit, formatDate, getPersonChanges } from '$lib/client/clutils';
   import type { PersonEdit, PersonChanges, YupErr } from '$lib/client/clutils';
-  import { DATE_MAX_LEN, type PersonData } from '$lib/types/person';
+  import { DATE_MAX_LEN, type DateType, type PersonData } from '$lib/types/person';
   import { isDateString } from '$lib/utils';
   import type { Result } from 'neverthrow';
   import { createEventDispatcher } from 'svelte';
@@ -22,13 +22,33 @@
   let editPerson: PersonEdit;
   let birthDM: DateMode;
   let deathDM: DateMode;
+  let isAlive: boolean;
   const phShown = { name: false, bio: false };
+
+  function displayDates(birthDate: DateType, deathDate: DateType): string {
+    if (birthDate === 'none' && deathDate === 'none') {
+      return '';
+    }
+    if (birthDate === 'none') {
+      return m.cPersonInfoDatesDeathOnly({ date: formatDate(deathDate, 'death') });
+    }
+    if (deathDate === 'none') {
+      return m.cPersonInfoDatesBirthOnly({ date: formatDate(birthDate, 'birth') });
+    }
+    return m.cPersonInfoDates({ birthdate: formatDate(birthDate, 'birth'), deathdate: formatDate(deathDate, 'death') });
+  }
 
   export function reset(newPerson?: PersonData) {
     if (newPerson === undefined) {
       newPerson = person;
     }
     editPerson = toPersonEdit(newPerson);
+    if (editPerson.deathDate === 'none') {
+      isAlive = true;
+      editPerson.deathDate = '';
+    } else {
+      isAlive = false;
+    }
     birthDM = toViableDM(initDateMode, editPerson.birthDate);
     deathDM = toViableDM(initDateMode, editPerson.deathDate);
     setPlaceholderShown('name', editPerson.name.length < 1, editPerson.name);
@@ -42,6 +62,9 @@
     const result = getPersonChanges(person, editPerson);
     setPlaceholderShown('name', np);
     setPlaceholderShown('bio', bp);
+    if (result.isOk() && isAlive) {
+      result.value.deathDate = 'none';
+    }
     return result;
   }
 
@@ -117,15 +140,18 @@
     {/if}
     <button type="button" class="switch-format-btn" title={m.cPersonInfoToggleDateMode()} on:click={toggleDM}>-</button>
     {#if deathDM === 'date'}
-      <input type="date" title={m.cPersonInfoDeath()} bind:value={editPerson.deathDate} />
+      <input type="date" title={m.cPersonInfoDeath()} disabled={isAlive} bind:value={editPerson.deathDate} />
     {:else}
-      <input type="text" title={m.cPersonInfoDeath()} placeholder={m.cPersonInfoDeath()} maxlength={DATE_MAX_LEN} bind:value={editPerson.deathDate} />
+      <input type="text" title={m.cPersonInfoDeath()} disabled={isAlive} placeholder={m.cPersonInfoDeath()} maxlength={DATE_MAX_LEN} bind:value={editPerson.deathDate} />
     {/if}
   </div>
 {:else}
   <h4 class="date display" transition:slide={{ axis: 'y', ...transOptions }}>
-    {formatDate(person.birthDate, 'birth')} - {formatDate(person.deathDate, 'death')}
+    {displayDates(person.birthDate, person.deathDate)}
   </h4>
+{/if}
+{#if editMode}
+  <label class="alive-box" transition:slide={{ axis: 'y', ...transOptions }}><input type="checkbox" bind:checked={isAlive}><span>{m.cPersonInfoIsAlive()}</span></label>
 {/if}
 
 {#if editMode}
@@ -165,7 +191,7 @@
     }
   }
   .date {
-    margin: var(--pi-date-margin, 4px 0 0);
+    margin: var(--pi-date-margin, 5px 0 0);
     font-size: var(--pi-date-font-size, inherit);
     font-weight: var(--pi-date-font-weight, bold);
     @include colors.col-trans($bg: true, $fg: true, $br: true);
@@ -177,13 +203,18 @@
       border: 1px solid transparent;
     }
     &.input {
-      input {
+      input[type="date"],
+      input[type="text"] {
         background-color: var(--col-secondary-bg, colors.$light-secondary-bg);
         border: 1px solid var(--col-secondary-border, colors.$light-secondary-border);
         border-radius: 2px;
         color: var(--col-fg, colors.$light-text);
         @include colors.col-trans($bg: true, $fg: true, $br: true);
         width: 10em;
+        &:disabled {
+          // background-color: var(--col-disabled-fg, colors.$light-text-disabled);
+          color: var(--col-disabled-fg, colors.$light-text-disabled);
+        }
       }
       .switch-format-btn {
         @include common.styleless-button;
@@ -196,6 +227,13 @@
           background-color: var(--col-secondary-border, colors.$light-secondary-border);
         }
       }
+    }
+  }
+  .alive-box {
+    margin-top: 2.5px;
+    @include common.flex($dir: row, $wrap: nowrap, $alignit: center);
+    span {
+      margin-left: 0.2em;
     }
   }
   .bio {
